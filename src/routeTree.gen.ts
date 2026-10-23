@@ -12,7 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as CustomerRouteRouteImport } from './routes/_customer/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
 import { Route as CustomerIndexRouteImport } from './routes/_customer/index'
+import { Route as CustomerProfileIndexRouteImport } from './routes/_customer/profile/index'
+import { Route as CustomerSecurityIndexRouteImport } from './routes/_customer/security/index'
+import { Route as PublicForgotPasswordIndexRouteImport } from './routes/_public/forgot-password/index'
 import { Route as PublicLoginIndexRouteImport } from './routes/_public/login/index'
+import { Route as PublicSignupIndexRouteImport } from './routes/_public/signup/index'
+import { Route as PublicVerifyIndexRouteImport } from './routes/_public/verify/index'
 
 const CustomerRouteRoute = CustomerRouteRouteImport.update({
   id: '/_customer',
@@ -27,33 +32,98 @@ const CustomerIndexRoute = CustomerIndexRouteImport.update({
   path: '/',
   getParentRoute: () => CustomerRouteRoute,
 } as any)
+const CustomerProfileIndexRoute = CustomerProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => CustomerRouteRoute,
+} as any)
+const CustomerSecurityIndexRoute = CustomerSecurityIndexRouteImport.update({
+  id: '/security/',
+  path: '/security/',
+  getParentRoute: () => CustomerRouteRoute,
+} as any)
+const PublicForgotPasswordIndexRoute =
+  PublicForgotPasswordIndexRouteImport.update({
+    id: '/forgot-password/',
+    path: '/forgot-password/',
+    getParentRoute: () => PublicRouteRoute,
+  } as any)
 const PublicLoginIndexRoute = PublicLoginIndexRouteImport.update({
   id: '/login/',
   path: '/login/',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PublicSignupIndexRoute = PublicSignupIndexRouteImport.update({
+  id: '/signup/',
+  path: '/signup/',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
+const PublicVerifyIndexRoute = PublicVerifyIndexRouteImport.update({
+  id: '/verify/',
+  path: '/verify/',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof CustomerIndexRoute
+  '/profile/': typeof CustomerProfileIndexRoute
+  '/security/': typeof CustomerSecurityIndexRoute
+  '/forgot-password/': typeof PublicForgotPasswordIndexRoute
   '/login/': typeof PublicLoginIndexRoute
+  '/signup/': typeof PublicSignupIndexRoute
+  '/verify/': typeof PublicVerifyIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof CustomerIndexRoute
+  '/profile': typeof CustomerProfileIndexRoute
+  '/security': typeof CustomerSecurityIndexRoute
+  '/forgot-password': typeof PublicForgotPasswordIndexRoute
   '/login': typeof PublicLoginIndexRoute
+  '/signup': typeof PublicSignupIndexRoute
+  '/verify': typeof PublicVerifyIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_customer': typeof CustomerRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
   '/_customer/': typeof CustomerIndexRoute
+  '/_customer/profile/': typeof CustomerProfileIndexRoute
+  '/_customer/security/': typeof CustomerSecurityIndexRoute
+  '/_public/forgot-password/': typeof PublicForgotPasswordIndexRoute
   '/_public/login/': typeof PublicLoginIndexRoute
+  '/_public/signup/': typeof PublicSignupIndexRoute
+  '/_public/verify/': typeof PublicVerifyIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login/'
+  fullPaths:
+    | '/'
+    | '/profile/'
+    | '/security/'
+    | '/forgot-password/'
+    | '/login/'
+    | '/signup/'
+    | '/verify/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login'
-  id: '__root__' | '/_customer' | '/_public' | '/_customer/' | '/_public/login/'
+  to:
+    | '/'
+    | '/profile'
+    | '/security'
+    | '/forgot-password'
+    | '/login'
+    | '/signup'
+    | '/verify'
+  id:
+    | '__root__'
+    | '/_customer'
+    | '/_public'
+    | '/_customer/'
+    | '/_customer/profile/'
+    | '/_customer/security/'
+    | '/_public/forgot-password/'
+    | '/_public/login/'
+    | '/_public/signup/'
+    | '/_public/verify/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -84,6 +154,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerIndexRouteImport
       parentRoute: typeof CustomerRouteRoute
     }
+    '/_customer/profile/': {
+      id: '/_customer/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof CustomerProfileIndexRouteImport
+      parentRoute: typeof CustomerRouteRoute
+    }
+    '/_customer/security/': {
+      id: '/_customer/security/'
+      path: '/security'
+      fullPath: '/security/'
+      preLoaderRoute: typeof CustomerSecurityIndexRouteImport
+      parentRoute: typeof CustomerRouteRoute
+    }
+    '/_public/forgot-password/': {
+      id: '/_public/forgot-password/'
+      path: '/forgot-password'
+      fullPath: '/forgot-password/'
+      preLoaderRoute: typeof PublicForgotPasswordIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
     '/_public/login/': {
       id: '/_public/login/'
       path: '/login'
@@ -91,15 +182,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicLoginIndexRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_public/signup/': {
+      id: '/_public/signup/'
+      path: '/signup'
+      fullPath: '/signup/'
+      preLoaderRoute: typeof PublicSignupIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
+    '/_public/verify/': {
+      id: '/_public/verify/'
+      path: '/verify'
+      fullPath: '/verify/'
+      preLoaderRoute: typeof PublicVerifyIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
   }
 }
 
 interface CustomerRouteRouteChildren {
   CustomerIndexRoute: typeof CustomerIndexRoute
+  CustomerProfileIndexRoute: typeof CustomerProfileIndexRoute
+  CustomerSecurityIndexRoute: typeof CustomerSecurityIndexRoute
 }
 
 const CustomerRouteRouteChildren: CustomerRouteRouteChildren = {
   CustomerIndexRoute: CustomerIndexRoute,
+  CustomerProfileIndexRoute: CustomerProfileIndexRoute,
+  CustomerSecurityIndexRoute: CustomerSecurityIndexRoute,
 }
 
 const CustomerRouteRouteWithChildren = CustomerRouteRoute._addFileChildren(
@@ -107,11 +216,17 @@ const CustomerRouteRouteWithChildren = CustomerRouteRoute._addFileChildren(
 )
 
 interface PublicRouteRouteChildren {
+  PublicForgotPasswordIndexRoute: typeof PublicForgotPasswordIndexRoute
   PublicLoginIndexRoute: typeof PublicLoginIndexRoute
+  PublicSignupIndexRoute: typeof PublicSignupIndexRoute
+  PublicVerifyIndexRoute: typeof PublicVerifyIndexRoute
 }
 
 const PublicRouteRouteChildren: PublicRouteRouteChildren = {
+  PublicForgotPasswordIndexRoute: PublicForgotPasswordIndexRoute,
   PublicLoginIndexRoute: PublicLoginIndexRoute,
+  PublicSignupIndexRoute: PublicSignupIndexRoute,
+  PublicVerifyIndexRoute: PublicVerifyIndexRoute,
 }
 
 const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(

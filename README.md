@@ -25,11 +25,11 @@ You need [Node.js](https://nodejs.org/) 22+ and [pnpm](https://pnpm.io/).
     pnpm install
     ```
 
-2.  **Point the dev proxy at the backend** (optional, defaults to `http://localhost:8080`):
+2.  **Point the dev proxy at the backend** (optional, defaults to `http://localhost:3000`, where `make dev` in `private_bond_back` serves the API):
 
     ```bash
     # .env.development
-    API_PROXY_TARGET=http://localhost:8080
+    API_PROXY_TARGET=http://localhost:3000
     ```
 
 3.  **Run the development server:**
@@ -38,7 +38,9 @@ You need [Node.js](https://nodejs.org/) 22+ and [pnpm](https://pnpm.io/).
     pnpm dev
     ```
 
-    The application will be available at `http://localhost:5174` (the admin app uses 5173, so both can run at once).
+    The application will be available at `http://localhost:5174` (the admin app uses 5173, so both can run at once). Keep this port: the API accepts the client web only from `CLIENT_ORIGINS`, locally `http://localhost:5174`.
+
+    Locally every one-time code is `123456` (`OTP_FIXED_CODE` in the backend).
 
 ## Available Scripts
 
@@ -57,7 +59,6 @@ You need [Node.js](https://nodejs.org/) 22+ and [pnpm](https://pnpm.io/).
 ```
 .
 ├── public
-│   └── favicon.svg
 ├── src
 │   ├── assets
 │   ├── components
@@ -110,7 +111,7 @@ You need [Node.js](https://nodejs.org/) 22+ and [pnpm](https://pnpm.io/).
 
 ### Root files
 
-- **`public`**: Static files served as-is, not processed by Vite (favicon).
+- **`public`**: Static files served as-is, not processed by Vite (empty for now: no favicon, `index.html` points the icon at `data:,` so the browser asks for none).
 - **`.env.development` / `.env.staging` / `.env.prod`**: Environment per mode. See [Environment Variables](#environment-variables).
 - **`biome.json`**: Lint and format rules. Skips `routeTree.gen.ts` and `components/ui`.
 - **`components.json`**: shadcn/ui config (style, base color, aliases). Used by `shadcn add`.
@@ -147,22 +148,25 @@ Files:
 
 ### `src/components`: UI
 
-- **`ui`**: shadcn/ui primitives (button, sonner). Add new ones with `pnpm dlx shadcn@latest add <name>`. Do not rewrite them by hand; excluded from Biome.
-- **`layout`**: Page shells. `CustomerLayout` is a mobile-first page with a top header and a centered content column (no sidebar). `PublicLayout` is a centered page for login.
-- **`forms`**: Forms (react-hook-form + zod), e.g. `login-form.tsx`.
+- **`ui`**: shadcn/ui primitives (button, input, field, card, dialog, tabs, input-otp, select, ...). Add new ones with `pnpm dlx shadcn@latest add <name>`. Do not rewrite them by hand; excluded from Biome.
+- **`layout`**: Page shells. `CustomerLayout` is a dashboard: a collapsible left sidebar (menu, KYC status, account menu; a drawer on phones) and a top bar. `PublicLayout` is the split sign-in page: the brand panel on the left (large screens), the form on the right.
+- **`auth`**, **`home`**, **`profile`**: the screens' parts (login, signup, OTP, forgot password; KYC steps, pending popup, dashboard; profile, email and password forms).
+- **`common`**, **`brand`**: shared pieces (form field, API error alert, status badge, confirm dialog, theme toggle, logo).
 - **`<domain>`** (add when needed): components for one feature, e.g. `components/contract/` (preview, signature pad).
 
 ### `src/hooks`
 
-Reusable React hooks. Empty for now.
+Reusable React hooks: `use-countdown` (OTP expiry, resend wait, lock countdowns) and `use-logout`.
 
 ### `src/lib`: infrastructure (no UI)
 
-- **`fetcher.ts`**: The axios instance (`baseURL`, `withCredentials`, 20s timeout), the 401 interceptor, `fetchAndValidate(url, schema, options)` that validates responses with zod, and `ApiError` (keeps the HTTP status).
+- **`fetcher.ts`**: The axios instance (`baseURL`, `withCredentials`, 20s timeout), the refresh-and-retry 401 interceptor, `fetchAndValidate(url, schema, options)` that validates responses with zod, and `ApiError` (the problem body: code, detail, field errors, request id, Retry-After).
 - **`query-client.ts`**: The `QueryClient` singleton and its defaults (2 min `staleTime`, no retry on 4xx).
 - **`auth.ts`**: `requireAuth(queryClient)` for a route's `beforeLoad`.
 - **`utils.ts`**: `cn` (class name merge) and `showToast`.
 - **`types.ts`**: Shared types (`PaginationParams`).
+- **`format.ts`**: dates in Ulaanbaatar time, countdowns, the device name sent at sign-in.
+- **`password.ts`**, **`countries.ts`**, **`client.ts`**, **`form-errors.ts`**: the password rule, nationalities, client labels and the API's field errors on a form.
 
 ### `src/queries`: API layer, one folder per domain
 
@@ -170,11 +174,11 @@ Reusable React hooks. Empty for now.
 - **`query.ts`**: Fetch functions that call `fetchAndValidate` (`getContracts`, `signContract`, ...).
 - **`options.ts`**: The query key factory (`contractKeys`) and `queryOptions` builders used by `useQuery`, `useSuspenseQuery` and route loaders.
 
-`auth/` is the first domain: `MeSchema`, `getMe` and `meOptions`.
+`auth/` holds the account and sign-in calls (`MeSchema`, `getMe`, `login`, `signup`, ...); `session/` the session list.
 
 ### `src/stores`: Zustand
 
-Client-only state, e.g. the steps of the contract signing flow. Empty for now.
+Client-only state: `pending-signup-store` keeps the email waiting for its sign-up code.
 
 **Rule:** server data (including the current user) stays in TanStack Query. Do not copy it into a store.
 
@@ -196,42 +200,49 @@ src/routes/_customer/contracts/$contractId/index.tsx   detail page (/contracts/:
 src/stores/sign-flow-store.ts                   signing wizard state, if needed
 ```
 
+## Screens
+
+| Path | Who | What |
+|---|---|---|
+| `/login` | signed out | Two tabs: Хувь хүн (email) and Байгууллага (7-digit register number). Lock and throttle countdowns; an unverified account gets a fresh code and goes to `/verify`. |
+| `/signup` | signed out | Монгол иргэн or Гадаад иргэн: names, email, password twice with live rule checks. Байгууллага shows "Шийдэлд хүртэл түр хүлээх". |
+| `/verify` | signed out | The 6-digit sign-up code: expiry countdown, resend after 60 s or `Retry-After`. The pending email lives in `stores/pending-signup-store.ts` (sessionStorage). |
+| `/forgot-password` | signed out | Login, code, new password twice, done. Never says "not found". |
+| `/` | signed in | By status: the profile form while `profile_complete` is false; the pending popup once complete; the reject reason when rejected; the dashboard once approved. |
+| `/profile` | signed in | `PATCH /me` (names and documents lock once approved), email change with a code, password change. |
+| `/security` | signed in | Sessions and devices: end one, end the others, forget a device. |
+
 ## Auth Flow
 
-The session is an httpOnly cookie set by the backend. The frontend never reads or stores a token.
+The API sets HttpOnly cookies (`client-access`, `client-refresh`, `client-device`). The frontend never reads or stores a token and sends every request with `withCredentials`.
 
 ```
 open a /_customer page
-  -> routes/_customer/route.tsx beforeLoad
-  -> lib/auth.ts requireAuth
-  -> queryClient.ensureQueryData(meOptions())      queries/auth/options.ts
-  -> getMe() -> fetchAndValidate('auth/me', MeSchema)
-  -> GET /api/auth/me (cookie sent, withCredentials)
-       200: page renders; components read the user with useSuspenseQuery(meOptions())
+  -> routes/_customer/route.tsx beforeLoad -> lib/auth.ts requireAuth
+  -> queryClient.ensureQueryData(meOptions()) -> GET /api/client/me
+       200: page renders; components read the client with useSuspenseQuery(meOptions())
        error: redirect to /login
 
-any request returns 401 later
-  -> fetcher interceptor -> handler in main.tsx
-  -> queryClient.clear(), toast if the user was signed in, navigate to /login
+a request answers 401 auth.unauthenticated (the 15-minute access cookie expired)
+  -> lib/fetcher.ts interceptor -> refreshSession(): POST auth/refresh
+     (one at a time: a shared promise per tab, navigator.locks across tabs)
+       ok: retry the request once
+       auth.refresh_invalid: handler in main.tsx clears the cache and goes to /login
+
+login, code verification, refresh and a password change answer access_expires_at
+  -> scheduleRefresh() refreshes a minute before it
 ```
+
+Errors are `application/problem+json`. `toApiError` turns them into `ApiError` with `code`, the Mongolian `detail` as `message`, `errors[]`, `requestId` and `retryAfter`. Forms branch on `code`, map `errors[]` to fields with `lib/form-errors.ts`, and show the rest with `ApiErrorAlert` (which prints the request id for support).
 
 ## Environment Variables
 
 | Variable | File | Purpose |
 |---|---|---|
-| `VITE_API_URL` | all `.env.*` | Axios `baseURL`. `/api` keeps requests same-origin so the cookie is sent. |
+| `VITE_API_URL` | all `.env.*` | Axios `baseURL`, `/api/client`. Same-origin so the cookies are sent. |
 | `API_PROXY_TARGET` | `.env.development` | Backend address for the dev proxy. Not exposed to the browser (no `VITE_` prefix). |
 
-In staging and production, `/api` must be reverse-proxied to the backend (nginx).
-
-## Backend TODOs
-
-These are placeholders until the backend API is defined (marked `TODO` in code):
-
-- `GET /me` path (`auth/me`) and its response (`MeSchema` in `queries/auth/type.ts`).
-- Error body shape (`{ error }` in `lib/fetcher.ts`).
-- Dev proxy target and route prefix (`vite.config.ts`).
-- Session cookie name, separate from the admin app (e.g. `customer_session`), with `SameSite=Lax` and `Secure`.
+In staging and production, `/api` must be reverse-proxied to the backend (nginx), or the app and the API must share one site: the cookies are `SameSite=Strict`.
 
 ## Learn More
 
