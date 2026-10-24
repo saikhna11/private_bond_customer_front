@@ -79,6 +79,7 @@ function BrandPanel() {
       onMouseLeave={() => setPaused(false)}
     >
       <div className="bg-grid absolute inset-0 [mask-image:radial-gradient(ellipse_at_top_left,black,transparent_70%)]" />
+      <div className="absolute inset-x-0 top-0 h-1 bg-brand-gradient" />
       <div className="absolute -right-40 -bottom-40 size-[32rem] rounded-full bg-gold/15 blur-3xl" />
 
       <div className="relative flex flex-1 flex-col justify-between p-10 xl:p-14">
@@ -129,7 +130,7 @@ function BrandPanel() {
                   aria-current={i === index}
                   className={cn(
                     'h-1.5 rounded-full transition-all duration-500 focus-visible:outline-2 focus-visible:outline-gold',
-                    i === index ? 'w-8 bg-gold' : 'w-3 bg-white/30',
+                    i === index ? 'w-8 bg-brand-gradient' : 'w-3 bg-white/30',
                   )}
                 />
               ))}

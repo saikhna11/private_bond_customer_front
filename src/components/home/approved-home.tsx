@@ -27,6 +27,7 @@ export function ApprovedHome() {
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="relative overflow-hidden border-0 bg-linear-to-br from-brand-panel to-brand-panel-2 py-0 text-white shadow-lg shadow-brand-panel/20 lg:col-span-2">
           <div className="bg-grid absolute inset-0 [mask-image:linear-gradient(to_left,black,transparent)]" />
+          <div className="absolute inset-x-0 top-0 h-1 bg-brand-gradient" />
           <div className="absolute -top-24 -right-24 size-72 rounded-full bg-gold/20 blur-3xl" />
           <CardContent className="relative flex flex-col gap-8 p-6 sm:p-8">
             <div className="flex items-center justify-between gap-3">
