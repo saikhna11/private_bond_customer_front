@@ -129,7 +129,7 @@ apiClient.interceptors.response.use(
     }
     const config = error.config as RetriableConfig | undefined;
     const url = config?.url ?? '';
-    const code = (error.response.data as ProblemBody | undefined)?.code;
+    const code = problemOf(error.response.data).code;
 
     if (
       config &&
@@ -147,10 +147,22 @@ apiClient.interceptors.response.use(
   },
 );
 
+/** A failed download carries its problem body as bytes; read it back as JSON. */
+function problemOf(data: unknown): ProblemBody {
+  if (data instanceof ArrayBuffer) {
+    try {
+      return JSON.parse(new TextDecoder().decode(data)) as ProblemBody;
+    } catch {
+      return {};
+    }
+  }
+  return (data ?? {}) as ProblemBody;
+}
+
 export function toApiError(err: unknown): ApiError {
   if (err instanceof ApiError) return err;
   if (axios.isAxiosError(err)) {
-    const data = (err.response?.data ?? {}) as ProblemBody;
+    const data = problemOf(err.response?.data);
     const retry = Number(err.response?.headers?.['retry-after']);
     if (!err.response) {
       return new ApiError({
@@ -186,6 +198,8 @@ export default async function fetchAndValidate<T>(
     headers?: Record<string, string>;
     /** Per-request timeout in ms; overrides the client default (20s). */
     timeout?: number;
+    /** 'arraybuffer' for downloads; JSON otherwise. */
+    responseType?: 'json' | 'arraybuffer';
   },
 ): Promise<T> {
   try {
@@ -195,6 +209,7 @@ export default async function fetchAndValidate<T>(
       headers: options?.headers,
       data: options?.body,
       timeout: options?.timeout,
+      responseType: options?.responseType ?? 'json',
     });
 
     if (!schema) {

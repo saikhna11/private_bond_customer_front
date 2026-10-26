@@ -51,7 +51,7 @@ type NavKey = 'dashboard' | 'bonds' | 'contracts' | 'profile' | 'security';
 
 interface NavItem {
   title: NavKey;
-  to?: '/' | '/profile' | '/security';
+  to?: '/' | '/contracts' | '/profile' | '/security';
   icon: LucideIcon;
 }
 
@@ -64,11 +64,11 @@ const navGroups: {
     items: [{ title: 'dashboard', to: '/', icon: HouseIcon }],
   },
   {
-    // Bonds, contracts and certificates come with their modules.
+    // Bonds and certificates come with their modules.
     label: 'investment',
     items: [
       { title: 'bonds', icon: LandmarkIcon },
-      { title: 'contracts', icon: FileTextIcon },
+      { title: 'contracts', to: '/contracts', icon: FileTextIcon },
     ],
   },
   {
@@ -82,6 +82,7 @@ const navGroups: {
 
 const titles: Record<string, NavKey> = {
   '/': 'dashboard',
+  '/contracts': 'contracts',
   '/profile': 'profile',
   '/security': 'security',
 };
