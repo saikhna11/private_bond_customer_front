@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as CustomerRouteRouteImport } from './routes/_customer/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
 import { Route as CustomerIndexRouteImport } from './routes/_customer/index'
+import { Route as CustomerContractsIndexRouteImport } from './routes/_customer/contracts/index'
 import { Route as CustomerProfileIndexRouteImport } from './routes/_customer/profile/index'
 import { Route as CustomerSecurityIndexRouteImport } from './routes/_customer/security/index'
 import { Route as PublicForgotPasswordIndexRouteImport } from './routes/_public/forgot-password/index'
@@ -30,6 +31,11 @@ const PublicRouteRoute = PublicRouteRouteImport.update({
 const CustomerIndexRoute = CustomerIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => CustomerRouteRoute,
+} as any)
+const CustomerContractsIndexRoute = CustomerContractsIndexRouteImport.update({
+  id: '/contracts/',
+  path: '/contracts/',
   getParentRoute: () => CustomerRouteRoute,
 } as any)
 const CustomerProfileIndexRoute = CustomerProfileIndexRouteImport.update({
@@ -66,6 +72,7 @@ const PublicVerifyIndexRoute = PublicVerifyIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof CustomerIndexRoute
+  '/contracts/': typeof CustomerContractsIndexRoute
   '/profile/': typeof CustomerProfileIndexRoute
   '/security/': typeof CustomerSecurityIndexRoute
   '/forgot-password/': typeof PublicForgotPasswordIndexRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof CustomerIndexRoute
+  '/contracts': typeof CustomerContractsIndexRoute
   '/profile': typeof CustomerProfileIndexRoute
   '/security': typeof CustomerSecurityIndexRoute
   '/forgot-password': typeof PublicForgotPasswordIndexRoute
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/_customer': typeof CustomerRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
   '/_customer/': typeof CustomerIndexRoute
+  '/_customer/contracts/': typeof CustomerContractsIndexRoute
   '/_customer/profile/': typeof CustomerProfileIndexRoute
   '/_customer/security/': typeof CustomerSecurityIndexRoute
   '/_public/forgot-password/': typeof PublicForgotPasswordIndexRoute
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/contracts/'
     | '/profile/'
     | '/security/'
     | '/forgot-password/'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/contracts'
     | '/profile'
     | '/security'
     | '/forgot-password'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/_customer'
     | '/_public'
     | '/_customer/'
+    | '/_customer/contracts/'
     | '/_customer/profile/'
     | '/_customer/security/'
     | '/_public/forgot-password/'
@@ -152,6 +164,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof CustomerIndexRouteImport
+      parentRoute: typeof CustomerRouteRoute
+    }
+    '/_customer/contracts/': {
+      id: '/_customer/contracts/'
+      path: '/contracts'
+      fullPath: '/contracts/'
+      preLoaderRoute: typeof CustomerContractsIndexRouteImport
       parentRoute: typeof CustomerRouteRoute
     }
     '/_customer/profile/': {
@@ -201,12 +220,14 @@ declare module '@tanstack/react-router' {
 
 interface CustomerRouteRouteChildren {
   CustomerIndexRoute: typeof CustomerIndexRoute
+  CustomerContractsIndexRoute: typeof CustomerContractsIndexRoute
   CustomerProfileIndexRoute: typeof CustomerProfileIndexRoute
   CustomerSecurityIndexRoute: typeof CustomerSecurityIndexRoute
 }
 
 const CustomerRouteRouteChildren: CustomerRouteRouteChildren = {
   CustomerIndexRoute: CustomerIndexRoute,
+  CustomerContractsIndexRoute: CustomerContractsIndexRoute,
   CustomerProfileIndexRoute: CustomerProfileIndexRoute,
   CustomerSecurityIndexRoute: CustomerSecurityIndexRoute,
 }
