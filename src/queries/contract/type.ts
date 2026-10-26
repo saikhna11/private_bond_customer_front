@@ -1,6 +1,12 @@
 import z from 'zod';
 
-const partyTypeSchema = z.enum(['CO', 'ORG', 'USER', 'GUARDIAN', 'JUNIOR']);
+const partyTypeSchema = z.enum([
+  'holder',
+  'co_holder',
+  'organization',
+  'guardian',
+  'minor',
+]);
 
 /**
  * A person or organization a contract names, at their place among the parties its template
@@ -90,7 +96,6 @@ export const ContractSchema = z.object({
   signature_deadline: z.string().optional(),
   cancel_reason: cancelReasonSchema.optional(),
   cancelled_at: z.string().optional(),
-  signed_document_hash: z.string().optional(),
   signed_at: z.string().optional(),
   parties: z.array(PartySchema),
   signatures: z.array(SignatureSchema),

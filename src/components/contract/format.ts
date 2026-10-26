@@ -22,11 +22,11 @@ export const frequencyLabels: Record<
 };
 
 export const partyLabels: Record<PartyType['type'], string> = {
-  USER: 'Худалдан авагч',
-  CO: 'Хамтран эзэмшигч',
-  ORG: 'Байгууллага',
-  GUARDIAN: 'Асран хамгаалагч',
-  JUNIOR: 'Насанд хүрээгүй эзэмшигч',
+  holder: 'Худалдан авагч',
+  co_holder: 'Хамтран эзэмшигч',
+  organization: 'Байгууллага',
+  guardian: 'Асран хамгаалагч',
+  minor: 'Насанд хүрээгүй эзэмшигч',
 };
 
 export function partyName(
