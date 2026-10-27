@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import {
   getContract,
+  getContractDocument,
   getContractPreview,
   getContracts,
   getProductPreview,
@@ -31,6 +32,7 @@ export const contractKeys = {
     ] as const,
   templateFile: (id: string) =>
     [...contractKeys.all, 'template-file', id] as const,
+  document: (id: string) => [...contractKeys.all, 'document', id] as const,
 };
 
 /** The client's own party on the contract. */
@@ -138,6 +140,18 @@ export function templateFileOptions(id: string) {
   return queryOptions({
     queryKey: contractKeys.templateFile(id),
     queryFn: () => getTemplateFile(id),
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+}
+
+/**
+ * A signed contract's PDF. It never changes once signed, so the page that shows it and the
+ * download share one fetch.
+ */
+export function contractDocumentOptions(id: string) {
+  return queryOptions({
+    queryKey: contractKeys.document(id),
+    queryFn: () => getContractDocument(id),
     staleTime: Number.POSITIVE_INFINITY,
   });
 }

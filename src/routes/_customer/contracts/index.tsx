@@ -10,6 +10,7 @@ import { ContractList } from '@/components/contract/contract-list';
 import { ContractPreview } from '@/components/contract/contract-preview';
 import { DeclineButton } from '@/components/contract/decline-button';
 import { DoneStep, PartyStatuses } from '@/components/contract/done-step';
+import { SignedContractDocument } from '@/components/contract/pdf-document';
 import { ProductCards } from '@/components/contract/product-cards';
 import { SignStep } from '@/components/contract/sign-step';
 import { type Step, Steps } from '@/components/contract/steps';
@@ -278,9 +279,10 @@ function ProductSteps({ product }: { product: Product }) {
 /**
  * A stored contract. While it waits for the client's own signature, they read it with
  * the signatures given so far and sign it (CoSignSteps). Otherwise it shows whose
- * signatures it waits for, then its PDF rendering, then the download. While the PDF
- * renders, the page polls often at first and less often after (pdfPollDelay), only while
- * the tab is visible, and stops after pdfPollLimit; checking again starts over.
+ * signatures it waits for, then its PDF rendering, then the signed PDF itself and its
+ * download. While the PDF renders, the page polls often at first and less often after
+ * (pdfPollDelay), only while the tab is visible, and stops after pdfPollLimit; checking
+ * again starts over.
  */
 function StoredContract({ contractId }: { contractId: string }) {
   const navigate = Route.useNavigate();
@@ -346,6 +348,9 @@ function StoredContract({ contractId }: { contractId: string }) {
         onCheckAgain={checkAgain}
         onList={() => navigate({ search: {} })}
       />
+      {contract.status === 'signed' && (
+        <SignedContractDocument contract={contract} />
+      )}
     </Section>
   );
 }
