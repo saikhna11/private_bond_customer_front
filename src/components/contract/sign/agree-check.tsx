@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -10,6 +11,7 @@ export function AgreeCheck({
   checked: boolean;
   onChange: (checked: boolean) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Card className="py-0">
       <CardContent className="flex-row items-start gap-3 p-5">
@@ -19,7 +21,7 @@ export function AgreeCheck({
           onCheckedChange={(v) => onChange(v === true)}
         />
         <Label htmlFor="agree" className="leading-snug font-normal">
-          Гэрээний нөхцөлтэй бүрэн танилцаж, зөвшөөрч байна.
+          {t('contract.sign.agree')}
         </Label>
       </CardContent>
     </Card>

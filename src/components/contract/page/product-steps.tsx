@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ContractPreview } from '@/components/contract/preview/contract-preview';
 import { ToSignButton } from '@/components/contract/preview/to-sign-button';
 import { SignStep } from '@/components/contract/sign/sign-step';
@@ -21,6 +22,7 @@ import { contractsRoute } from './route';
  */
 export function ProductSteps({ product }: { product: Product }) {
   const { sign } = contractsRoute.useSearch();
+  const { t } = useTranslation();
   const navigate = contractsRoute.useNavigate();
   const queryClient = useQueryClient();
   // One id per purchase: a request sent again, after a lost answer or a second press, finds
@@ -42,7 +44,7 @@ export function ProductSteps({ product }: { product: Product }) {
     return <ContractFailed error={products.error} />;
   }
   if (!info) {
-    return <ContractFailed message="Бүтээгдэхүүн олдсонгүй." />;
+    return <ContractFailed message={t('contract.productNotFound')} />;
   }
   if (isPending) {
     return <ContractLoading />;
@@ -88,7 +90,7 @@ export function ProductSteps({ product }: { product: Product }) {
           variant="outline"
           onClick={() => navigate({ to: '/contracts' })}
         >
-          Буцах
+          {t('contract.back')}
         </Button>
         <ToSignButton
           onClick={() => navigate({ search: { product, sign: true } })}

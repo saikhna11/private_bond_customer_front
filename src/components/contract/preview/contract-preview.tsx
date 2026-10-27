@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
   Card,
   CardContent,
@@ -15,14 +16,15 @@ import { DocxView } from './docx-view';
  * signatures the parties already gave in place.
  */
 export function ContractPreview({ preview }: { preview: ProductPreviewType }) {
+  const { t } = useTranslation();
   return (
     <>
       <ContractTerms preview={preview} />
       <Card>
         <CardHeader>
-          <CardTitle>Гэрээний эх</CardTitle>
+          <CardTitle>{t('contract.document.title')}</CardTitle>
           <CardDescription>
-            Гарын үсэг зурахаасаа өмнө гэрээг бүтэн уншина уу.
+            {t('contract.document.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import z from 'zod';
 import { PageTitle } from '@/components/common/page-title';
 import { ContractList } from '@/components/contract/list/contract-list';
@@ -25,6 +26,7 @@ export const Route = createFileRoute('/_customer/contracts/')({
 });
 
 function ContractPage() {
+  const { t } = useTranslation();
   const { product, contractId } = Route.useSearch();
   const navigate = Route.useNavigate();
 
@@ -37,12 +39,12 @@ function ContractPage() {
   return (
     <>
       <PageTitle
-        title="Гэрээ, гэрчилгээ"
-        description="Бонд сонгож гэрээгээ уншаад гарын үсэг зурна. Баталгаажсан гэрээний эх хувийг эндээс татаж авна."
+        title={t('contract.page.title')}
+        description={t('contract.page.description')}
       />
       <section className="space-y-3">
         <h2 className="text-sm font-medium text-muted-foreground">
-          Бонд худалдан авах
+          {t('contract.page.buy')}
         </h2>
         <ProductCards onPick={(p) => navigate({ search: { product: p } })} />
       </section>

@@ -6,36 +6,42 @@ import {
   PercentIcon,
   RepeatIcon,
 } from 'lucide-react';
-import { formatAmount, frequencyLabels } from '@/components/contract/format';
+import { useTranslation } from 'react-i18next';
+import { formatAmount, frequencyLabel } from '@/components/contract/format';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { ProductPreviewType } from '@/queries/contract/type';
 
 /** The previewed contract's key terms, one tile each. */
 export function ContractTerms({ preview }: { preview: ProductPreviewType }) {
+  const { t } = useTranslation();
   const terms = [
-    { label: 'Гэрээний дугаар', value: preview.contract_no, Icon: HashIcon },
     {
-      label: 'Дүн',
+      label: t('contract.terms.contractNo'),
+      value: preview.contract_no,
+      Icon: HashIcon,
+    },
+    {
+      label: t('contract.terms.amount'),
       value: `${formatAmount(preview.principal_amount)} ₮`,
       Icon: BanknoteIcon,
     },
     {
-      label: 'Жилийн хүү',
+      label: t('contract.terms.annualRate'),
       value: `${Number(preview.annual_rate)}%`,
       Icon: PercentIcon,
     },
     {
-      label: 'Хугацаа',
-      value: `${preview.term_months} сар`,
+      label: t('contract.terms.term'),
+      value: t('contract.months', { count: preview.term_months }),
       Icon: CalendarRangeIcon,
     },
     {
-      label: 'Хүү төлөх',
-      value: frequencyLabels[preview.interest_frequency],
+      label: t('contract.terms.frequency'),
+      value: frequencyLabel(preview.interest_frequency),
       Icon: RepeatIcon,
     },
     {
-      label: 'Дуусах огноо',
+      label: t('contract.terms.maturity'),
       value: preview.maturity_date,
       Icon: CalendarCheckIcon,
     },
@@ -44,7 +50,7 @@ export function ContractTerms({ preview }: { preview: ProductPreviewType }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Гэрээний нөхцөл</CardTitle>
+        <CardTitle>{t('contract.terms.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

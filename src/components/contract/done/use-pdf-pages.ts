@@ -1,5 +1,6 @@
 import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 import { useEffect, useRef, useState } from 'react';
+import i18n from '@/lib/i18n';
 
 // The most device pixels a page is drawn with per CSS pixel: a sharper page costs memory
 // and shows no more.
@@ -67,7 +68,7 @@ export function usePdfPages(data: ArrayBuffer | undefined) {
         canvas.setAttribute('role', 'img');
         canvas.setAttribute(
           'aria-label',
-          `Гэрээний ${n}/${doc.numPages}-р хуудас`,
+          i18n.t('contract.signed.page', { n, total: doc.numPages }),
         );
         const task = page.render({ canvas, viewport });
         tasks.add(task);

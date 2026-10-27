@@ -1,4 +1,5 @@
 import { ArrowLeftIcon, RefreshCwIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { DeclineButton } from '@/components/contract/decline-button';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -22,13 +23,14 @@ export function PendingActions({
   onCheckAgain: () => void;
   onList: () => void;
 }) {
+  const { t } = useTranslation();
   const you = yourParty(contract);
 
   return (
     <div className="flex flex-wrap justify-center gap-3">
       <Button variant="outline" className="h-10 rounded-xl" onClick={onList}>
         <ArrowLeftIcon />
-        Гэрээнүүд
+        {t('contract.toList')}
       </Button>
       {contract.status === 'pending_signature' && you?.signs && (
         <DeclineButton contractId={contract.id} signed={!!you.signed_at} />
@@ -44,7 +46,7 @@ export function PendingActions({
               checking && 'animate-spin motion-reduce:animate-none',
             )}
           />
-          Дахин шалгах
+          {t('contract.pending.checkAgain')}
         </Button>
       )}
     </div>

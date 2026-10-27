@@ -1,9 +1,11 @@
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { ArrowRightIcon, ClockIcon, InfoIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ApiErrorAlert } from '@/components/common/api-error-alert';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { isIndividual } from '@/lib/client';
 import { toApiError } from '@/lib/fetcher';
 import { meOptions } from '@/queries/auth/options';
 import { productsOptions } from '@/queries/contract/options';
@@ -22,16 +24,17 @@ export function ProductCards({
 }: {
   onPick: (product: Product) => void;
 }) {
+  const { t } = useTranslation();
   const { data: me } = useSuspenseQuery(meOptions());
   const { data: products, isPending, error } = useQuery(productsOptions());
 
-  if (me.type !== 'customer') {
+  if (!isIndividual(me)) {
     return (
       <ProductNotice
         Icon={InfoIcon}
         className="border-dashed"
-        title="Одоогоор зөвхөн Монгол Улсын иргэнд"
-        text="Бонд худалдан авах гэрээ одоогоор зөвхөн Монгол Улсын иргэнд нээлттэй."
+        title={t('contract.product.individualsOnlyTitle')}
+        text={t('contract.product.individualsOnlyText')}
       />
     );
   }
@@ -41,12 +44,12 @@ export function ProductCards({
         Icon={ClockIcon}
         className="border-warning/30 bg-warning/5"
         iconClassName="bg-warning/15 text-warning-foreground dark:text-warning"
-        title="Бүртгэл баталгаажаагүй байна"
-        text="Бүртгэл тань баталгаажсаны дараа бонд худалдан авч, гэрээ байгуулах боломжтой."
+        title={t('contract.product.notApprovedTitle')}
+        text={t('contract.product.notApprovedText')}
         action={
           <Button asChild variant="outline" className="h-10 rounded-xl">
             <Link to="/profile">
-              Профайл
+              {t('contract.product.profile')}
               <ArrowRightIcon />
             </Link>
           </Button>

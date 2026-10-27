@@ -1,4 +1,5 @@
 import { EraserIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -24,6 +25,7 @@ export function SignatureField({
   description?: string;
   onChange: (png: string | null) => void;
 }) {
+  const { t } = useTranslation();
   const { canvas, clear } = useSignaturePad(onChange);
 
   return (
@@ -40,7 +42,7 @@ export function SignatureField({
             onClick={clear}
           >
             <EraserIcon />
-            Арилгах
+            {t('contract.sign.clear')}
           </Button>
         </CardAction>
       </CardHeader>
@@ -50,7 +52,7 @@ export function SignatureField({
           className="mx-auto block aspect-[3/1] w-full max-w-2xl touch-none rounded-xl border-2 border-dashed bg-background"
         />
         <p className="mt-2 text-center text-xs text-muted-foreground">
-          Хулгана эсвэл хуруугаараа дээрх талбарт гарын үсгээ зурна уу.
+          {t('contract.sign.padHint')}
         </p>
       </CardContent>
     </Card>

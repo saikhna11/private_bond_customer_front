@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { ApiErrorAlert } from '@/components/common/api-error-alert';
 import { useDownloadContract } from '@/components/contract/download';
 import {
@@ -23,17 +24,18 @@ export function ContractList({
 }: {
   onOpen: (contractId: string) => void;
 }) {
+  const { t } = useTranslation();
   const { data: contracts, isPending, error } = useQuery(contractsOptions());
   const download = useDownloadContract();
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Миний гэрээнүүд</CardTitle>
+        <CardTitle>{t('contract.list.title')}</CardTitle>
         <CardDescription>
           {contracts
-            ? `${contracts.length} гэрээ`
-            : 'Гэрээнүүдийг ачаалж байна...'}
+            ? t('contract.list.count', { count: contracts.length })
+            : t('contract.list.loading')}
         </CardDescription>
       </CardHeader>
       <CardContent className="px-0">

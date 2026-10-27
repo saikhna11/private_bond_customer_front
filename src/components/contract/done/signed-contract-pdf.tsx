@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toApiError } from '@/lib/fetcher';
 import { apiErrorMessage } from '@/lib/i18n';
@@ -10,6 +11,7 @@ import { usePdfPages } from './use-pdf-pages';
  * (contractDocumentOptions).
  */
 export function SignedContractPdf({ contractId }: { contractId: string }) {
+  const { t } = useTranslation();
   const { data, isPending, error } = useQuery(
     contractDocumentOptions(contractId),
   );
@@ -20,7 +22,7 @@ export function SignedContractPdf({ contractId }: { contractId: string }) {
       <p className="py-10 text-center text-sm text-destructive">
         {error
           ? apiErrorMessage(toApiError(error))
-          : 'Гэрээг харуулж чадсангүй. PDF татаж аваад үзнэ үү.'}
+          : t('contract.signed.pdfFailed')}
       </p>
     );
   }

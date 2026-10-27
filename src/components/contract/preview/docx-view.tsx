@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toApiError } from '@/lib/fetcher';
 import { apiErrorMessage } from '@/lib/i18n';
@@ -8,6 +9,7 @@ import { useDocxRender } from './use-docx-render';
 
 /** The previewed contract's document, filled and drawn in the browser (useDocxRender). */
 export function DocxView({ preview }: { preview: ProductPreviewType }) {
+  const { t } = useTranslation();
   const { data, isPending, error } = useQuery(
     templateFileOptions(preview.template.id),
   );
@@ -21,7 +23,7 @@ export function DocxView({ preview }: { preview: ProductPreviewType }) {
       <p className="py-10 text-center text-sm text-destructive">
         {error
           ? apiErrorMessage(toApiError(error))
-          : 'Гэрээг харуулж чадсангүй.'}
+          : t('contract.document.failed')}
       </p>
     );
   }

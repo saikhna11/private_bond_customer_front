@@ -4,6 +4,7 @@ import {
   FileTextIcon,
   PenLineIcon,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ContractStatusBadge } from '@/components/contract/contract-status-badge';
 import { contractNumber, formatAmount } from '@/components/contract/format';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ export function ContractListItem({
   onDownload: () => void;
   downloading: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <li className="group flex items-center gap-3 px-6 py-4 transition-colors hover:bg-muted/40">
       <button
@@ -37,13 +39,13 @@ export function ContractListItem({
         <span className="min-w-0 flex-1 space-y-1">
           <span className="flex flex-wrap items-center gap-2">
             <span className="font-semibold">
-              {c.contract_no ?? `${c.contract_prefix} бонд`}
+              {c.contract_no ?? t('contract.bond', { name: c.contract_prefix })}
             </span>
             <ContractStatusBadge status={c.status} />
             {c.awaiting_signature && (
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
                 <PenLineIcon className="size-3.5" />
-                Таны гарын үсэг хүлээгдэж байна
+                {t('contract.list.awaitingYou')}
               </span>
             )}
           </span>

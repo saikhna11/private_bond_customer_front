@@ -1,4 +1,5 @@
 import { ArrowLeftIcon, DownloadIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useDownloadContract } from '@/components/contract/download';
 import { Button } from '@/components/ui/button';
 import type { ContractType } from '@/queries/contract/type';
@@ -11,6 +12,7 @@ export function SignedContractHeader({
   contract: ContractType;
   onList: () => void;
 }) {
+  const { t } = useTranslation();
   const download = useDownloadContract();
 
   return (
@@ -22,7 +24,7 @@ export function SignedContractHeader({
           onClick={onList}
         >
           <ArrowLeftIcon />
-          Гэрээнүүд
+          {t('contract.toList')}
         </Button>
         <Button
           className="h-10 flex-1 rounded-xl px-6 sm:flex-none"
@@ -30,7 +32,7 @@ export function SignedContractHeader({
           disabled={download.isPending}
         >
           <DownloadIcon />
-          PDF татах
+          {t('contract.signed.download')}
         </Button>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import type { ContractType } from '@/queries/contract/type';
 import { PartyStatuses } from './party-statuses';
@@ -24,7 +25,8 @@ export function PendingContract({
   onCheckAgain: () => void;
   onList: () => void;
 }) {
-  const { title, message } = pendingCopy(contract, slow);
+  const { t } = useTranslation();
+  const { title, message } = pendingCopy(t, contract, slow);
 
   return (
     <Card>

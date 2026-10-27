@@ -1,5 +1,6 @@
 import { ArrowRightIcon, LandmarkIcon } from 'lucide-react';
-import { frequencyLabels } from '@/components/contract/format';
+import { useTranslation } from 'react-i18next';
+import { frequencyLabel } from '@/components/contract/format';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import type { BondProductType } from '@/queries/contract/type';
@@ -12,6 +13,7 @@ export function ProductCard({
   product: BondProductType;
   onPick: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Card className="group py-0 transition-all hover:-translate-y-px hover:border-primary/40 hover:shadow-sm motion-reduce:hover:translate-y-0">
       <CardContent className="flex h-full flex-col gap-5 p-5">
@@ -20,25 +22,37 @@ export function ProductCard({
             <LandmarkIcon className="size-5" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="font-semibold">{p.name} бонд</p>
-            <p className="text-sm text-muted-foreground">Хувь хүн эзэмшинэ</p>
+            <p className="font-semibold">
+              {t('contract.bond', { name: p.name })}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {t('contract.product.individual')}
+            </p>
           </div>
           <div className="text-right">
             <p className="tabular text-2xl font-bold text-primary">
               {Number(p.annual_rate)}%
             </p>
-            <p className="text-xs text-muted-foreground">жилийн хүү</p>
+            <p className="text-xs text-muted-foreground">
+              {t('contract.product.annualRate')}
+            </p>
           </div>
         </div>
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <div className="rounded-xl bg-muted/60 px-3 py-2">
-            <dt className="text-xs text-muted-foreground">Хугацаа</dt>
-            <dd className="tabular font-semibold">{p.term_months} сар</dd>
+            <dt className="text-xs text-muted-foreground">
+              {t('contract.product.term')}
+            </dt>
+            <dd className="tabular font-semibold">
+              {t('contract.months', { count: p.term_months })}
+            </dd>
           </div>
           <div className="rounded-xl bg-muted/60 px-3 py-2">
-            <dt className="text-xs text-muted-foreground">Хүү төлөх</dt>
+            <dt className="text-xs text-muted-foreground">
+              {t('contract.product.frequency')}
+            </dt>
             <dd className="font-semibold">
-              {frequencyLabels[p.interest_frequency]}
+              {frequencyLabel(p.interest_frequency)}
             </dd>
           </div>
         </dl>
@@ -48,12 +62,12 @@ export function ProductCard({
             disabled={!p.available}
             onClick={onPick}
           >
-            Гэрээ байгуулах
+            {t('contract.product.buy')}
             <ArrowRightIcon />
           </Button>
           {!p.available && (
             <p className="text-center text-xs text-muted-foreground">
-              Энэ бондод гэрээний загвар хараахан оноогоогүй байна.
+              {t('contract.product.noTemplate')}
             </p>
           )}
         </div>

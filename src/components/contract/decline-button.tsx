@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2Icon, XIcon } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -29,6 +30,7 @@ export function DeclineButton({
   contractId: string;
   signed: boolean;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const decline = useMutation({
@@ -46,7 +48,9 @@ export function DeclineButton({
       setOpen(false);
     },
   });
-  const action = signed ? 'Гэрээг цуцлах' : 'Гэрээнээс татгалзах';
+  const action = t(
+    signed ? 'contract.decline.withdraw' : 'contract.decline.decline',
+  );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -62,15 +66,12 @@ export function DeclineButton({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{action}?</DialogTitle>
-          <DialogDescription>
-            Гэрээ бүх талын хувьд цуцлагдаж, дахин гарын үсэг зурах боломжгүй
-            болно. Шаардлагатай бол шинэ гэрээ байгуулна.
-          </DialogDescription>
+          <DialogDescription>{t('contract.decline.text')}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="outline" className="h-10 rounded-xl">
-              Болих
+              {t('common.cancel')}
             </Button>
           </DialogClose>
           <Button

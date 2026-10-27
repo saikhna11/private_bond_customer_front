@@ -1,7 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeftIcon, Loader2Icon, PenLineIcon } from 'lucide-react';
 import { useState } from 'react';
-import { partyLabels, partyName } from '@/components/contract/format';
+import { useTranslation } from 'react-i18next';
+import { partyLabel, partyName } from '@/components/contract/format';
 import { Button } from '@/components/ui/button';
 import { toApiError } from '@/lib/fetcher';
 import { apiErrorMessage } from '@/lib/i18n';
@@ -33,6 +34,7 @@ export function SignStep({
   onSigned: (contract: ContractType) => void;
   onConflict: () => void;
 }) {
+  const { t } = useTranslation();
   const [drawing, setDrawing] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(false);
   const queryClient = useQueryClient();
@@ -57,7 +59,7 @@ export function SignStep({
   return (
     <>
       <SignatureField
-        title={partyLabels[signer.type]}
+        title={partyLabel(signer.type)}
         description={`${partyName(signer)} · ${signer.register_no}`}
         onChange={setDrawing}
       />
@@ -71,7 +73,7 @@ export function SignStep({
           onClick={onBack}
         >
           <ArrowLeftIcon />
-          Гэрээ рүү буцах
+          {t('contract.sign.back')}
         </Button>
         <Button
           type="button"
@@ -84,7 +86,9 @@ export function SignStep({
           ) : (
             <PenLineIcon />
           )}
-          {sign.isPending ? 'Илгээж байна...' : 'Гарын үсэг зурах'}
+          {sign.isPending
+            ? t('contract.sign.sending')
+            : t('contract.sign.submit')}
         </Button>
       </div>
     </>

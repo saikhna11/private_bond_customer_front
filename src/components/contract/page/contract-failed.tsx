@@ -1,4 +1,5 @@
 import { ArrowLeftIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ApiErrorAlert } from '@/components/common/api-error-alert';
 import { Button } from '@/components/ui/button';
 import { toApiError } from '@/lib/fetcher';
@@ -12,6 +13,7 @@ export function ContractFailed({
   error?: unknown;
   message?: string;
 }) {
+  const { t } = useTranslation();
   const navigate = contractsRoute.useNavigate();
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col items-start gap-4">
@@ -26,7 +28,7 @@ export function ContractFailed({
         onClick={() => navigate({ search: {} })}
       >
         <ArrowLeftIcon />
-        Гэрээнүүд
+        {t('contract.toList')}
       </Button>
     </div>
   );
