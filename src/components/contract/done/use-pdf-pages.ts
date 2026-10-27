@@ -1,40 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
 import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 import { useEffect, useRef, useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { toApiError } from '@/lib/fetcher';
-import { apiErrorMessage } from '@/lib/i18n';
-import { contractDocumentOptions } from '@/queries/contract/options';
-import type { ContractType } from '@/queries/contract/type';
-import { contractNumber } from './format';
-
-/** The signed contract itself, the PDF every party signed, page by page. */
-export function SignedContractDocument({
-  contract,
-}: {
-  contract: ContractType;
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Гэрээний эх хувь</CardTitle>
-        <CardDescription>
-          {contractNumber(contract)} дугаартай, бүх талын гарын үсэгтэй гэрээ.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <PdfView contractId={contract.id} />
-      </CardContent>
-    </Card>
-  );
-}
 
 // The most device pixels a page is drawn with per CSS pixel: a sharper page costs memory
 // and shows no more.
@@ -56,13 +21,15 @@ async function loadPdfjs() {
   return pdfjs;
 }
 
-function PdfView({ contractId }: { contractId: string }) {
-  const { data, isPending, error } = useQuery(
-    contractDocumentOptions(contractId),
-  );
+/**
+ * Draws a PDF (data) in pages, one canvas each, as wide as the column at the screen's
+ * density, and again when the column's width changes. ready says the pages are drawn,
+ * failed that they could not be.
+ */
+export function usePdfPages(data: ArrayBuffer | undefined) {
   const pages = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
-  const [renderFailed, setRenderFailed] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const el = pages.current;
@@ -118,7 +85,7 @@ function PdfView({ contractId }: { contractId: string }) {
       if (cancelled || (err as Error)?.name === 'RenderingCancelledException') {
         return;
       }
-      setRenderFailed(true);
+      setFailed(true);
     };
 
     let destroy: (() => Promise<void>) | undefined;
@@ -152,22 +119,5 @@ function PdfView({ contractId }: { contractId: string }) {
     };
   }, [data]);
 
-  if (error || renderFailed) {
-    return (
-      <p className="py-10 text-center text-sm text-destructive">
-        {error
-          ? apiErrorMessage(toApiError(error))
-          : 'Гэрээг харуулж чадсангүй. PDF татаж аваад үзнэ үү.'}
-      </p>
-    );
-  }
-  return (
-    <div
-      aria-busy={!ready}
-      className="max-h-[75vh] overflow-y-auto rounded-xl border bg-muted p-2 [scrollbar-gutter:stable] sm:p-4"
-    >
-      {(isPending || !ready) && <Skeleton className="h-[60vh] w-full" />}
-      <div ref={pages} className="flex flex-col gap-3" />
-    </div>
-  );
+  return { pages, ready, failed };
 }
