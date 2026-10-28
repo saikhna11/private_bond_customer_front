@@ -20,7 +20,13 @@ export function useDocxRender(
     let cancelled = false;
     let observer: ResizeObserver | undefined;
     el.replaceChildren();
-    fillDocx(data, preview.values, preview.schedule, preview.signatures)
+    fillDocx(
+      data,
+      preview.values,
+      preview.schedule_keys,
+      preview.schedule,
+      preview.signatures,
+    )
       .then((doc) =>
         renderAsync(doc, el, undefined, {
           inWrapper: true,
@@ -52,7 +58,13 @@ export function useDocxRender(
       cancelled = true;
       observer?.disconnect();
     };
-  }, [data, preview.values, preview.schedule, preview.signatures]);
+  }, [
+    data,
+    preview.values,
+    preview.schedule_keys,
+    preview.schedule,
+    preview.signatures,
+  ]);
 
   return { container, failed };
 }

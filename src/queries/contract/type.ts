@@ -170,9 +170,10 @@ export const ProductPreviewSchema = z.object({
   interest_frequency: frequencySchema,
   parties: z.array(PreviewPartySchema),
   values: z.record(z.string(), z.string()),
-  schedule: z.array(
-    z.object({ interest_date: z.string(), interest_amount: z.string() }),
-  ),
+  // The schedule's placeholders and one row of their values per payment: its table row
+  // repeats once per payment.
+  schedule_keys: z.array(z.string()),
+  schedule: z.array(z.record(z.string(), z.string())),
   signatures: z.array(PreviewSignatureSchema),
 });
 
