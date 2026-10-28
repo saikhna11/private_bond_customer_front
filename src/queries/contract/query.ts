@@ -3,6 +3,7 @@ import fetchAndValidate from '@/lib/fetcher';
 import {
   BondProductSchema,
   type BondProductType,
+  type CoHolder,
   ContractSchema,
   ContractSummarySchema,
   type ContractSummaryType,
@@ -45,13 +46,17 @@ export const declineContract = (id: string): Promise<ContractType> =>
     body: {},
   });
 
-/** What the browser fills the product's contract preview from; nothing is stored. */
+/**
+ * What the browser fills the product's contract preview from; nothing is stored. The
+ * co-holder travels in the body, so it stays out of URLs and logs.
+ */
 export const getProductPreview = (
   product: Product,
+  coHolder?: CoHolder,
 ): Promise<ProductPreviewType> =>
   fetchAndValidate(`products/${product}/preview`, ProductPreviewSchema, {
     method: 'POST',
-    body: {},
+    body: coHolder ? { co_holder: coHolder } : {},
   });
 
 /** What the browser fills a stored contract from, with its parties' signatures so far. */

@@ -26,7 +26,9 @@ export function ProductCard({
               {t('contract.bond', { name: p.name })}
             </p>
             <p className="text-sm text-muted-foreground">
-              {t('contract.product.individual')}
+              {p.co_holder
+                ? t('contract.product.joint')
+                : t('contract.product.individual')}
             </p>
           </div>
           <div className="text-right">

@@ -180,6 +180,15 @@ export type PreviewPartyType = z.infer<typeof PreviewPartySchema>;
 export type ProductPreviewType = z.infer<typeof ProductPreviewSchema>;
 
 /**
+ * A contract's co-holder: another approved client's register number (a foreigner's
+ * passport number) and phone, both. It stays in the page's memory, never the URL.
+ */
+export interface CoHolder {
+  register_no: string;
+  phone: string;
+}
+
+/**
  * POST /contracts: the client's own signature on the preview, a base64 PNG without the
  * data URL prefix, which stores the contract; the backend fills the rest from the bond's
  * sample order. Each other party signs from their own account. request_id names the
@@ -189,5 +198,6 @@ export interface CreateContractBody {
   product: Product;
   template_id: string;
   request_id: string;
+  co_holder?: CoHolder;
   signature: string;
 }

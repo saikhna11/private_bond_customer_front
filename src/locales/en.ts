@@ -530,6 +530,7 @@ export const en: Messages = {
     },
     product: {
       individual: 'Held by one person',
+      joint: 'Held jointly',
       annualRate: 'annual rate',
       term: 'Term',
       frequency: 'Interest paid',
@@ -549,8 +550,22 @@ export const en: Messages = {
       count_other: '{{count}} contracts',
       loading: 'Loading contracts...',
       awaitingYou: 'Awaiting your signature',
+      awaitingTitle: 'Waiting for your signature ({{count}})',
+      othersTitle: 'Other contracts',
       emptyTitle: 'No contracts yet',
       emptyText: 'Choose a bond above to make your first contract.',
+    },
+    coHolder: {
+      title: 'Co-holder',
+      description: 'Name the client who holds the bond with you.',
+      intro:
+        'The co-holder must be an approved client. Enter the register number (a passport number for a foreigner) and the phone number they signed up with. They sign the contract from their own account.',
+      registerNo: 'Register or passport number',
+      registerNoPlaceholder: 'УБ12345678',
+      registerNoRequired: "Enter the co-holder's register or passport number",
+      phone: 'Phone number',
+      submit: 'To the contract',
+      change: 'Change the co-holder',
     },
     terms: {
       title: 'Contract terms',
@@ -694,9 +709,9 @@ export const en: Messages = {
         'The contract parties do not match the template: each party it needs must appear exactly once.',
       signature_invalid: 'The signature must be a PNG image under 512 KB.',
       co_holder_invalid:
-        'A product with a co-holder needs their register and phone numbers; other products take none.',
+        'A product with a co-holder needs their register (or passport) and phone numbers; other products take none.',
       co_holder_not_found:
-        'Co-holder not found. Check the register and phone numbers: they must be an approved client other than you.',
+        'Co-holder not found. Check the register (or passport) and phone numbers: they must be an approved client other than you.',
       not_pending:
         'This contract is not awaiting signatures: every party has signed, it was cancelled, or its signing time ran out.',
       already_signed: 'You have already signed this contract.',
