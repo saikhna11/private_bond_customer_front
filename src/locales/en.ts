@@ -450,6 +450,171 @@ export const en: Messages = {
     generic: 'Something went wrong. Please try again.',
     genericShort: 'Something went wrong.',
   },
+  contract: {
+    page: {
+      title: 'Contracts & certificates',
+      description:
+        'Choose a bond, read its contract and sign it. Download your signed contracts here.',
+      buy: 'Buy a bond',
+    },
+    toList: 'Contracts',
+    back: 'Back',
+    bond: '{{name}} bond',
+    months_one: '{{count}} month',
+    months_other: '{{count}} months',
+    unnumbered: 'Not numbered yet',
+    productNotFound: 'Product not found.',
+    steps: {
+      create: {
+        label: 'Choose a bond',
+        hint: 'Product',
+      },
+      view: {
+        label: 'Read the contract',
+        hint: 'Review the terms',
+      },
+      sign: {
+        label: 'Signature',
+        hint: 'From your account',
+      },
+      done: {
+        label: 'Confirmed',
+        hint: 'Download the original',
+      },
+    },
+    sections: {
+      create: {
+        title: 'Choose a bond',
+        description: '',
+      },
+      view: {
+        title: 'Review the contract',
+        description: 'Read the terms and the contract carefully.',
+      },
+      sign: {
+        title: 'Sign the contract',
+        description: 'Draw your own signature.',
+      },
+      done: {
+        title: 'Contract',
+        description: 'You can download the original once it is ready.',
+      },
+    },
+    status: {
+      draft: 'Draft',
+      pending_signature: 'Awaiting signatures',
+      rendering: 'Preparing',
+      signed: 'Confirmed',
+      cancelled: 'Cancelled',
+    },
+    frequency: {
+      monthly: 'Monthly',
+      quarterly: 'Quarterly',
+      semi_annual: 'Every six months',
+      annual: 'Annually',
+      at_maturity: 'At maturity',
+    },
+    party: {
+      holder: 'Buyer',
+      co_holder: 'Co-holder',
+      organization: 'Organization',
+      guardian: 'Guardian',
+      minor: 'Minor holder',
+    },
+    partyState: {
+      signed: 'Signed',
+      declined: 'Declined',
+      awaited: 'Awaiting',
+      unsigned: 'Not signed',
+    },
+    product: {
+      individual: 'Held by one person',
+      annualRate: 'annual rate',
+      term: 'Term',
+      frequency: 'Interest paid',
+      buy: 'Make a contract',
+      noTemplate: 'No contract template is assigned to this bond yet.',
+      individualsOnlyTitle: 'Individuals only for now',
+      individualsOnlyText:
+        'Bond purchase contracts are open to individuals only for now.',
+      notApprovedTitle: 'Your account is not approved yet',
+      notApprovedText:
+        'Once your account is approved you can buy bonds and make contracts.',
+      profile: 'Profile',
+    },
+    list: {
+      title: 'My contracts',
+      count_one: '{{count}} contract',
+      count_other: '{{count}} contracts',
+      loading: 'Loading contracts...',
+      awaitingYou: 'Awaiting your signature',
+      emptyTitle: 'No contracts yet',
+      emptyText: 'Choose a bond above to make your first contract.',
+    },
+    terms: {
+      title: 'Contract terms',
+      contractNo: 'Contract number',
+      amount: 'Amount',
+      annualRate: 'Annual rate',
+      term: 'Term',
+      frequency: 'Interest paid',
+      maturity: 'Maturity date',
+    },
+    document: {
+      title: 'The contract',
+      description: 'Read the whole contract before you sign it.',
+      failed: 'Could not show the contract.',
+    },
+    toSign: 'Sign',
+    sign: {
+      back: 'Back to the contract',
+      submit: 'Sign',
+      sending: 'Sending...',
+      agree: 'I have read the terms of the contract in full and agree to them.',
+      clear: 'Clear',
+      padHint:
+        'Draw your signature in the box above with a mouse or your finger.',
+      others: '{{names}} will sign from their own accounts.',
+      deadline:
+        'Once every party signs within 72 hours, the contract is numbered and confirmed. Otherwise it is cancelled.',
+    },
+    coSignIntro:
+      "This contract is waiting for your signature. The other parties' signatures appear on the contract.",
+    decline: {
+      decline: 'Decline the contract',
+      withdraw: 'Cancel the contract',
+      text: 'The contract is cancelled for every party and can no longer be signed. Make a new contract if you need one.',
+    },
+    facts: {
+      contractNo: 'Contract number',
+      amount: 'Amount',
+      status: 'Status',
+      signedAt: 'Confirmed on',
+      deadline: 'Signing deadline',
+    },
+    signed: {
+      title: 'Contract confirmed',
+      text: 'The original, signed by every party.',
+      download: 'Download PDF',
+      original: 'The original contract',
+      toast: 'Contract {{no}} is confirmed.',
+      pdfFailed: 'Could not show the contract. Download the PDF to read it.',
+      page: 'Contract page {{n}} of {{total}}',
+    },
+    pending: {
+      checkAgain: 'Check again',
+      received: 'Signature received',
+      cancelled: 'Contract cancelled',
+      expired: 'Not every party signed in time, so the contract was cancelled.',
+      declinedBy: '{{who}} declined, so the contract was cancelled.',
+      someParty: 'A party',
+      awaitingOthers:
+        "Waiting for the other parties' signatures. They sign from their own accounts. Once everyone has signed, the contract is numbered and its final copy is prepared.",
+      slow: 'Preparing the final copy is taking longer than usual. Press "Check again", or check your contract list later.',
+      rendering:
+        'Preparing the final copy of the contract. This page updates once it is ready.',
+    },
+  },
   errors: {
     internal: 'A system error occurred. Please try again.',
     network: {
@@ -512,6 +677,32 @@ export const en: Messages = {
         'Your account is not verified yet. You can use this once our team has verified it.',
       profile_locked:
         'Name, registration number, passport and officer details of a verified account cannot be changed.',
+    },
+    contract: {
+      not_found: 'Contract not found.',
+      no_active_template:
+        'No active template is assigned to this bond and ownership type.',
+      template_unsupported: 'A contract cannot be made from this template.',
+      product_not_found: 'Product not found.',
+      template_not_found: 'Contract template not found.',
+      template_changed:
+        'The contract template was updated. Read the contract again, then sign it.',
+      parties_mismatch:
+        'The contract parties do not match the template: each party it needs must appear exactly once.',
+      signature_invalid: 'The signature must be a PNG image under 512 KB.',
+      co_holder_invalid:
+        'A product with a co-holder needs their register and phone numbers; other products take none.',
+      co_holder_not_found:
+        'Co-holder not found. Check the register and phone numbers: they must be an approved client other than you.',
+      not_pending:
+        'This contract is not awaiting signatures: every party has signed, it was cancelled, or its signing time ran out.',
+      already_signed: 'You have already signed this contract.',
+      not_signer: 'This contract does not need your signature.',
+      request_conflict:
+        'A different contract was stored for this request. Reload the page and try again.',
+      document_not_ready: 'The final contract document is not ready yet.',
+      holder_unsupported:
+        'For now only approved individuals with a register or passport number and a bank account can make a contract.',
     },
   },
 };

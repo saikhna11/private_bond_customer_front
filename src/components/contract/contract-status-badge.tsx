@@ -5,37 +5,33 @@ import {
   FilePenLineIcon,
   LoaderCircleIcon,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { ContractSummaryType } from '@/queries/contract/type';
 
 const statuses: Record<
   ContractSummaryType['status'],
-  { label: string; className: string; Icon: typeof CircleCheckIcon }
+  { className: string; Icon: typeof CircleCheckIcon }
 > = {
   draft: {
-    label: 'Ноорог',
     className: 'bg-muted text-muted-foreground',
     Icon: FilePenLineIcon,
   },
   // Stored with the first signature, it waits for the other parties' own.
   pending_signature: {
-    label: 'Гарын үсэг хүлээж байна',
     className: 'bg-warning/15 text-warning-foreground dark:text-warning',
     Icon: ClockIcon,
   },
   // Every party has signed: its PDF is rendering.
   rendering: {
-    label: 'Бэлтгэж байна',
     className: 'bg-warning/15 text-warning-foreground dark:text-warning',
     Icon: LoaderCircleIcon,
   },
   signed: {
-    label: 'Баталгаажсан',
     className: 'bg-success/12 text-success',
     Icon: CircleCheckIcon,
   },
   cancelled: {
-    label: 'Цуцлагдсан',
     className: 'bg-destructive/10 text-destructive',
     Icon: CircleXIcon,
   },
@@ -49,11 +45,12 @@ export function ContractStatusBadge({
   status: ContractSummaryType['status'];
   className?: string;
 }) {
+  const { t } = useTranslation();
   const s = statuses[status];
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium',
+        'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium',
         s.className,
         className,
       )}
@@ -64,7 +61,7 @@ export function ContractStatusBadge({
           status === 'rendering' && 'animate-spin motion-reduce:animate-none',
         )}
       />
-      {s.label}
+      {t(`contract.status.${status}`)}
     </span>
   );
 }

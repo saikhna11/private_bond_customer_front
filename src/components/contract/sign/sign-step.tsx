@@ -1,22 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  ArrowLeftIcon,
-  InfoIcon,
-  Loader2Icon,
-  PenLineIcon,
-} from 'lucide-react';
+import { ArrowLeftIcon, Loader2Icon, PenLineIcon } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { partyLabel, partyName } from '@/components/contract/format';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { toApiError } from '@/lib/fetcher';
 import { apiErrorMessage } from '@/lib/i18n';
 import { showToast } from '@/lib/utils';
 import { contractKeys } from '@/queries/contract/options';
 import type { ContractType, PreviewPartyType } from '@/queries/contract/type';
-import { partyLabels, partyName } from './format';
-import { SignatureField } from './signature-pad';
+import { AgreeCheck } from './agree-check';
+import { SignatureField } from './signature-field';
+import { SignersNotice } from './signers-notice';
 
 /**
  * The signed-in client signs their own party here, and only theirs: every other party
@@ -39,6 +34,7 @@ export function SignStep({
   onSigned: (contract: ContractType) => void;
   onConflict: () => void;
 }) {
+  const { t } = useTranslation();
   const [drawing, setDrawing] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(false);
   const queryClient = useQueryClient();
@@ -63,42 +59,12 @@ export function SignStep({
   return (
     <>
       <SignatureField
-        title={`${partyLabels[signer.type]} (та)`}
+        title={partyLabel(signer.type)}
         description={`${partyName(signer)} · ${signer.register_no}`}
         onChange={setDrawing}
       />
-      {others.length > 0 && (
-        <Card className="border-dashed py-0">
-          <CardContent className="flex items-start gap-3 p-5 text-sm">
-            <InfoIcon className="mt-0.5 size-4 shrink-0 text-primary" />
-            <div className="space-y-1">
-              <p>
-                {others
-                  .map((p) => `${partyLabels[p.type]} ${partyName(p)}`)
-                  .join(', ')}{' '}
-                өөрийн бүртгэлээр нэвтэрч гарын үсгээ зурна.
-              </p>
-              <p className="text-muted-foreground">
-                Бүх тал 72 цагийн дотор зурсны дараа гэрээ дугаарлагдаж
-                баталгаажна. Эс бөгөөс гэрээ цуцлагдана.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      <Card className="py-0">
-        <CardContent className="flex items-start gap-3 p-5">
-          <Checkbox
-            id="agree"
-            checked={agreed}
-            onCheckedChange={(v) => setAgreed(v === true)}
-          />
-          <Label htmlFor="agree" className="leading-snug font-normal">
-            Гэрээний нөхцөлтэй бүрэн танилцаж, зөвшөөрч байна. Бүх тал гарын
-            үсгээ зурсны дараа гэрээ байгуулагдаж, дугаар олгогдоно.
-          </Label>
-        </CardContent>
-      </Card>
+      {others.length > 0 && <SignersNotice others={others} />}
+      <AgreeCheck checked={agreed} onChange={setAgreed} />
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
         <Button
           type="button"
@@ -107,7 +73,7 @@ export function SignStep({
           onClick={onBack}
         >
           <ArrowLeftIcon />
-          Гэрээ рүү буцах
+          {t('contract.sign.back')}
         </Button>
         <Button
           type="button"
@@ -120,7 +86,9 @@ export function SignStep({
           ) : (
             <PenLineIcon />
           )}
-          {sign.isPending ? 'Илгээж байна...' : 'Гарын үсэг зурах'}
+          {sign.isPending
+            ? t('contract.sign.sending')
+            : t('contract.sign.submit')}
         </Button>
       </div>
     </>

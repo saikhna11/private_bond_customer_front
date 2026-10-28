@@ -1,6 +1,12 @@
 import z from 'zod';
 
-const partyTypeSchema = z.enum(['CO', 'ORG', 'USER', 'GUARDIAN', 'JUNIOR']);
+const partyTypeSchema = z.enum([
+  'holder',
+  'co_holder',
+  'organization',
+  'guardian',
+  'minor',
+]);
 
 /**
  * A person or organization a contract names, at their place among the parties its template
@@ -90,7 +96,6 @@ export const ContractSchema = z.object({
   signature_deadline: z.string().optional(),
   cancel_reason: cancelReasonSchema.optional(),
   cancelled_at: z.string().optional(),
-  signed_document_hash: z.string().optional(),
   signed_at: z.string().optional(),
   parties: z.array(PartySchema),
   signatures: z.array(SignatureSchema),
@@ -175,15 +180,6 @@ export type PreviewPartyType = z.infer<typeof PreviewPartySchema>;
 export type ProductPreviewType = z.infer<typeof ProductPreviewSchema>;
 
 /**
- * A contract's co-holder: another approved customer's register number and phone, both.
- * It stays in the page's memory, never the URL.
- */
-export interface CoHolder {
-  register_no: string;
-  phone: string;
-}
-
-/**
  * POST /contracts: the client's own signature on the preview, a base64 PNG without the
  * data URL prefix, which stores the contract; the backend fills the rest from the bond's
  * sample order. Each other party signs from their own account. request_id names the
@@ -193,6 +189,5 @@ export interface CreateContractBody {
   product: Product;
   template_id: string;
   request_id: string;
-  co_holder?: CoHolder;
   signature: string;
 }

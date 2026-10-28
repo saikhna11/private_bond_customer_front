@@ -1,19 +1,14 @@
 import { queryOptions } from '@tanstack/react-query';
 import {
   getContract,
+  getContractDocument,
   getContractPreview,
   getContracts,
   getProductPreview,
   getProducts,
   getTemplateFile,
 } from './query';
-import type {
-  BondProductType,
-  CoHolder,
-  ContractType,
-  PartyType,
-  Product,
-} from './type';
+import type { BondProductType, ContractType, PartyType, Product } from './type';
 
 export const contractKeys = {
   all: ['contract'] as const,
@@ -21,16 +16,11 @@ export const contractKeys = {
   products: () => [...contractKeys.all, 'products'] as const,
   detail: (id: string) => [...contractKeys.all, 'detail', id] as const,
   preview: (id: string) => [...contractKeys.all, 'preview', id] as const,
-  productPreview: (product: Product, coHolder?: CoHolder) =>
-    [
-      ...contractKeys.all,
-      'product-preview',
-      product,
-      coHolder?.register_no ?? '',
-      coHolder?.phone ?? '',
-    ] as const,
+  productPreview: (product: Product) =>
+    [...contractKeys.all, 'product-preview', product] as const,
   templateFile: (id: string) =>
     [...contractKeys.all, 'template-file', id] as const,
+  document: (id: string) => [...contractKeys.all, 'document', id] as const,
 };
 
 /** The client's own party on the contract. */
@@ -95,19 +85,13 @@ export function contractsOptions() {
 }
 
 /**
- * Whether bonds with a co-holder (SONO) are offered. Off until the co-holder flow is
- * decided: productsOptions leaves them out, so no card shows them and their ?product= URL
- * answers that the product is not found. Contracts already stored keep their pages, and
- * signing by each party from their own account stays for any contract that names more
- * than one signer.
+ * The bonds the app sells: none with a co-holder (SONO), which it has no step to name, so
+ * no card shows them and their ?product= URL answers that the product is not found.
+ * Contracts already stored keep their pages, and each party still signs from their own
+ * account. A stable function, so the query reruns it only when the products change.
  */
-const coHolderProductsEnabled = false;
-
-// A stable function, so the query reruns it only when the products change.
 function offered(products: BondProductType[]): BondProductType[] {
-  return coHolderProductsEnabled
-    ? products
-    : products.filter((p) => !p.co_holder);
+  return products.filter((p) => !p.co_holder);
 }
 
 export function productsOptions() {
@@ -118,14 +102,11 @@ export function productsOptions() {
   });
 }
 
-/**
- * The preview is dated today; a few minutes old is still current. A product with a
- * co-holder previews with them only.
- */
-export function productPreviewOptions(product: Product, coHolder?: CoHolder) {
+/** The preview is dated today; a few minutes old is still current. */
+export function productPreviewOptions(product: Product) {
   return queryOptions({
-    queryKey: contractKeys.productPreview(product, coHolder),
-    queryFn: () => getProductPreview(product, coHolder),
+    queryKey: contractKeys.productPreview(product),
+    queryFn: () => getProductPreview(product),
     staleTime: 5 * 60 * 1000,
   });
 }
@@ -138,6 +119,18 @@ export function templateFileOptions(id: string) {
   return queryOptions({
     queryKey: contractKeys.templateFile(id),
     queryFn: () => getTemplateFile(id),
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+}
+
+/**
+ * A signed contract's PDF. It never changes once signed, so the page that shows it and the
+ * download share one fetch.
+ */
+export function contractDocumentOptions(id: string) {
+  return queryOptions({
+    queryKey: contractKeys.document(id),
+    queryFn: () => getContractDocument(id),
     staleTime: Number.POSITIVE_INFINITY,
   });
 }
