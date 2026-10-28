@@ -507,6 +507,8 @@ export const en: Messages = {
       rendering: 'Preparing',
       signed: 'Confirmed',
       cancelled: 'Cancelled',
+      expired: 'Expired',
+      failed: 'Failed',
     },
     frequency: {
       monthly: 'Monthly',
@@ -621,7 +623,11 @@ export const en: Messages = {
       checkAgain: 'Check again',
       received: 'Signature received',
       cancelled: 'Contract cancelled',
-      expired: 'Not every party signed in time, so the contract was cancelled.',
+      expiredTitle: 'The signing deadline passed',
+      expired: 'Not every party signed in time, so the contract is void.',
+      failedTitle: 'The final copy could not be prepared',
+      failed:
+        'Every party has signed and the contract is numbered, but preparing its final copy failed. Our staff will check it and prepare it.',
       declinedBy: '{{who}} declined, so the contract was cancelled.',
       someParty: 'A party',
       awaitingOthers:

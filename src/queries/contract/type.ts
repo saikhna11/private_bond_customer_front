@@ -44,6 +44,8 @@ const statusSchema = z.enum([
   'rendering',
   'signed',
   'cancelled',
+  'expired',
+  'failed',
 ]);
 
 const frequencySchema = z.enum([

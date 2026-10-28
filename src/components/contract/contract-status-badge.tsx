@@ -1,9 +1,11 @@
 import {
   CircleCheckIcon,
   CircleXIcon,
+  ClockAlertIcon,
   ClockIcon,
   FilePenLineIcon,
   LoaderCircleIcon,
+  TriangleAlertIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -34,6 +36,16 @@ const statuses: Record<
   cancelled: {
     className: 'bg-destructive/10 text-destructive',
     Icon: CircleXIcon,
+  },
+  // The signing deadline passed before every party signed.
+  expired: {
+    className: 'bg-muted text-muted-foreground',
+    Icon: ClockAlertIcon,
+  },
+  // Every party signed, but its PDF could not be rendered.
+  failed: {
+    className: 'bg-destructive/10 text-destructive',
+    Icon: TriangleAlertIcon,
   },
 };
 
