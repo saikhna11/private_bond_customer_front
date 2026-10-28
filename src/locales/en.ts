@@ -1,6 +1,5 @@
 import type { Messages } from './mn';
 
-/** English. Typed as Mongolian's shape: a missing or extra key fails to compile. */
 export const en: Messages = {
   common: {
     cancel: 'Cancel',
@@ -41,7 +40,7 @@ export const en: Messages = {
     en: 'English',
   },
   brand: {
-    tagline: 'Private bonds',
+    tagline: 'Bonds',
   },
   publicLayout: {
     slides: {

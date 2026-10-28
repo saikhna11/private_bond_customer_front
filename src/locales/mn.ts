@@ -39,7 +39,7 @@ export const mn = {
     en: 'English',
   },
   brand: {
-    tagline: 'Хувийн бонд',
+    tagline: 'Бонд',
   },
   publicLayout: {
     slides: {
