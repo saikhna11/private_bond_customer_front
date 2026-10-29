@@ -527,12 +527,19 @@ export const mn = {
       unsigned: 'Зураагүй',
     },
     product: {
-      individual: 'Хувь хүн эзэмшинэ',
-      joint: 'Хамтран эзэмшинэ',
+      kinds_one: 'Гэрээний {{count}} төрөл',
+      kinds_other: 'Гэрээний {{count}} төрөл',
+      ownership: {
+        individual: 'Хувь хүн',
+        joint: 'Хамтран эзэмшигчтэй',
+        minor: 'Хүүхэд',
+        organization: 'Байгууллага',
+      },
+      ttd: 'ТТД',
       annualRate: 'жилийн хүү',
       term: 'Хугацаа',
       frequency: 'Хүү төлөх',
-      buy: 'Гэрээ байгуулах',
+      buy: 'Худалдан авах',
       noTemplate: 'Энэ бондод гэрээний загвар хараахан оноогоогүй байна.',
       individualsOnlyTitle: 'Одоогоор зөвхөн хувь хүнд',
       individualsOnlyText:

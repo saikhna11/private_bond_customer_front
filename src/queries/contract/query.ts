@@ -12,6 +12,7 @@ import {
   type Product,
   ProductPreviewSchema,
   type ProductPreviewType,
+  type PurchasableOwnership,
 } from './type';
 
 export const getProducts = (): Promise<BondProductType[]> =>
@@ -47,16 +48,19 @@ export const declineContract = (id: string): Promise<ContractType> =>
   });
 
 /**
- * What the browser fills the product's contract preview from; nothing is stored. The
- * co-holder travels in the body, so it stays out of URLs and logs.
+ * What the browser fills the preview of the product's contract of ownership from; nothing
+ * is stored. The co-holder travels in the body, so it stays out of URLs and logs.
  */
 export const getProductPreview = (
   product: Product,
+  ownership: PurchasableOwnership,
   coHolder?: CoHolder,
 ): Promise<ProductPreviewType> =>
   fetchAndValidate(`products/${product}/preview`, ProductPreviewSchema, {
     method: 'POST',
-    body: coHolder ? { co_holder: coHolder } : {},
+    body: coHolder
+      ? { ownership_type: ownership, co_holder: coHolder }
+      : { ownership_type: ownership },
   });
 
 /** What the browser fills a stored contract from, with its parties' signatures so far. */

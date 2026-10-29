@@ -8,7 +8,13 @@ import {
   getProducts,
   getTemplateFile,
 } from './query';
-import type { CoHolder, ContractType, PartyType, Product } from './type';
+import type {
+  CoHolder,
+  ContractType,
+  PartyType,
+  Product,
+  PurchasableOwnership,
+} from './type';
 
 export const contractKeys = {
   all: ['contract'] as const,
@@ -16,11 +22,16 @@ export const contractKeys = {
   products: () => [...contractKeys.all, 'products'] as const,
   detail: (id: string) => [...contractKeys.all, 'detail', id] as const,
   preview: (id: string) => [...contractKeys.all, 'preview', id] as const,
-  productPreview: (product: Product, coHolder?: CoHolder) =>
+  productPreview: (
+    product: Product,
+    ownership: PurchasableOwnership,
+    coHolder?: CoHolder,
+  ) =>
     [
       ...contractKeys.all,
       'product-preview',
       product,
+      ownership,
       coHolder?.register_no ?? '',
       coHolder?.phone ?? '',
     ] as const,
@@ -91,8 +102,8 @@ export function contractsOptions() {
 }
 
 /**
- * The bonds the app sells. One with a co-holder (SONO) asks for them before its preview;
- * they sign from their own account.
+ * The bonds the app sells, each with the kinds of contract it is sold under. A joint one
+ * asks for the co-holder before its preview; they sign from their own account.
  */
 export function productsOptions() {
   return queryOptions({
@@ -102,13 +113,17 @@ export function productsOptions() {
 }
 
 /**
- * The preview is dated today; a few minutes old is still current. A product with a
- * co-holder previews with them only.
+ * The preview is dated today; a few minutes old is still current. A joint contract
+ * previews with its co-holder only.
  */
-export function productPreviewOptions(product: Product, coHolder?: CoHolder) {
+export function productPreviewOptions(
+  product: Product,
+  ownership: PurchasableOwnership,
+  coHolder?: CoHolder,
+) {
   return queryOptions({
-    queryKey: contractKeys.productPreview(product, coHolder),
-    queryFn: () => getProductPreview(product, coHolder),
+    queryKey: contractKeys.productPreview(product, ownership, coHolder),
+    queryFn: () => getProductPreview(product, ownership, coHolder),
     staleTime: 5 * 60 * 1000,
   });
 }

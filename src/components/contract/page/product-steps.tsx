@@ -12,18 +12,28 @@ import {
   productsOptions,
 } from '@/queries/contract/options';
 import { createContract } from '@/queries/contract/query';
-import type { CoHolder, Product } from '@/queries/contract/type';
+import type {
+  CoHolder,
+  Product,
+  PurchasableOwnership,
+} from '@/queries/contract/type';
 import { ContractFailed } from './contract-failed';
 import { ContractLoading } from './contract-loading';
 import { ContractSection } from './contract-section';
 import { contractsRoute } from './route';
 
 /**
- * A product's contract before it exists: name the co-holder when the product has one, read
- * the preview, then sign the holder's own party, which stores it. The co-holder signs later,
- * from their own account.
+ * A product's contract of ownership before it exists: name the co-holder of a joint one,
+ * read the preview, then sign the holder's own party, which stores it. The co-holder signs
+ * later, from their own account.
  */
-export function ProductSteps({ product }: { product: Product }) {
+export function ProductSteps({
+  product,
+  ownership,
+}: {
+  product: Product;
+  ownership: PurchasableOwnership;
+}) {
   const { sign } = contractsRoute.useSearch();
   const { t } = useTranslation();
   const navigate = contractsRoute.useNavigate();
@@ -35,9 +45,13 @@ export function ProductSteps({ product }: { product: Product }) {
   const [requestId] = useState(() => crypto.randomUUID());
   const products = useQuery(productsOptions());
   const info = products.data?.find((p) => p.name === product);
-  const needsCoHolder = info?.co_holder ?? false;
+  const needsCoHolder = ownership === 'joint';
   const asking = needsCoHolder && (!coHolder || editingCoHolder);
-  const previewOptions = productPreviewOptions(product, coHolder ?? undefined);
+  const previewOptions = productPreviewOptions(
+    product,
+    ownership,
+    coHolder ?? undefined,
+  );
   const {
     data: preview,
     isPending,
@@ -66,7 +80,7 @@ export function ProductSteps({ product }: { product: Product }) {
           onDone={(c) => {
             setCoHolder(c);
             setEditingCoHolder(false);
-            navigate({ search: { product } });
+            navigate({ search: { product, ownership } });
           }}
           onBack={() =>
             coHolder
@@ -93,20 +107,21 @@ export function ProductSteps({ product }: { product: Product }) {
           submit={(signature) =>
             createContract({
               product,
+              ownership_type: ownership,
               template_id: preview.template.id,
               request_id: requestId,
               co_holder: coHolder ?? undefined,
               signature,
             })
           }
-          onBack={() => navigate({ search: { product } })}
+          onBack={() => navigate({ search: { product, ownership } })}
           onSigned={(c) => navigate({ search: { contractId: c.id } })}
           onConflict={() => {
             // The template changed since the preview: read the new one before signing.
             queryClient.invalidateQueries({
               queryKey: previewOptions.queryKey,
             });
-            navigate({ search: { product } });
+            navigate({ search: { product, ownership } });
           }}
         />
       </ContractSection>
@@ -137,7 +152,9 @@ export function ProductSteps({ product }: { product: Product }) {
             </Button>
           )}
           <ToSignButton
-            onClick={() => navigate({ search: { product, sign: true } })}
+            onClick={() =>
+              navigate({ search: { product, ownership, sign: true } })
+            }
           />
         </div>
       </div>

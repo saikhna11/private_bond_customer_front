@@ -6,8 +6,8 @@ import { productPreviewOptions } from '@/queries/contract/options';
 import type { CoHolder, Product } from '@/queries/contract/type';
 
 /**
- * Checks a co-holder by fetching the product's preview with them, which the view step then
- * reads from the cache. A co-holder the backend does not find goes to onNotFound, for the
+ * Checks a co-holder by fetching the preview of the product's joint contract with them,
+ * which the view step then reads from the cache. A co-holder the backend does not find goes to onNotFound, for the
  * form to show on the number; any other failure is error.
  */
 export function useCoHolderCheck(
@@ -21,7 +21,9 @@ export function useCoHolderCheck(
   async function check(coHolder: CoHolder): Promise<boolean> {
     setError(null);
     try {
-      await queryClient.fetchQuery(productPreviewOptions(product, coHolder));
+      await queryClient.fetchQuery(
+        productPreviewOptions(product, 'joint', coHolder),
+      );
       return true;
     } catch (err) {
       const e = toApiError(err);

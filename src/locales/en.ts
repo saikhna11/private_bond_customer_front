@@ -531,12 +531,19 @@ export const en: Messages = {
       unsigned: 'Not signed',
     },
     product: {
-      individual: 'Held by one person',
-      joint: 'Held jointly',
+      kinds_one: '{{count}} kind of contract',
+      kinds_other: '{{count}} kinds of contract',
+      ownership: {
+        individual: 'Individual',
+        joint: 'With a co-holder',
+        minor: 'Child',
+        organization: 'Organization',
+      },
+      ttd: 'Taxpayer no.',
       annualRate: 'annual rate',
       term: 'Term',
       frequency: 'Interest paid',
-      buy: 'Make a contract',
+      buy: 'Buy',
       noTemplate: 'No contract template is assigned to this bond yet.',
       individualsOnlyTitle: 'Individuals only for now',
       individualsOnlyText:
