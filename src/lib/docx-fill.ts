@@ -1,19 +1,14 @@
 import JSZip from 'jszip';
 
-/** One interest payment the contract's schedule lists. */
-export interface ScheduleRow {
-  interest_date: string;
-  interest_amount: string;
-}
-
-// The schedule row's placeholders, which fillDocx repeats once per payment.
-const interestDate = '{InterestDate}';
-const interestAmount = '{InterestAmount}';
+/** One interest payment of the contract's schedule: each schedule placeholder's value. */
+export type ScheduleRow = Record<string, string>;
 
 const rowStart = /<w:tr[ >]/g;
 const wordIds = / w14:(?:paraId|textId)="[^"]*"/g;
-const placeholder = /\{([A-Za-z]+)\}/g;
-// The parts the backend's go-docx fills: the body, the headers and the footers.
+// A placeholder: a name in braces that starts with a letter and goes on with letters,
+// digits and underscores, as the backend's placeholderPattern matches it.
+const placeholder = /\{(\p{L}[\p{L}\p{N}_]*)\}/gu;
+// The parts the backend fills: the body, the headers and the footers.
 const filledPart = /^word\/(?:document|header\d*|footer\d*)\.xml$/;
 
 function escapeXml(s: string): string {
@@ -25,28 +20,36 @@ function escapeXml(s: string): string {
     .replace(/'/g, '&apos;');
 }
 
+/** Replaces each placeholder of xml that values names with its value; any other stays. */
+function fillPlaceholders(xml: string, values: Record<string, string>): string {
+  return xml.replace(placeholder, (match, key: string) =>
+    key in values ? escapeXml(values[key]) : match,
+  );
+}
+
 /**
- * Repeats the table row holding the schedule's placeholders once per payment, filled, and
- * drops the original, as the backend's cloneScheduleRows does. Word's paragraph ids are
- * removed from the copies, which would otherwise repeat.
+ * Repeats the table row holding the schedule's placeholders (keys) once per payment,
+ * filled, and drops the original, as the backend's cloneScheduleRows does. Word's paragraph
+ * ids are removed from the copies, which would otherwise repeat.
  */
-function cloneScheduleRows(doc: string, rows: ScheduleRow[]): string {
-  const at = doc.indexOf(interestDate);
-  if (at < 0) return doc;
-  const starts = [...doc.slice(0, at).matchAll(rowStart)];
+function cloneScheduleRows(
+  doc: string,
+  keys: string[],
+  rows: ScheduleRow[],
+): string {
+  if (keys.length === 0) return doc;
+  const first = `{${keys[0]}}`;
+  const at = doc.indexOf(first);
+  const starts = [...doc.slice(0, Math.max(at, 0)).matchAll(rowStart)];
   const end = doc.indexOf('</w:tr>', at);
   const last = starts.at(-1);
-  if (last?.index === undefined || end < 0) {
-    throw new Error(`${interestDate} is not inside a table row`);
+  if (at < 0 || last?.index === undefined || end < 0) {
+    throw new Error(`${first} is not inside a table row`);
   }
   const from = last.index;
   const to = end + '</w:tr>'.length;
   const row = doc.slice(from, to).replace(wordIds, '');
-  const copies = rows.map((r) =>
-    row
-      .replaceAll(interestDate, escapeXml(r.interest_date))
-      .replaceAll(interestAmount, escapeXml(r.interest_amount)),
-  );
+  const copies = rows.map((r) => fillPlaceholders(row, r));
   return doc.slice(0, from) + copies.join('') + doc.slice(to);
 }
 
@@ -87,14 +90,16 @@ function fromBase64(b64: string): Uint8Array {
 
 /**
  * Fills a template .docx in the browser for its preview: the schedule's rows, then every
- * {Key} that values names, then the signatures the parties already gave, on their
- * pictures. Each placeholder sits in one text run of the templates, so a text replacement
- * is enough; one values leaves out stays as it is, as the backend leaves it. The backend
- * fills the signed document from the same values and signatures.
+ * {name} that values names, then the signatures the parties already gave, on their
+ * pictures. The backend gathered each placeholder into one text run when the template was
+ * uploaded, so a text replacement is enough; one values leaves out stays as it is, as the
+ * backend leaves it. The backend fills the signed document from the same values and
+ * signatures.
  */
 export async function fillDocx(
   template: ArrayBuffer,
   values: Record<string, string>,
+  scheduleKeys: string[],
   schedule: ScheduleRow[],
   signatures: PlacedSignature[] = [],
 ): Promise<ArrayBuffer> {
@@ -103,11 +108,10 @@ export async function fillDocx(
     if (!filledPart.test(name)) continue;
     let xml = await zip.file(name)?.async('string');
     if (xml === undefined) continue;
-    if (name === 'word/document.xml') xml = cloneScheduleRows(xml, schedule);
-    xml = xml.replace(placeholder, (match, key: string) =>
-      key in values ? escapeXml(values[key]) : match,
-    );
-    zip.file(name, xml);
+    if (name === 'word/document.xml') {
+      xml = cloneScheduleRows(xml, scheduleKeys, schedule);
+    }
+    zip.file(name, fillPlaceholders(xml, values));
   }
   if (signatures.length > 0) {
     const doc = (await zip.file('word/document.xml')?.async('string')) ?? '';

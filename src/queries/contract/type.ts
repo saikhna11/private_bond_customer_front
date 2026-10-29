@@ -44,6 +44,8 @@ const statusSchema = z.enum([
   'rendering',
   'signed',
   'cancelled',
+  'expired',
+  'failed',
 ]);
 
 const frequencySchema = z.enum([
@@ -112,14 +114,29 @@ export type ContractSummaryType = z.infer<typeof ContractSummarySchema>;
  */
 export type Product = string;
 
-/** A bond on sale: its terms and the template its contracts are drafted from. */
-export const BondProductSchema = z.object({
-  name: z.string(),
-  annual_rate: z.string(),
-  term_months: z.number(),
-  interest_frequency: frequencySchema,
-  co_holder: z.boolean(),
-  available: z.boolean(),
+/**
+ * Who a contract names: a holder alone, with a co-holder, a minor with their guardian, or
+ * an organization.
+ */
+export const ownershipSchema = z.enum([
+  'individual',
+  'joint',
+  'minor',
+  'organization',
+]);
+export type Ownership = z.infer<typeof ownershipSchema>;
+
+/** The kinds a holder can buy now: alone, or with a co-holder who signs too. */
+export const purchasableOwnershipSchema = z.enum(['individual', 'joint']);
+export type PurchasableOwnership = z.infer<typeof purchasableOwnershipSchema>;
+
+/**
+ * One kind of contract a bond is sold under: its ownership type, whether it prints the
+ * holder's taxpayer number (ТТД), its active template, and whether it can be bought now.
+ */
+export const ProductOptionSchema = z.object({
+  ownership_type: ownershipSchema,
+  ttd: z.boolean(),
   template: z
     .object({
       id: z.uuid(),
@@ -127,6 +144,18 @@ export const BondProductSchema = z.object({
       status: z.enum(['draft', 'active', 'inactive']),
     })
     .optional(),
+  available: z.boolean(),
+});
+
+export type ProductOptionType = z.infer<typeof ProductOptionSchema>;
+
+/** A bond on sale: its terms and the kinds of contract it is sold under. */
+export const BondProductSchema = z.object({
+  name: z.string(),
+  annual_rate: z.string(),
+  term_months: z.number(),
+  interest_frequency: frequencySchema,
+  options: z.array(ProductOptionSchema),
 });
 
 export type BondProductType = z.infer<typeof BondProductSchema>;
@@ -170,14 +199,24 @@ export const ProductPreviewSchema = z.object({
   interest_frequency: frequencySchema,
   parties: z.array(PreviewPartySchema),
   values: z.record(z.string(), z.string()),
-  schedule: z.array(
-    z.object({ interest_date: z.string(), interest_amount: z.string() }),
-  ),
+  // The schedule's placeholders and one row of their values per payment: its table row
+  // repeats once per payment.
+  schedule_keys: z.array(z.string()),
+  schedule: z.array(z.record(z.string(), z.string())),
   signatures: z.array(PreviewSignatureSchema),
 });
 
 export type PreviewPartyType = z.infer<typeof PreviewPartySchema>;
 export type ProductPreviewType = z.infer<typeof ProductPreviewSchema>;
+
+/**
+ * A contract's co-holder: another approved client's register number (a foreigner's
+ * passport number) and phone, both. It stays in the page's memory, never the URL.
+ */
+export interface CoHolder {
+  register_no: string;
+  phone: string;
+}
 
 /**
  * POST /contracts: the client's own signature on the preview, a base64 PNG without the
@@ -187,7 +226,9 @@ export type ProductPreviewType = z.infer<typeof ProductPreviewSchema>;
  */
 export interface CreateContractBody {
   product: Product;
+  ownership_type: PurchasableOwnership;
   template_id: string;
   request_id: string;
+  co_holder?: CoHolder;
   signature: string;
 }

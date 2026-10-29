@@ -8,7 +8,13 @@ import {
   getProducts,
   getTemplateFile,
 } from './query';
-import type { BondProductType, ContractType, PartyType, Product } from './type';
+import type {
+  CoHolder,
+  ContractType,
+  PartyType,
+  Product,
+  PurchasableOwnership,
+} from './type';
 
 export const contractKeys = {
   all: ['contract'] as const,
@@ -16,8 +22,19 @@ export const contractKeys = {
   products: () => [...contractKeys.all, 'products'] as const,
   detail: (id: string) => [...contractKeys.all, 'detail', id] as const,
   preview: (id: string) => [...contractKeys.all, 'preview', id] as const,
-  productPreview: (product: Product) =>
-    [...contractKeys.all, 'product-preview', product] as const,
+  productPreview: (
+    product: Product,
+    ownership: PurchasableOwnership,
+    coHolder?: CoHolder,
+  ) =>
+    [
+      ...contractKeys.all,
+      'product-preview',
+      product,
+      ownership,
+      coHolder?.register_no ?? '',
+      coHolder?.phone ?? '',
+    ] as const,
   templateFile: (id: string) =>
     [...contractKeys.all, 'template-file', id] as const,
   document: (id: string) => [...contractKeys.all, 'document', id] as const,
@@ -85,28 +102,28 @@ export function contractsOptions() {
 }
 
 /**
- * The bonds the app sells: none with a co-holder (SONO), which it has no step to name, so
- * no card shows them and their ?product= URL answers that the product is not found.
- * Contracts already stored keep their pages, and each party still signs from their own
- * account. A stable function, so the query reruns it only when the products change.
+ * The bonds the app sells, each with the kinds of contract it is sold under. A joint one
+ * asks for the co-holder before its preview; they sign from their own account.
  */
-function offered(products: BondProductType[]): BondProductType[] {
-  return products.filter((p) => !p.co_holder);
-}
-
 export function productsOptions() {
   return queryOptions({
     queryKey: contractKeys.products(),
     queryFn: getProducts,
-    select: offered,
   });
 }
 
-/** The preview is dated today; a few minutes old is still current. */
-export function productPreviewOptions(product: Product) {
+/**
+ * The preview is dated today; a few minutes old is still current. A joint contract
+ * previews with its co-holder only.
+ */
+export function productPreviewOptions(
+  product: Product,
+  ownership: PurchasableOwnership,
+  coHolder?: CoHolder,
+) {
   return queryOptions({
-    queryKey: contractKeys.productPreview(product),
-    queryFn: () => getProductPreview(product),
+    queryKey: contractKeys.productPreview(product, ownership, coHolder),
+    queryFn: () => getProductPreview(product, ownership, coHolder),
     staleTime: 5 * 60 * 1000,
   });
 }

@@ -1,8 +1,16 @@
-import { CircleXIcon, ClockIcon, LoaderCircleIcon } from 'lucide-react';
+import {
+  CircleXIcon,
+  ClockIcon,
+  LoaderCircleIcon,
+  TriangleAlertIcon,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ContractType } from '@/queries/contract/type';
 
-/** The round icon heading a pending contract: cancelled, waiting, or its PDF rendering. */
+/**
+ * The round icon heading a contract not signed yet: cancelled or expired, its PDF failed,
+ * waiting, or its PDF rendering.
+ */
 export function PendingStatusIcon({
   status,
   slow,
@@ -10,9 +18,11 @@ export function PendingStatusIcon({
   status: ContractType['status'];
   slow: boolean;
 }) {
-  const Icon =
-    status === 'cancelled'
-      ? CircleXIcon
+  const ended = status === 'cancelled' || status === 'expired';
+  const Icon = ended
+    ? CircleXIcon
+    : status === 'failed'
+      ? TriangleAlertIcon
       : slow || status === 'pending_signature'
         ? ClockIcon
         : LoaderCircleIcon;
@@ -21,7 +31,7 @@ export function PendingStatusIcon({
     <span
       className={cn(
         'flex size-16 items-center justify-center rounded-full',
-        status === 'cancelled'
+        ended || status === 'failed'
           ? 'bg-destructive/10 text-destructive'
           : 'bg-warning/15 text-warning-foreground dark:text-warning',
       )}

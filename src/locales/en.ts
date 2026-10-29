@@ -507,6 +507,8 @@ export const en: Messages = {
       rendering: 'Preparing',
       signed: 'Confirmed',
       cancelled: 'Cancelled',
+      expired: 'Expired',
+      failed: 'Failed',
     },
     frequency: {
       monthly: 'Monthly',
@@ -529,11 +531,19 @@ export const en: Messages = {
       unsigned: 'Not signed',
     },
     product: {
-      individual: 'Held by one person',
+      kinds_one: '{{count}} contract type',
+      kinds_other: '{{count}} contract types',
+      ownership: {
+        individual: 'Individual',
+        joint: 'Joint',
+        minor: 'Minor',
+        organization: 'Organization',
+      },
+      ttd: 'TIN',
       annualRate: 'annual rate',
       term: 'Term',
       frequency: 'Interest paid',
-      buy: 'Make a contract',
+      buy: 'Buy',
       noTemplate: 'No contract template is assigned to this bond yet.',
       individualsOnlyTitle: 'Individuals only for now',
       individualsOnlyText:
@@ -549,8 +559,22 @@ export const en: Messages = {
       count_other: '{{count}} contracts',
       loading: 'Loading contracts...',
       awaitingYou: 'Awaiting your signature',
+      awaitingTitle: 'Waiting for your signature ({{count}})',
+      othersTitle: 'Other contracts',
       emptyTitle: 'No contracts yet',
       emptyText: 'Choose a bond above to make your first contract.',
+    },
+    coHolder: {
+      title: 'Co-holder',
+      description: 'Name the client who holds the bond with you.',
+      intro:
+        'The co-holder must be an approved client. Enter the register number (a passport number for a foreigner) and the phone number they signed up with. They sign the contract from their own account.',
+      registerNo: 'Register or passport number',
+      registerNoPlaceholder: 'УБ12345678',
+      registerNoRequired: "Enter the co-holder's register or passport number",
+      phone: 'Phone number',
+      submit: 'To the contract',
+      change: 'Change the co-holder',
     },
     terms: {
       title: 'Contract terms',
@@ -606,7 +630,11 @@ export const en: Messages = {
       checkAgain: 'Check again',
       received: 'Signature received',
       cancelled: 'Contract cancelled',
-      expired: 'Not every party signed in time, so the contract was cancelled.',
+      expiredTitle: 'The signing deadline passed',
+      expired: 'Not every party signed in time, so the contract is void.',
+      failedTitle: 'The final copy could not be prepared',
+      failed:
+        'Every party has signed and the contract is numbered, but preparing its final copy failed. Our staff will check it and prepare it.',
       declinedBy: '{{who}} declined, so the contract was cancelled.',
       someParty: 'A party',
       awaitingOthers:
@@ -694,9 +722,9 @@ export const en: Messages = {
         'The contract parties do not match the template: each party it needs must appear exactly once.',
       signature_invalid: 'The signature must be a PNG image under 512 KB.',
       co_holder_invalid:
-        'A product with a co-holder needs their register and phone numbers; other products take none.',
+        'A product with a co-holder needs their register (or passport) and phone numbers; other products take none.',
       co_holder_not_found:
-        'Co-holder not found. Check the register and phone numbers: they must be an approved client other than you.',
+        'Co-holder not found. Check the register (or passport) and phone numbers: they must be an approved client other than you.',
       not_pending:
         'This contract is not awaiting signatures: every party has signed, it was cancelled, or its signing time ran out.',
       already_signed: 'You have already signed this contract.',

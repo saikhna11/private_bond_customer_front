@@ -1,17 +1,20 @@
-import { ArrowRightIcon, LandmarkIcon } from 'lucide-react';
+import { LandmarkIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { frequencyLabel } from '@/components/contract/format';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import type { BondProductType } from '@/queries/contract/type';
+import type {
+  BondProductType,
+  PurchasableOwnership,
+} from '@/queries/contract/type';
+import { ProductOptionRow } from './product-option-row';
 
-/** One bond on sale: its rate and terms, and the way to its contract. */
+/** One bond on sale: its rate and terms, and the kinds of contract it is sold under. */
 export function ProductCard({
   product: p,
   onPick,
 }: {
   product: BondProductType;
-  onPick: () => void;
+  onPick: (ownership: PurchasableOwnership) => void;
 }) {
   const { t } = useTranslation();
   return (
@@ -26,7 +29,7 @@ export function ProductCard({
               {t('contract.bond', { name: p.name })}
             </p>
             <p className="text-sm text-muted-foreground">
-              {t('contract.product.individual')}
+              {t('contract.product.kinds', { count: p.options.length })}
             </p>
           </div>
           <div className="text-right">
@@ -56,21 +59,21 @@ export function ProductCard({
             </dd>
           </div>
         </dl>
-        <div className="mt-auto flex flex-col gap-2">
-          <Button
-            className="h-10 rounded-xl"
-            disabled={!p.available}
-            onClick={onPick}
-          >
-            {t('contract.product.buy')}
-            <ArrowRightIcon />
-          </Button>
-          {!p.available && (
-            <p className="text-center text-xs text-muted-foreground">
-              {t('contract.product.noTemplate')}
-            </p>
-          )}
-        </div>
+        {p.options.length === 0 ? (
+          <p className="text-center text-xs text-muted-foreground">
+            {t('contract.product.noTemplate')}
+          </p>
+        ) : (
+          <ul className="divide-y border-t">
+            {p.options.map((o) => (
+              <ProductOptionRow
+                key={`${o.ownership_type}-${o.ttd}`}
+                option={o}
+                onPick={onPick}
+              />
+            ))}
+          </ul>
+        )}
       </CardContent>
     </Card>
   );

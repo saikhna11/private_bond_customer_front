@@ -9,12 +9,13 @@ import { isIndividual } from '@/lib/client';
 import { toApiError } from '@/lib/fetcher';
 import { meOptions } from '@/queries/auth/options';
 import { productsOptions } from '@/queries/contract/options';
-import type { Product } from '@/queries/contract/type';
+import type { Product, PurchasableOwnership } from '@/queries/contract/type';
 import { ProductCard } from './product-card';
 import { ProductNotice } from './product-notice';
 
 /**
- * The sample bonds a holder can buy, one card each, opening its contract's preview.
+ * The sample bonds a holder can buy, one card each, whose kinds of contract open their
+ * preview.
  * Nothing is stored until the holder signs it; the backend fills it from the bond's sample
  * order and the client's profile, so the user enters nothing. Only an approved customer
  * buys: the templates name a Mongolian citizen.
@@ -22,7 +23,7 @@ import { ProductNotice } from './product-notice';
 export function ProductCards({
   onPick,
 }: {
-  onPick: (product: Product) => void;
+  onPick: (product: Product, ownership: PurchasableOwnership) => void;
 }) {
   const { t } = useTranslation();
   const { data: me } = useSuspenseQuery(meOptions());
@@ -71,7 +72,11 @@ export function ProductCards({
   return (
     <div className="grid">
       {products.map((p) => (
-        <ProductCard key={p.name} product={p} onPick={() => onPick(p.name)} />
+        <ProductCard
+          key={p.name}
+          product={p}
+          onPick={(ownership) => onPick(p.name, ownership)}
+        />
       ))}
     </div>
   );
