@@ -17,3 +17,24 @@ export const banks = [
   { key: 'chinggis', value: 'Чингис хаан банк' },
   { key: 'transport', value: 'Тээвэр хөгжлийн банк' },
 ] as const;
+
+/**
+ * Whether an IBAN passes ISO 13616's mod 97 check: the country code and check digits move
+ * to the end, letters become 10 to 35, and the number leaves 1.
+ */
+export function ibanChecksumValid(iban: string) {
+  const s = iban.toUpperCase();
+  let rem = 0;
+  for (const c of s.slice(4) + s.slice(0, 4)) {
+    if (c >= '0' && c <= '9') rem = (rem * 10 + Number(c)) % 97;
+    else if (c >= 'A' && c <= 'Z')
+      rem = (rem * 100 + c.charCodeAt(0) - 55) % 97;
+    else return false;
+  }
+  return rem === 1;
+}
+
+/** Whether a Mongolian IBAN ends with the account number padded with zeros to 12 digits. */
+export function ibanMatchesAccount(iban: string, account: string) {
+  return account.length <= 12 && iban.slice(-12) === account.padStart(12, '0');
+}

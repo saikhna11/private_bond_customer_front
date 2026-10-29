@@ -299,6 +299,8 @@ export const en: Messages = {
       bank: 'Select your bank',
       accountNumber: 'Account number must be 6-20 digits',
       iban: 'IBAN must be MN followed by 18 digits',
+      ibanChecksum: 'This IBAN is not valid. Please check it',
+      ibanMismatch: 'The account number does not match the IBAN',
       holderLastName: "Enter the account holder's last name",
       holderFirstName: "Enter the account holder's first name",
       nationality: 'Select your nationality',
@@ -672,6 +674,8 @@ export const en: Messages = {
       org_name_taken: 'An organization with this name is already registered.',
       not_organization: 'Only an organization can do this.',
       member_not_found: 'Officer not found.',
+      iban_invalid: 'This IBAN is not valid. Please check it.',
+      iban_mismatch: 'The account number does not match the IBAN.',
       not_approved:
         'Your account is not verified yet. You can use this once our team has verified it.',
       profile_locked:

@@ -114,7 +114,7 @@ export interface UpdateMeBody {
   register_number?: string;
   nationality?: string;
   passport_number?: string;
-  /** Customers: replaces the account bond payments go to. */
+  /** Individuals: replaces the account bond payments go to. */
   bank_account?: BankAccountType;
   /** Customers: true requests the interest tax exemption, false withdraws it. */
   tax_exempt?: boolean;

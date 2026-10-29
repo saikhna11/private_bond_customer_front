@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useRelocalizedErrors } from '@/hooks/use-relocalized-errors';
-import { banks } from '@/lib/banks';
+import { banks, ibanChecksumValid, ibanMatchesAccount } from '@/lib/banks';
 import { PERSON_REGISTER } from '@/lib/client';
 import { countries, priorityCount } from '@/lib/countries';
 import { type ApiError, toApiError } from '@/lib/fetcher';
@@ -113,6 +113,8 @@ function rules(me: MeType) {
         'register_number',
         'details.errors.register',
       );
+    }
+    if (customer || foreign) {
       need(v.bank_name !== '', 'bank_name', 'details.errors.bank');
       need(
         /^\d{6,20}$/.test(v.account_number),
@@ -120,6 +122,17 @@ function rules(me: MeType) {
         'details.errors.accountNumber',
       );
       need(/^\d{18}$/.test(v.iban), 'iban', 'details.errors.iban');
+      if (/^\d{18}$/.test(v.iban)) {
+        const iban = `MN${v.iban}`;
+        const valid = ibanChecksumValid(iban);
+        need(valid, 'iban', 'details.errors.ibanChecksum');
+        if (valid && /^\d{6,20}$/.test(v.account_number))
+          need(
+            ibanMatchesAccount(iban, v.account_number),
+            'account_number',
+            'details.errors.ibanMismatch',
+          );
+      }
       need(
         v.holder_last_name !== '',
         'holder_last_name',
@@ -178,7 +191,7 @@ function changes(me: MeType, values: Values): UpdateMeBody {
     if (v !== before[k] && v !== '') (body as Record<string, string>)[k] = v;
   }
 
-  if (me.type === 'customer') {
+  if (me.type === 'customer' || me.type === 'foreign') {
     const bankKeys = [
       'bank_name',
       'account_number',
@@ -197,6 +210,8 @@ function changes(me: MeType, values: Values): UpdateMeBody {
         holder_first_name: values.holder_first_name,
       };
     }
+  }
+  if (me.type === 'customer') {
     if (values.tax_exempt !== before.tax_exempt)
       body.tax_exempt = values.tax_exempt;
   }
@@ -207,6 +222,8 @@ const fieldOf: Partial<Record<string, Key>> = {
   'client.register_taken': 'register_number',
   'client.passport_taken': 'passport_number',
   'client.org_name_taken': 'name',
+  'client.iban_invalid': 'iban',
+  'client.iban_mismatch': 'account_number',
 };
 
 /**
@@ -230,6 +247,7 @@ export function ProfileDetailsForm({
   const [error, setError] = useState<ApiError | null>(null);
   const locked = me.status === 'approved';
   const customer = me.type === 'customer';
+  const individual = customer || me.type === 'foreign';
   const organization = me.type === 'organization';
 
   const form = useForm<Values>({
@@ -463,7 +481,7 @@ export function ProfileDetailsForm({
           </>
         )}
 
-        {customer && (
+        {individual && (
           <>
             <Section
               title={t('details.bankAccount')}
@@ -529,7 +547,7 @@ export function ProfileDetailsForm({
                       id="iban"
                       inputMode="numeric"
                       maxLength={18}
-                      placeholder="120005005000123456"
+                      placeholder="300005005000123456"
                       className="tabular h-10 rounded-l-none font-mono tracking-wider"
                       aria-invalid={!!errors.iban}
                       {...form.register('iban', {
@@ -544,13 +562,15 @@ export function ProfileDetailsForm({
               {input('holder_first_name', t('details.holderFirstName'))}
             </Section>
 
-            <TaxExemptField
-              status={me.tax_exempt_status}
-              checked={form.watch('tax_exempt')}
-              onChange={(v) =>
-                form.setValue('tax_exempt', v, { shouldDirty: true })
-              }
-            />
+            {customer && (
+              <TaxExemptField
+                status={me.tax_exempt_status}
+                checked={form.watch('tax_exempt')}
+                onChange={(v) =>
+                  form.setValue('tax_exempt', v, { shouldDirty: true })
+                }
+              />
+            )}
           </>
         )}
 
