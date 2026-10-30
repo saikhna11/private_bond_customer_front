@@ -204,6 +204,8 @@ export const ProductPreviewSchema = z.object({
   schedule_keys: z.array(z.string()),
   schedule: z.array(z.record(z.string(), z.string())),
   signatures: z.array(PreviewSignatureSchema),
+  // Sums the values and schedule; a purchase sends it back to sign what it read.
+  values_hash: z.string(),
 });
 
 export type PreviewPartyType = z.infer<typeof PreviewPartySchema>;
@@ -222,12 +224,14 @@ export interface CoHolder {
  * POST /contracts: the client's own signature on the preview, a base64 PNG without the
  * data URL prefix, which stores the contract; the backend fills the rest from the bond's
  * sample order. Each other party signs from their own account. request_id names the
- * purchase: sent again, it answers the contract the first request stored.
+ * purchase: sent again, it answers the contract the first request stored. values_hash is the
+ * preview's: values changed since answer contract.template_changed, as a new template does.
  */
 export interface CreateContractBody {
   product: Product;
   ownership_type: PurchasableOwnership;
   template_id: string;
+  values_hash: string;
   request_id: string;
   co_holder?: CoHolder;
   signature: string;

@@ -109,6 +109,7 @@ export function ProductSteps({
               product,
               ownership_type: ownership,
               template_id: preview.template.id,
+              values_hash: preview.values_hash,
               request_id: requestId,
               co_holder: coHolder ?? undefined,
               signature,
@@ -117,7 +118,8 @@ export function ProductSteps({
           onBack={() => navigate({ search: { product, ownership } })}
           onSigned={(c) => navigate({ search: { contractId: c.id } })}
           onConflict={() => {
-            // The template changed since the preview: read the new one before signing.
+            // The template or its values changed since the preview: read the new one before
+            // signing.
             queryClient.invalidateQueries({
               queryKey: previewOptions.queryKey,
             });
