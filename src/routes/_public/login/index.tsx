@@ -22,6 +22,15 @@ function LoginPage() {
           {t('common.signup')}
         </Link>
       </p>
+      <p className="mt-2 text-center text-sm text-muted-foreground">
+        {t('issuer.loginLink')}{' '}
+        <Link
+          to="/issuer/login"
+          className="font-medium text-primary hover:underline"
+        >
+          {t('issuer.loginLinkAction')}
+        </Link>
+      </p>
     </>
   );
 }

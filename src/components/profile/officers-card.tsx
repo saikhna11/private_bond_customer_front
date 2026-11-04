@@ -199,6 +199,11 @@ export function OfficersCard({ me }: { me: MeType }) {
                   <div className="min-w-0 space-y-0.5">
                     <p className="flex flex-wrap items-center gap-2 text-sm font-medium">
                       {m.last_name} {m.first_name}
+                      {m.id === me.id && (
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                          {t('members.you')}
+                        </span>
+                      )}
                       {!m.is_active && (
                         <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                           {t('members.inactive')}
@@ -242,24 +247,27 @@ export function OfficersCard({ me }: { me: MeType }) {
                         </Button>
                       }
                     />
-                    <ConfirmDialog
-                      trigger={
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          <Trash2Icon />
-                          {t('members.remove')}
-                        </Button>
-                      }
-                      title={t('members.removeTitle')}
-                      description={t('members.removeText', {
-                        name: `${m.last_name} ${m.first_name}`,
-                      })}
-                      confirmLabel={t('members.remove')}
-                      onConfirm={() => remove(m)}
-                    />
+                    {/* A member never removes themselves: the organization keeps someone who signs in. */}
+                    {m.id !== me.id && (
+                      <ConfirmDialog
+                        trigger={
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <Trash2Icon />
+                            {t('members.remove')}
+                          </Button>
+                        }
+                        title={t('members.removeTitle')}
+                        description={t('members.removeText', {
+                          name: `${m.last_name} ${m.first_name}`,
+                        })}
+                        confirmLabel={t('members.remove')}
+                        onConfirm={() => remove(m)}
+                      />
+                    )}
                   </div>
                 )}
               </li>

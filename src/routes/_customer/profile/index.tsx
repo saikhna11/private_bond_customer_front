@@ -16,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { editsProfile, initials, isIndividual } from '@/lib/client';
+import { actsForOrg, initials, isIndividual } from '@/lib/client';
 import { formatDate } from '@/lib/format';
 import { meOptions } from '@/queries/auth/options';
 import { displayName } from '@/queries/auth/type';
@@ -29,7 +29,7 @@ function ProfilePage() {
   const { t } = useTranslation();
   const { data: me } = useSuspenseQuery(meOptions());
   const individual = isIndividual(me);
-  const editable = editsProfile(me);
+  const member = me.type === 'org_member';
 
   return (
     <>
@@ -63,9 +63,29 @@ function ProfilePage() {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="flex min-w-0 flex-col gap-6">
+          {/* A member's own details; their organization changes them in Officers. */}
+          {member && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('profile.memberInfo')}</CardTitle>
+                <CardDescription>{t('profile.memberInfoText')}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  <Info label={t('common.name')} value={displayName(me)} />
+                  <Info label={t('profile.position')} value={me.position} />
+                  <Info label={t('common.phone')} value={me.phone} />
+                  <Info label={t('common.email')} value={me.email} />
+                </dl>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
-              <CardTitle>{t('profile.basicInfo')}</CardTitle>
+              <CardTitle>
+                {member ? t('profile.orgInfo') : t('profile.basicInfo')}
+              </CardTitle>
               <CardDescription>
                 {me.status === 'approved'
                   ? me.type === 'customer'
@@ -77,25 +97,11 @@ function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {editable ? (
-                <ProfileDetailsForm me={me} />
-              ) : (
-                <dl className="grid gap-4 sm:grid-cols-2">
-                  <Info label={t('common.name')} value={displayName(me)} />
-                  <Info
-                    label={t('common.registerNumber')}
-                    value={me.register_number}
-                  />
-                  <Info label={t('common.phone')} value={me.phone} />
-                  {me.position && (
-                    <Info label={t('profile.position')} value={me.position} />
-                  )}
-                </dl>
-              )}
+              <ProfileDetailsForm me={me} />
             </CardContent>
           </Card>
 
-          {me.type === 'organization' && <OfficersCard me={me} />}
+          {actsForOrg(me) && <OfficersCard me={me} />}
         </div>
 
         <div className="flex flex-col gap-6">

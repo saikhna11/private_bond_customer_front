@@ -17,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { editsProfile } from '@/lib/client';
+import { actsForOrg, editsProfile } from '@/lib/client';
 import { meOptions } from '@/queries/auth/options';
 import { displayName } from '@/queries/auth/type';
 
@@ -43,10 +43,12 @@ function CustomerHome() {
   const { t } = useTranslation();
   const { data: me } = useSuspenseQuery(meOptions());
   const needsProfile = editsProfile(me) && !me.profile_complete;
-  const organization = me.type === 'organization';
-  const name = organization
-    ? displayName(me)
-    : (me.first_name ?? displayName(me));
+  // A member completes their organization's profile, but is greeted by their own name.
+  const organization = actsForOrg(me);
+  const name =
+    me.type === 'organization'
+      ? displayName(me)
+      : (me.first_name ?? displayName(me));
 
   return (
     <>

@@ -51,9 +51,27 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
-let onUnauthorized: (() => void) | undefined;
+/**
+ * Which sign-in a call belongs to. A bond issuer's member signs in on this web too, with
+ * cookies of their own: their calls (/auth/issuer/*, /issuer/*) refresh through
+ * /auth/issuer/refresh, every other call through the client's /auth/refresh.
+ */
+export type Portal = 'client' | 'issuer';
 
-export function setOnUnauthorized(handler: () => void) {
+const REFRESH_URL: Record<Portal, string> = {
+  client: 'auth/refresh',
+  issuer: 'auth/issuer/refresh',
+};
+
+export function portalOf(url: string): Portal {
+  return url.startsWith('issuer/') || url.startsWith('auth/issuer/')
+    ? 'issuer'
+    : 'client';
+}
+
+let onUnauthorized: ((portal: Portal) => void) | undefined;
+
+export function setOnUnauthorized(handler: (portal: Portal) => void) {
   onUnauthorized = handler;
 }
 
@@ -67,56 +85,71 @@ const NO_REFRESH = [
   'auth/password/reset',
   'auth/refresh',
   'auth/logout',
+  'auth/issuer/login',
+  'auth/issuer/refresh',
+  'auth/issuer/logout',
 ];
 
-let refreshTimer: ReturnType<typeof setTimeout> | undefined;
-let refreshing: Promise<boolean> | undefined;
+const refreshTimers: Partial<Record<Portal, ReturnType<typeof setTimeout>>> =
+  {};
+const refreshing: Partial<Record<Portal, Promise<boolean>>> = {};
 
-/** Refreshes a minute before the access cookie expires. */
-export function scheduleRefresh(accessExpiresAt: string) {
-  clearTimeout(refreshTimer);
+function scheduleFor(portal: Portal, accessExpiresAt: string) {
+  clearTimeout(refreshTimers[portal]);
   const wait = new Date(accessExpiresAt).getTime() - Date.now() - 60_000;
-  refreshTimer = setTimeout(
+  refreshTimers[portal] = setTimeout(
     () => {
-      void refreshSession();
+      void refreshSession(portal);
     },
     Math.max(wait, 5_000),
   );
 }
 
-export function cancelRefresh() {
-  clearTimeout(refreshTimer);
+/** Refreshes a minute before the client access cookie expires. */
+export function scheduleRefresh(accessExpiresAt: string) {
+  scheduleFor('client', accessExpiresAt);
 }
 
-async function doRefresh(): Promise<boolean> {
+/** Refreshes a minute before the issuer access cookie expires. */
+export function scheduleIssuerRefresh(accessExpiresAt: string) {
+  scheduleFor('issuer', accessExpiresAt);
+}
+
+export function cancelRefresh(portal: Portal = 'client') {
+  clearTimeout(refreshTimers[portal]);
+}
+
+async function doRefresh(portal: Portal): Promise<boolean> {
   try {
     const res = await apiClient.post<{ access_expires_at: string }>(
-      'auth/refresh',
+      REFRESH_URL[portal],
     );
-    scheduleRefresh(res.data.access_expires_at);
+    scheduleFor(portal, res.data.access_expires_at);
     return true;
   } catch {
-    cancelRefresh();
+    cancelRefresh(portal);
     return false;
   }
 }
 
 /**
- * Trades the refresh cookie for new cookies. One refresh at a time per tab (a shared
+ * Trades a refresh cookie for new cookies. One refresh at a time per tab (a shared
  * promise) and across tabs (a Web Lock): two refreshes with the same cookie end the
  * session.
  */
-export function refreshSession(): Promise<boolean> {
-  if (!refreshing) {
-    const run =
+export function refreshSession(portal: Portal = 'client'): Promise<boolean> {
+  let run = refreshing[portal];
+  if (!run) {
+    run = (
       typeof navigator !== 'undefined' && navigator.locks
-        ? navigator.locks.request('client-refresh', doRefresh)
-        : doRefresh();
-    refreshing = run.finally(() => {
-      refreshing = undefined;
+        ? navigator.locks.request(`${portal}-refresh`, () => doRefresh(portal))
+        : doRefresh(portal)
+    ).finally(() => {
+      refreshing[portal] = undefined;
     });
+    refreshing[portal] = run;
   }
-  return refreshing;
+  return run;
 }
 
 type RetriableConfig = AxiosRequestConfig & { _retried?: boolean };
@@ -138,10 +171,11 @@ apiClient.interceptors.response.use(
       !NO_REFRESH.some((p) => url.startsWith(p))
     ) {
       config._retried = true;
-      if (await refreshSession()) {
+      const portal = portalOf(url);
+      if (await refreshSession(portal)) {
         return apiClient.request(config);
       }
-      onUnauthorized?.();
+      onUnauthorized?.(portal);
     }
     return Promise.reject(error);
   },

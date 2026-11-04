@@ -1,7 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ParseKeys } from 'i18next';
-import { Loader2Icon, LockIcon, PercentIcon } from 'lucide-react';
+import {
+  BadgeCheckIcon,
+  Loader2Icon,
+  LockIcon,
+  PercentIcon,
+  ShieldAlertIcon,
+} from 'lucide-react';
 import { Fragment, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -24,16 +30,17 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useRelocalizedErrors } from '@/hooks/use-relocalized-errors';
 import { banks, ibanChecksumValid, ibanMatchesAccount } from '@/lib/banks';
-import { PERSON_REGISTER } from '@/lib/client';
+import { actsForOrg, PERSON_REGISTER } from '@/lib/client';
 import { countries, priorityCount } from '@/lib/countries';
 import { type ApiError, toApiError } from '@/lib/fetcher';
 import { applyFieldErrors } from '@/lib/form-errors';
 import i18n, { apiErrorMessage, currentLanguage, msg } from '@/lib/i18n';
-import { isValidPhone } from '@/lib/phone';
+import { isValidPhone, phoneFitsCountry } from '@/lib/phone';
 import { cn, showToast } from '@/lib/utils';
 import { authKeys } from '@/queries/auth/options';
-import { updateMe } from '@/queries/auth/query';
+import { updateMe, verifyBankAccount } from '@/queries/auth/query';
 import type {
+  BankAccountType,
   MeType,
   TaxExemptStatus,
   UpdateMeBody,
@@ -54,8 +61,7 @@ const schema = z.object({
   bank_name: text(100),
   account_number: z.string().trim(),
   iban: z.string().trim(),
-  holder_last_name: text(100),
-  holder_first_name: text(100),
+  holder_account_name: text(200),
   tax_exempt: z.boolean(),
   name: text(200),
   activity: text(200),
@@ -78,8 +84,13 @@ function initial(me: MeType): Values {
     account_number: bank?.account_number ?? '',
     // The form keeps the 18 digits; MN is fixed in front of them.
     iban: bank?.iban.replace(/^mn/i, '') ?? '',
-    holder_last_name: bank?.holder_last_name ?? me.last_name ?? '',
-    holder_first_name: bank?.holder_first_name ?? me.first_name ?? '',
+    // Until an account is saved, the client's own name fills it in: an organization's
+    // account is held in its name, a person's in theirs.
+    holder_account_name:
+      bank?.holder_account_name ??
+      (actsForOrg(me)
+        ? (me.name ?? '')
+        : [me.last_name, me.first_name].filter(Boolean).join(' ')),
     tax_exempt:
       me.tax_exempt_status === 'requested' ||
       me.tax_exempt_status === 'approved',
@@ -91,7 +102,7 @@ function initial(me: MeType): Values {
 function rules(me: MeType) {
   const customer = me.type === 'customer';
   const foreign = me.type === 'foreign';
-  const organization = me.type === 'organization';
+  const organization = actsForOrg(me);
 
   return schema.superRefine((v, ctx) => {
     const need = (ok: boolean, path: Key, key: ParseKeys) => {
@@ -106,6 +117,12 @@ function rules(me: MeType) {
         'phone_secondary',
         'validation.phoneDigits',
       );
+      if (isValidPhone(v.phone_secondary))
+        need(
+          phoneFitsCountry(v.phone_secondary),
+          'phone_secondary',
+          'validation.phoneCountry',
+        );
     }
     if (customer) {
       need(
@@ -114,7 +131,7 @@ function rules(me: MeType) {
         'details.errors.register',
       );
     }
-    if (customer || foreign) {
+    if (customer || foreign || organization) {
       need(v.bank_name !== '', 'bank_name', 'details.errors.bank');
       need(
         /^\d{6,20}$/.test(v.account_number),
@@ -134,14 +151,15 @@ function rules(me: MeType) {
           );
       }
       need(
-        v.holder_last_name !== '',
-        'holder_last_name',
-        'details.errors.holderLastName',
+        v.holder_account_name !== '',
+        'holder_account_name',
+        'details.errors.holderAccountName',
       );
+      // A person's account name is stored in up to 100 characters.
       need(
-        v.holder_first_name !== '',
-        'holder_first_name',
-        'details.errors.holderFirstName',
+        organization || v.holder_account_name.length <= 100,
+        'holder_account_name',
+        'validation.tooLong',
       );
     }
     if (foreign) {
@@ -178,8 +196,9 @@ function changes(me: MeType, values: Values): UpdateMeBody {
     if (!locked && me.type === 'foreign')
       keys.push('nationality', 'passport_number');
   }
-  // An organization's officers have their own card (OfficersCard).
-  if (me.type === 'organization') {
+  // An organization's officers have their own card (OfficersCard); a member edits
+  // their organization's details here.
+  if (actsForOrg(me)) {
     keys.push('activity', 'address');
     if (!locked) keys.push('name');
   }
@@ -191,13 +210,13 @@ function changes(me: MeType, values: Values): UpdateMeBody {
     if (v !== before[k] && v !== '') (body as Record<string, string>)[k] = v;
   }
 
-  if (me.type === 'customer' || me.type === 'foreign') {
+  const organization = actsForOrg(me);
+  if (me.type === 'customer' || me.type === 'foreign' || organization) {
     const bankKeys = [
       'bank_name',
       'account_number',
       'iban',
-      'holder_last_name',
-      'holder_first_name',
+      'holder_account_name',
     ] as const;
     // The account is replaced as a whole: send it when any part changed, or when the
     // client has none yet.
@@ -206,8 +225,7 @@ function changes(me: MeType, values: Values): UpdateMeBody {
         bank_name: values.bank_name,
         account_number: values.account_number,
         iban: `MN${values.iban}`,
-        holder_last_name: values.holder_last_name,
-        holder_first_name: values.holder_first_name,
+        holder_account_name: values.holder_account_name,
       };
     }
   }
@@ -224,11 +242,12 @@ const fieldOf: Partial<Record<string, Key>> = {
   'client.org_name_taken': 'name',
   'client.iban_invalid': 'iban',
   'client.iban_mismatch': 'account_number',
+  'client.phone_invalid': 'phone_secondary',
 };
 
 /**
  * PATCH /me: completes the profile, or changes it later, for a customer, a foreigner or
- * an organization. Reviewed fields lock once approved; contacts, the bank account and
+ * an organization (with its bank account). Reviewed fields lock once approved; contacts, the bank account and
  * the tax exemption stay editable. Sends only what changed.
  */
 export function ProfileDetailsForm({
@@ -245,10 +264,11 @@ export function ProfileDetailsForm({
   const countryList = useMemo(() => countries(lang), [lang]);
   const queryClient = useQueryClient();
   const [error, setError] = useState<ApiError | null>(null);
+  const [verifying, setVerifying] = useState(false);
   const locked = me.status === 'approved';
   const customer = me.type === 'customer';
   const individual = customer || me.type === 'foreign';
-  const organization = me.type === 'organization';
+  const organization = actsForOrg(me);
 
   const form = useForm<Values>({
     resolver: zodResolver(rules(me)),
@@ -257,6 +277,39 @@ export function ProfileDetailsForm({
   });
   const { errors, isSubmitting, isDirty } = form.formState;
   useRelocalizedErrors(form);
+
+  const bank = me.bank_account;
+  const [bankName, accountNumber, iban, holderAccountName] = form.watch([
+    'bank_name',
+    'account_number',
+    'iban',
+    'holder_account_name',
+  ]);
+  // The verification belongs to the saved account: unsaved edits must be stored first.
+  const bankChanged =
+    !bank ||
+    bankName !== bank.bank_name ||
+    accountNumber !== bank.account_number ||
+    `MN${iban}` !== bank.iban.toUpperCase() ||
+    holderAccountName !== bank.holder_account_name;
+
+  async function onVerify() {
+    setVerifying(true);
+    try {
+      const account = await verifyBankAccount();
+      queryClient.setQueryData(authKeys.me(), (prev: MeType | undefined) =>
+        prev ? { ...prev, bank_account: account } : prev,
+      );
+      showToast('success', t('details.bankVerification.verifiedToast'));
+    } catch (err) {
+      const e = toApiError(err);
+      // A failed attempt is recorded on the account; read it back so the reason shows.
+      await queryClient.invalidateQueries({ queryKey: authKeys.me() });
+      showToast('error', apiErrorMessage(e));
+    } finally {
+      setVerifying(false);
+    }
+  }
 
   async function onSubmit(values: Values) {
     setError(null);
@@ -288,8 +341,7 @@ export function ProfileDetailsForm({
         'bank_account.bank_name': 'bank_name',
         'bank_account.account_number': 'account_number',
         'bank_account.iban': 'iban',
-        'bank_account.holder_last_name': 'holder_last_name',
-        'bank_account.holder_first_name': 'holder_first_name',
+        'bank_account.holder_account_name': 'holder_account_name',
       } as const;
       const fields = Object.fromEntries(
         (Object.keys(schema.shape) as Key[]).map((k) => [k, k]),
@@ -481,11 +533,15 @@ export function ProfileDetailsForm({
           </>
         )}
 
-        {individual && (
+        {(individual || organization) && (
           <>
             <Section
               title={t('details.bankAccount')}
-              description={t('details.bankAccountText')}
+              description={t(
+                organization
+                  ? 'details.orgBankAccountText'
+                  : 'details.bankAccountText',
+              )}
             >
               <FormField
                 id="bank_name"
@@ -558,8 +614,28 @@ export function ProfileDetailsForm({
                   </div>
                 </FormField>
               </div>
-              {input('holder_last_name', t('details.holderLastName'))}
-              {input('holder_first_name', t('details.holderFirstName'))}
+              <div className="sm:col-span-2">
+                {input('holder_account_name', t('details.holderAccountName'), {
+                  autoComplete: organization ? 'organization' : 'name',
+                  maxLength: organization ? 200 : 100,
+                  hint: t(
+                    organization
+                      ? 'details.holderAccountNameOrgHint'
+                      : 'details.holderAccountNameHint',
+                  ),
+                })}
+              </div>
+              {/* The bank check reads individuals' accounts only for now. */}
+              {individual && (
+                <div className="sm:col-span-2">
+                  <BankVerification
+                    account={bank}
+                    changed={bankChanged}
+                    verifying={verifying}
+                    onVerify={onVerify}
+                  />
+                </div>
+              )}
             </Section>
 
             {customer && (
@@ -593,6 +669,112 @@ export function ProfileDetailsForm({
         </div>
       </FieldGroup>
     </form>
+  );
+}
+
+const verificationError: Record<string, ParseKeys> = {
+  mismatch: 'details.bankVerification.mismatch',
+  not_found: 'details.bankVerification.notFound',
+};
+
+/** The saved account's CAM state, with the button that asks the bank again. */
+function BankVerification({
+  account,
+  changed,
+  verifying,
+  onVerify,
+}: {
+  account?: BankAccountType;
+  changed: boolean;
+  verifying: boolean;
+  onVerify: () => void;
+}) {
+  const { t } = useTranslation();
+  if (changed) {
+    return (
+      <div className="flex items-start gap-3 rounded-xl border border-dashed p-4">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+          <ShieldAlertIcon className="size-4.5" />
+        </span>
+        <div className="min-w-0 space-y-1">
+          <p className="text-sm font-medium">
+            {t('details.bankVerification.title')}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {t('details.bankVerification.saveFirst')}
+          </p>
+        </div>
+      </div>
+    );
+  }
+  if (!account) return null;
+
+  const verified = account.status === 'verified';
+  const reason = account.status ? verificationError[account.status] : undefined;
+
+  return (
+    <div
+      className={cn(
+        'rounded-xl border p-4',
+        verified
+          ? 'border-success/30 bg-success/5'
+          : 'border-warning/40 bg-warning/5',
+      )}
+    >
+      <div className="flex flex-wrap items-start gap-3">
+        <span
+          className={cn(
+            'flex size-9 shrink-0 items-center justify-center rounded-lg',
+            verified
+              ? 'bg-success/12 text-success'
+              : 'bg-warning/15 text-warning-foreground dark:text-warning',
+          )}
+        >
+          {verified ? (
+            <BadgeCheckIcon className="size-4.5" />
+          ) : (
+            <ShieldAlertIcon className="size-4.5" />
+          )}
+        </span>
+        <div className="min-w-0 flex-1 space-y-1">
+          <p className="text-sm font-semibold">
+            {t(
+              verified
+                ? 'details.bankVerification.verified'
+                : 'details.bankVerification.notVerified',
+            )}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {verified
+              ? t('details.bankVerification.verifiedText')
+              : reason
+                ? t(reason)
+                : t('details.bankVerification.notVerifiedText')}
+          </p>
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          variant={verified ? 'outline' : 'default'}
+          onClick={onVerify}
+          disabled={verifying}
+          className="h-9"
+        >
+          {verifying ? (
+            <Loader2Icon className="animate-spin" />
+          ) : verified ? (
+            <BadgeCheckIcon />
+          ) : (
+            <ShieldAlertIcon />
+          )}
+          {verifying
+            ? t('details.bankVerification.verifying')
+            : verified
+              ? t('details.bankVerification.reverify')
+              : t('details.bankVerification.verify')}
+        </Button>
+      </div>
+    </div>
   );
 }
 

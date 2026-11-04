@@ -10,18 +10,25 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as CustomerRouteRouteImport } from './routes/_customer/route'
+import { Route as IssuerRouteRouteImport } from './routes/_issuer/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
 import { Route as CustomerIndexRouteImport } from './routes/_customer/index'
 import { Route as CustomerContractsIndexRouteImport } from './routes/_customer/contracts/index'
 import { Route as CustomerProfileIndexRouteImport } from './routes/_customer/profile/index'
 import { Route as CustomerSecurityIndexRouteImport } from './routes/_customer/security/index'
+import { Route as IssuerIssuerIndexRouteImport } from './routes/_issuer/issuer/index'
 import { Route as PublicForgotPasswordIndexRouteImport } from './routes/_public/forgot-password/index'
 import { Route as PublicLoginIndexRouteImport } from './routes/_public/login/index'
 import { Route as PublicSignupIndexRouteImport } from './routes/_public/signup/index'
 import { Route as PublicVerifyIndexRouteImport } from './routes/_public/verify/index'
+import { Route as PublicIssuerLoginIndexRouteImport } from './routes/_public/issuer/login/index'
 
 const CustomerRouteRoute = CustomerRouteRouteImport.update({
   id: '/_customer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IssuerRouteRoute = IssuerRouteRouteImport.update({
+  id: '/_issuer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicRouteRoute = PublicRouteRouteImport.update({
@@ -48,6 +55,11 @@ const CustomerSecurityIndexRoute = CustomerSecurityIndexRouteImport.update({
   path: '/security/',
   getParentRoute: () => CustomerRouteRoute,
 } as any)
+const IssuerIssuerIndexRoute = IssuerIssuerIndexRouteImport.update({
+  id: '/issuer/',
+  path: '/issuer/',
+  getParentRoute: () => IssuerRouteRoute,
+} as any)
 const PublicForgotPasswordIndexRoute =
   PublicForgotPasswordIndexRouteImport.update({
     id: '/forgot-password/',
@@ -69,39 +81,51 @@ const PublicVerifyIndexRoute = PublicVerifyIndexRouteImport.update({
   path: '/verify/',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const PublicIssuerLoginIndexRoute = PublicIssuerLoginIndexRouteImport.update({
+  id: '/issuer/login/',
+  path: '/issuer/login/',
+  getParentRoute: () => PublicRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof CustomerIndexRoute
   '/contracts/': typeof CustomerContractsIndexRoute
   '/profile/': typeof CustomerProfileIndexRoute
   '/security/': typeof CustomerSecurityIndexRoute
+  '/issuer/': typeof IssuerIssuerIndexRoute
   '/forgot-password/': typeof PublicForgotPasswordIndexRoute
   '/login/': typeof PublicLoginIndexRoute
   '/signup/': typeof PublicSignupIndexRoute
   '/verify/': typeof PublicVerifyIndexRoute
+  '/issuer/login/': typeof PublicIssuerLoginIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof CustomerIndexRoute
   '/contracts': typeof CustomerContractsIndexRoute
   '/profile': typeof CustomerProfileIndexRoute
   '/security': typeof CustomerSecurityIndexRoute
+  '/issuer': typeof IssuerIssuerIndexRoute
   '/forgot-password': typeof PublicForgotPasswordIndexRoute
   '/login': typeof PublicLoginIndexRoute
   '/signup': typeof PublicSignupIndexRoute
   '/verify': typeof PublicVerifyIndexRoute
+  '/issuer/login': typeof PublicIssuerLoginIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_customer': typeof CustomerRouteRouteWithChildren
+  '/_issuer': typeof IssuerRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
   '/_customer/': typeof CustomerIndexRoute
   '/_customer/contracts/': typeof CustomerContractsIndexRoute
   '/_customer/profile/': typeof CustomerProfileIndexRoute
   '/_customer/security/': typeof CustomerSecurityIndexRoute
+  '/_issuer/issuer/': typeof IssuerIssuerIndexRoute
   '/_public/forgot-password/': typeof PublicForgotPasswordIndexRoute
   '/_public/login/': typeof PublicLoginIndexRoute
   '/_public/signup/': typeof PublicSignupIndexRoute
   '/_public/verify/': typeof PublicVerifyIndexRoute
+  '/_public/issuer/login/': typeof PublicIssuerLoginIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -110,36 +134,44 @@ export interface FileRouteTypes {
     | '/contracts/'
     | '/profile/'
     | '/security/'
+    | '/issuer/'
     | '/forgot-password/'
     | '/login/'
     | '/signup/'
     | '/verify/'
+    | '/issuer/login/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/contracts'
     | '/profile'
     | '/security'
+    | '/issuer'
     | '/forgot-password'
     | '/login'
     | '/signup'
     | '/verify'
+    | '/issuer/login'
   id:
     | '__root__'
     | '/_customer'
+    | '/_issuer'
     | '/_public'
     | '/_customer/'
     | '/_customer/contracts/'
     | '/_customer/profile/'
     | '/_customer/security/'
+    | '/_issuer/issuer/'
     | '/_public/forgot-password/'
     | '/_public/login/'
     | '/_public/signup/'
     | '/_public/verify/'
+    | '/_public/issuer/login/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   CustomerRouteRoute: typeof CustomerRouteRouteWithChildren
+  IssuerRouteRoute: typeof IssuerRouteRouteWithChildren
   PublicRouteRoute: typeof PublicRouteRouteWithChildren
 }
 
@@ -150,6 +182,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof CustomerRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_issuer': {
+      id: '/_issuer'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof IssuerRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public': {
@@ -187,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerSecurityIndexRouteImport
       parentRoute: typeof CustomerRouteRoute
     }
+    '/_issuer/issuer/': {
+      id: '/_issuer/issuer/'
+      path: '/issuer'
+      fullPath: '/issuer/'
+      preLoaderRoute: typeof IssuerIssuerIndexRouteImport
+      parentRoute: typeof IssuerRouteRoute
+    }
     '/_public/forgot-password/': {
       id: '/_public/forgot-password/'
       path: '/forgot-password'
@@ -215,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicVerifyIndexRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_public/issuer/login/': {
+      id: '/_public/issuer/login/'
+      path: '/issuer/login'
+      fullPath: '/issuer/login/'
+      preLoaderRoute: typeof PublicIssuerLoginIndexRouteImport
+      parentRoute: typeof PublicRouteRoute
+    }
   }
 }
 
@@ -236,11 +289,24 @@ const CustomerRouteRouteWithChildren = CustomerRouteRoute._addFileChildren(
   CustomerRouteRouteChildren,
 )
 
+interface IssuerRouteRouteChildren {
+  IssuerIssuerIndexRoute: typeof IssuerIssuerIndexRoute
+}
+
+const IssuerRouteRouteChildren: IssuerRouteRouteChildren = {
+  IssuerIssuerIndexRoute: IssuerIssuerIndexRoute,
+}
+
+const IssuerRouteRouteWithChildren = IssuerRouteRoute._addFileChildren(
+  IssuerRouteRouteChildren,
+)
+
 interface PublicRouteRouteChildren {
   PublicForgotPasswordIndexRoute: typeof PublicForgotPasswordIndexRoute
   PublicLoginIndexRoute: typeof PublicLoginIndexRoute
   PublicSignupIndexRoute: typeof PublicSignupIndexRoute
   PublicVerifyIndexRoute: typeof PublicVerifyIndexRoute
+  PublicIssuerLoginIndexRoute: typeof PublicIssuerLoginIndexRoute
 }
 
 const PublicRouteRouteChildren: PublicRouteRouteChildren = {
@@ -248,6 +314,7 @@ const PublicRouteRouteChildren: PublicRouteRouteChildren = {
   PublicLoginIndexRoute: PublicLoginIndexRoute,
   PublicSignupIndexRoute: PublicSignupIndexRoute,
   PublicVerifyIndexRoute: PublicVerifyIndexRoute,
+  PublicIssuerLoginIndexRoute: PublicIssuerLoginIndexRoute,
 }
 
 const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
@@ -256,6 +323,7 @@ const PublicRouteRouteWithChildren = PublicRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   CustomerRouteRoute: CustomerRouteRouteWithChildren,
+  IssuerRouteRoute: IssuerRouteRouteWithChildren,
   PublicRouteRoute: PublicRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport

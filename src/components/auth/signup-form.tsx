@@ -405,7 +405,8 @@ function OrganizationFields() {
         phone: values.phone,
         password: values.password,
       });
-      startSignup(values.register_number, { ...sent, sent_at: Date.now() });
+      // The code goes to the officer's phone, which is also their login.
+      startSignup(values.phone, { ...sent, sent_at: Date.now() });
       await navigate({ to: '/verify' });
     } catch (err) {
       const e = toApiError(err);

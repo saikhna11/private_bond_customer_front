@@ -1,6 +1,7 @@
 import fetchAndValidate, { scheduleRefresh } from '@/lib/fetcher';
 import { deviceName } from '@/lib/format';
 import {
+  BankAccountSchema,
   CodeSentSchema,
   MeSchema,
   ResetTokenSchema,
@@ -14,6 +15,12 @@ export const getMe = () => fetchAndValidate('me', MeSchema);
 
 export const updateMe = (body: UpdateMeBody) =>
   fetchAndValidate('me', MeSchema, { method: 'PATCH', body });
+
+/** POST /me/bank-account/verify: asks the bank whose name is on the saved account. */
+export const verifyBankAccount = () =>
+  fetchAndValidate('me/bank-account/verify', BankAccountSchema, {
+    method: 'POST',
+  });
 
 export const signup = (body: SignupBody) =>
   fetchAndValidate('auth/signup', CodeSentSchema, { method: 'POST', body });

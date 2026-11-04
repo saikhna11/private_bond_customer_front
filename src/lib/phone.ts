@@ -1,9 +1,11 @@
+import { isValidPhoneNumber } from 'libphonenumber-js/max';
+
 /**
  * Phones as the API stores them: a Mongolian number is its 8 digits, any other country
- * is E.164 (+ and 7 to 14 digits), never +976. Same rule as chk_users_phone.
+ * is E.164 (+ and 7 to 15 digits), never +976. Same rule as chk_users_phone.
  */
 export const PHONE_PATTERN =
-  /^([0-9]{8}|[+]([1-8][0-9]{6,13}|9[0-68-9][0-9]{5,12}|97[0-57-9][0-9]{4,11}))$/;
+  /^([0-9]{8}|[+]([1-8][0-9]{6,14}|9[0-68-9][0-9]{5,13}|97[0-57-9][0-9]{4,12}))$/;
 
 export const MONGOLIA_DIAL = '976';
 
@@ -90,4 +92,9 @@ export function joinPhone(iso: string, national: string): string {
 
 export function isValidPhone(value: string): boolean {
   return PHONE_PATTERN.test(value);
+}
+
+/** Checks a foreign phone against its country's numbering plan. */
+export function phoneFitsCountry(value: string): boolean {
+  return !value.startsWith('+') || isValidPhoneNumber(value);
 }

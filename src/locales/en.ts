@@ -106,14 +106,14 @@ export const en: Messages = {
     firstNameRequired: 'Enter your first name',
     emailInvalid: 'Enter a valid email address',
     phoneDigits: 'Enter a valid phone number. Mongolian numbers have 8 digits.',
+    phoneCountry:
+      "This number does not fit the selected country's phone numbers.",
     orgNameRequired: "Enter the organization's name",
   },
   login: {
     title: 'Welcome back',
     description: 'Sign in to your account to manage your investments.',
     noAccount: "Don't have an account?",
-    person: 'Individual',
-    organization: 'Organization',
     loginRequired: 'Enter your email or phone number',
     loginInvalid:
       'Enter an email or a phone number. Write a foreign number with its country code (+86...).',
@@ -121,7 +121,6 @@ export const en: Messages = {
     orgRegisterInvalid: 'Organization registration number must be 7 digits',
     loginLabel: 'Email or phone',
     loginPlaceholder: 'name@example.com or 99112233',
-    orgLabel: 'Organization registration number',
     forgot: 'Forgot password?',
     locked:
       'Your account is temporarily locked after too many failed attempts. Try again in {{time}}.',
@@ -263,6 +262,10 @@ export const en: Messages = {
     description: 'View and update your account details.',
     memberSince: 'Member since {{date}}',
     basicInfo: 'Basic information',
+    orgInfo: 'Organization details',
+    memberInfo: 'My details',
+    memberInfoText:
+      'You use the services on behalf of your organization. Your own details change in the officers list.',
     lockedCustomer:
       'Your name and registration number are verified and locked. You can still update your phone, address and bank account.',
     lockedOther:
@@ -301,8 +304,7 @@ export const en: Messages = {
       iban: 'IBAN must be MN followed by 18 digits',
       ibanChecksum: 'This IBAN is not valid. Please check it',
       ibanMismatch: 'The account number does not match the IBAN',
-      holderLastName: "Enter the account holder's last name",
-      holderFirstName: "Enter the account holder's first name",
+      holderAccountName: "Enter the account holder's name",
       nationality: 'Select your nationality',
       passport: 'Enter your passport number',
       activity: 'Enter your line of business',
@@ -337,8 +339,31 @@ export const en: Messages = {
     accountNumber: 'Account number',
     iban: 'IBAN',
     ibanHint: 'Find it in your banking app or account statement.',
-    holderLastName: "Holder's last name",
-    holderFirstName: "Holder's first name",
+    holderAccountName: "Account holder's name",
+    holderAccountNameHint: 'As registered with the bank, e.g. Bat Dorj.',
+    holderAccountNameOrgHint:
+      "The organization's name as registered with the bank.",
+    orgBankAccountText:
+      "Bond interest and principal are paid into this organization account. It must be in the organization's name.",
+    bankVerification: {
+      title: 'Account verification',
+      verified: 'Account verified',
+      notVerified: 'Account not verified',
+      verifiedText:
+        "The holder's name in the bank's record matches the name you registered.",
+      notVerifiedText:
+        'Verify the account against the bank record before money is sent to it.',
+      saveFirst:
+        'Save the account details first. You can verify the account once they are saved.',
+      verify: 'Verify account',
+      verifying: 'Verifying...',
+      reverify: 'Verify again',
+      verifiedToast: 'Your bank account is verified.',
+      mismatch:
+        "The bank's record names someone else. Check the holder's name and try again.",
+      notFound:
+        'The bank does not know this account. Check the account number and IBAN.',
+    },
     tax: {
       title: 'Interest income tax exemption',
       requested: 'Under review',
@@ -353,8 +378,9 @@ export const en: Messages = {
   },
   members: {
     title: 'Officers',
+    you: 'You',
     description:
-      'The officers who represent the organization. You are the first; adding others is optional.',
+      'The officers who represent the organization. Each signs in with their own phone or email and uses the services on its behalf. A new officer sets their first password through "Forgot password?".',
     lockedText:
       'Your account is verified, so officer details can no longer be changed.',
     emptyTitle: 'Register your first officer',
@@ -440,6 +466,46 @@ export const en: Messages = {
       'All sessions in this browser will end, and its next sign-in will register as a new device.',
     forgetConfirm: 'Forget',
     forgotten: 'Device forgotten',
+  },
+  issuer: {
+    nav: {
+      general: 'General',
+      bonds: 'Bonds',
+      dashboard: 'Dashboard',
+      schedule: 'Schedule',
+    },
+    loginLink: 'A bond issuer?',
+    loginLinkAction: 'Sign in as an issuer',
+    clientLink: 'A client?',
+    clientLinkAction: 'Sign in as a client',
+    loginTitle: 'Bond issuer sign-in',
+    loginDescription:
+      'Staff of a bond issuer registered by Ulzii & Co sign in with their own email.',
+    emailRequired: 'Enter your email',
+    emailInvalid: 'The email is not valid',
+    title: 'Bond issuer',
+    company: 'Company',
+    companyName: 'Company name',
+    members: 'Members',
+    membersText:
+      'Ulzii & Co staff register members and give them their passwords.',
+    bankAccounts: 'Bank accounts',
+    bankAccountsText: 'The money your bonds raise is paid into these accounts.',
+    noBankAccounts: 'No bank account is registered yet.',
+    accountName: 'Account holder',
+    accountNumber: 'Account number',
+    you: 'You',
+    blocked: 'Inactive',
+    role: {
+      director: 'Director',
+      staff: 'Staff',
+    },
+    bankStatus: {
+      unverified: 'Unverified',
+      verified: 'Verified',
+      mismatch: 'Name mismatch',
+      not_found: 'Not found at the bank',
+    },
   },
   session: {
     expired: 'Your session has expired. Please sign in again.',
@@ -694,6 +760,11 @@ export const en: Messages = {
       unavailable:
         'We could not send a verification code. Please wait and try again.',
     },
+    issuer: {
+      not_found: 'The bond issuer was not found.',
+      member_not_found: 'The member was not found.',
+      member_blocked: 'Your bond issuer account has been deactivated.',
+    },
     client: {
       blocked: 'Your account has been blocked.',
       register_taken:
@@ -702,8 +773,11 @@ export const en: Messages = {
       org_name_taken: 'An organization with this name is already registered.',
       not_organization: 'Only an organization can do this.',
       member_not_found: 'Officer not found.',
+      remove_self: 'You cannot remove yourself from the organization.',
       iban_invalid: 'This IBAN is not valid. Please check it.',
       iban_mismatch: 'The account number does not match the IBAN.',
+      phone_invalid:
+        "This number does not fit the selected country's phone numbers.",
       not_approved:
         'Your account is not verified yet. You can use this once our team has verified it.',
       profile_locked:

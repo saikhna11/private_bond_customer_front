@@ -10,14 +10,31 @@ import i18n from '@/lib/i18n';
 import { queryClient } from '@/lib/query-client';
 import { showToast } from '@/lib/utils';
 import { authKeys } from '@/queries/auth/options';
+import { issuerKeys } from '@/queries/issuer/options';
 import { router } from '@/router';
 import './index.css';
 
-const PUBLIC_PATHS = ['/login', '/signup', '/verify', '/forgot-password'];
+const PUBLIC_PATHS = [
+  '/login',
+  '/signup',
+  '/verify',
+  '/forgot-password',
+  '/issuer/login',
+];
 
 // Registered here so fetcher.ts never imports the router (no import cycle). Runs once a
-// refresh failed: the session ended, so sign in again.
-setOnUnauthorized(() => {
+// refresh failed: the session ended, so sign in again, on the login of the portal whose
+// session it was.
+setOnUnauthorized((portal) => {
+  if (portal === 'issuer') {
+    const wasSignedIn = queryClient.getQueryData(issuerKeys.me()) !== undefined;
+    cancelRefresh('issuer');
+    queryClient.removeQueries({ queryKey: issuerKeys.all });
+    if (router.state.location.pathname === '/issuer/login') return;
+    if (wasSignedIn) showToast('warning', i18n.t('session.expired'));
+    router.navigate({ to: '/issuer/login' });
+    return;
+  }
   const wasSignedIn = queryClient.getQueryData(authKeys.me()) !== undefined;
   cancelRefresh();
   queryClient.clear();

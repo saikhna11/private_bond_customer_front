@@ -12,8 +12,10 @@ export const BankAccountSchema = z.object({
   bank_name: z.string(),
   account_number: z.string(),
   iban: z.string(),
-  holder_last_name: z.string(),
-  holder_first_name: z.string(),
+  /** The name the account is held in: the person's, or the organization's. */
+  holder_account_name: z.string(),
+  /** unverified, verified, mismatch or not_found: only a verified account takes payments. */
+  status: z.string().optional(),
 });
 export type BankAccountType = z.infer<typeof BankAccountSchema>;
 
@@ -114,7 +116,7 @@ export interface UpdateMeBody {
   register_number?: string;
   nationality?: string;
   passport_number?: string;
-  /** Individuals: replaces the account bond payments go to. */
+  /** Individuals and organizations (a member for theirs): replaces the account bond payments go to. */
   bank_account?: BankAccountType;
   /** Customers: true requests the interest tax exemption, false withdraws it. */
   tax_exempt?: boolean;

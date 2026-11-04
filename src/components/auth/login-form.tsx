@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
-import { Building2Icon, Loader2Icon, UserRoundIcon } from 'lucide-react';
+import { Loader2Icon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -12,10 +12,8 @@ import { FormField } from '@/components/common/form-field';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCountdown } from '@/hooks/use-countdown';
 import { useRelocalizedErrors } from '@/hooks/use-relocalized-errors';
-import { ORG_REGISTER } from '@/lib/client';
 import { type ApiError, toApiError } from '@/lib/fetcher';
 import { formatSeconds } from '@/lib/format';
 import { msg } from '@/lib/i18n';
@@ -24,9 +22,11 @@ import { meOptions } from '@/queries/auth/options';
 import { login, resendCode } from '@/queries/auth/query';
 import { usePendingSignup } from '@/stores/pending-signup-store';
 
-type Kind = 'person' | 'organization';
-
-const personSchema = z.object({
+/**
+ * One form for everyone: an email or a phone. An organization has no login of its own; its
+ * officers sign in with theirs and act for it.
+ */
+const schema = z.object({
   login: z
     .string()
     .trim()
@@ -38,38 +38,9 @@ const personSchema = z.object({
   password: z.string().min(1, msg('login.passwordRequired')),
 });
 
-const orgSchema = z.object({
-  login: z.string().trim().regex(ORG_REGISTER, msg('login.orgRegisterInvalid')),
-  password: z.string().min(1, msg('login.passwordRequired')),
-});
-
-type Values = z.infer<typeof personSchema>;
+type Values = z.infer<typeof schema>;
 
 export function LoginForm() {
-  const { t } = useTranslation();
-  const [kind, setKind] = useState<Kind>('person');
-
-  return (
-    <div className="flex flex-col gap-6">
-      <Tabs value={kind} onValueChange={(v) => setKind(v as Kind)}>
-        <TabsList className="grid h-12! w-full grid-cols-2 rounded-xl p-1">
-          <TabsTrigger value="person" className="h-full rounded-lg">
-            <UserRoundIcon />
-            {t('login.person')}
-          </TabsTrigger>
-          <TabsTrigger value="organization" className="h-full rounded-lg">
-            <Building2Icon />
-            {t('login.organization')}
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-      {/* Keyed so switching tabs starts a clean form. */}
-      <LoginFields key={kind} kind={kind} />
-    </div>
-  );
-}
-
-function LoginFields({ kind }: { kind: Kind }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -79,7 +50,7 @@ function LoginFields({ kind }: { kind: Kind }) {
   const lockedFor = useCountdown(lockedUntil);
 
   const form = useForm<Values>({
-    resolver: zodResolver(kind === 'person' ? personSchema : orgSchema),
+    resolver: zodResolver(schema),
     defaultValues: { login: '', password: '' },
   });
   const { errors, isSubmitting } = form.formState;
@@ -122,43 +93,23 @@ function LoginFields({ kind }: { kind: Kind }) {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
       <FieldGroup className="gap-5">
-        {kind === 'person' ? (
-          <FormField
+        <FormField
+          id="login"
+          label={t('login.loginLabel')}
+          error={errors.login?.message}
+        >
+          <Input
             id="login"
-            label={t('login.loginLabel')}
-            error={errors.login?.message}
-          >
-            <Input
-              id="login"
-              type="text"
-              inputMode="email"
-              autoComplete="username"
-              placeholder={t('login.loginPlaceholder')}
-              className="h-12 rounded-xl"
-              autoFocus
-              aria-invalid={!!errors.login}
-              {...form.register('login')}
-            />
-          </FormField>
-        ) : (
-          <FormField
-            id="login"
-            label={t('login.orgLabel')}
-            error={errors.login?.message}
-          >
-            <Input
-              id="login"
-              inputMode="numeric"
-              autoComplete="username"
-              placeholder="1234567"
-              maxLength={7}
-              className="tabular h-12 rounded-xl tracking-widest"
-              autoFocus
-              aria-invalid={!!errors.login}
-              {...form.register('login')}
-            />
-          </FormField>
-        )}
+            type="text"
+            inputMode="email"
+            autoComplete="username"
+            placeholder={t('login.loginPlaceholder')}
+            className="h-12 rounded-xl"
+            autoFocus
+            aria-invalid={!!errors.login}
+            {...form.register('login')}
+          />
+        </FormField>
 
         <FormField
           id="password"
