@@ -19,8 +19,13 @@ const statuses: Record<
     className: 'bg-muted text-muted-foreground',
     Icon: FilePenLineIcon,
   },
-  // Stored with the first signature, it waits for the other parties' own.
-  pending_signature: {
+  // Stored with the first signature, it waits for the other clients' own.
+  pending_customer_signature: {
+    className: 'bg-warning/15 text-warning-foreground dark:text-warning',
+    Icon: ClockIcon,
+  },
+  // Every client has signed: it waits for the bond issuer's director.
+  pending_issuer_signature: {
     className: 'bg-warning/15 text-warning-foreground dark:text-warning',
     Icon: ClockIcon,
   },

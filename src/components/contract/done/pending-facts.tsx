@@ -5,6 +5,7 @@ import {
   formatAmount,
   formatDateTime,
 } from '@/components/contract/format';
+import { isPending } from '@/queries/contract/options';
 import type { ContractType } from '@/queries/contract/type';
 
 /** A pending contract's number, amount and status, and the deadline for its signatures. */
@@ -36,7 +37,7 @@ export function PendingFacts({ contract }: { contract: ContractType }) {
           <ContractStatusBadge status={status} />
         </dd>
       </div>
-      {status === 'pending_signature' && contract.signature_deadline && (
+      {isPending(status) && contract.signature_deadline && (
         <div className="col-span-2 flex items-center justify-between rounded-xl bg-muted/60 px-3 py-2">
           <dt className="text-xs text-muted-foreground">
             {t('contract.facts.deadline')}

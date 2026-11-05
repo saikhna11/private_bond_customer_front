@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { toApiError } from '@/lib/fetcher';
 import { apiErrorMessage } from '@/lib/i18n';
 import { showToast } from '@/lib/utils';
-import { contractKeys } from '@/queries/contract/options';
+import { useContractApi } from '@/queries/contract/api';
+import { storedKeys } from '@/queries/contract/options';
 import type { ContractType, PreviewPartyType } from '@/queries/contract/type';
 import { AgreeCheck } from './agree-check';
 import { SignatureField } from './signature-field';
@@ -38,15 +39,16 @@ export function SignStep({
   const [drawing, setDrawing] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(false);
   const queryClient = useQueryClient();
+  const keys = storedKeys(useContractApi());
 
   const sign = useMutation({
     // The data URL's payload is the base64 PNG the API takes.
     mutationFn: () =>
       submit((drawing ?? '').replace(/^data:image\/png;base64,/, '')),
     onSuccess: (c) => {
-      queryClient.setQueryData(contractKeys.detail(c.id), c);
-      queryClient.invalidateQueries({ queryKey: contractKeys.list() });
-      queryClient.invalidateQueries({ queryKey: contractKeys.preview(c.id) });
+      queryClient.setQueryData(keys.detail(c.id), c);
+      queryClient.invalidateQueries({ queryKey: keys.list() });
+      queryClient.invalidateQueries({ queryKey: keys.preview(c.id) });
       onSigned(c);
     },
     onError: (err) => {

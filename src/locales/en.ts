@@ -515,7 +515,15 @@ export const en: Messages = {
       general: 'General',
       bonds: 'Bonds',
       dashboard: 'Dashboard',
+      contracts: 'Contracts',
       schedule: 'Schedule',
+    },
+    contracts: {
+      title: 'Contracts',
+      description:
+        'Contracts the clients have signed wait 72 hours for your signature. Read each one and sign it.',
+      list: "The issuer's contracts",
+      empty: 'Contracts appear here once their clients sign them.',
     },
     loginLink: 'A bond issuer?',
     loginLinkAction: 'Sign in as an issuer',
@@ -614,7 +622,8 @@ export const en: Messages = {
     },
     status: {
       draft: 'Draft',
-      pending_signature: 'Awaiting signatures',
+      pending_customer_signature: 'Awaiting signatures',
+      pending_issuer_signature: "Awaiting the issuer's signature",
       rendering: 'Preparing',
       signed: 'Confirmed',
       cancelled: 'Cancelled',
@@ -631,6 +640,7 @@ export const en: Messages = {
     party: {
       holder: 'Buyer',
       co_holder: 'Co-holder',
+      issuer: 'Issuer',
       organization: 'Organization',
       guardian: 'Guardian',
       minor: 'Minor holder',
@@ -712,7 +722,7 @@ export const en: Messages = {
         'Draw your signature in the box above with a mouse or your finger.',
       others: '{{names}} will sign from their own accounts.',
       deadline:
-        'Once every party signs within 72 hours, the contract is numbered and confirmed. Otherwise it is cancelled.',
+        'Once the clients sign within 72 hours, and then the bond issuer within 72 hours, the contract is numbered and confirmed. Otherwise it is cancelled.',
     },
     coSignIntro:
       "This contract is waiting for your signature. The other parties' signatures appear on the contract.",
@@ -749,7 +759,9 @@ export const en: Messages = {
       declinedBy: '{{who}} declined, so the contract was cancelled.',
       someParty: 'A party',
       awaitingOthers:
-        "Waiting for the other parties' signatures. They sign from their own accounts. Once everyone has signed, the contract is numbered and its final copy is prepared.",
+        "Waiting for the other parties' signatures. They sign from their own accounts. Then the bond issuer signs.",
+      awaitingIssuer:
+        "Waiting for the bond issuer's signature. Once they sign, the contract is numbered and its final copy is prepared.",
       slow: 'Preparing the final copy is taking longer than usual. Press "Check again", or check your contract list later.',
       rendering:
         'Preparing the final copy of the contract. This page updates once it is ready.',

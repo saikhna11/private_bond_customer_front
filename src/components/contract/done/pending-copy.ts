@@ -36,8 +36,11 @@ export function pendingCopy(
     };
   }
   const title = t('contract.pending.received');
-  if (contract.status === 'pending_signature') {
+  if (contract.status === 'pending_customer_signature') {
     return { title, message: t('contract.pending.awaitingOthers') };
+  }
+  if (contract.status === 'pending_issuer_signature') {
+    return { title, message: t('contract.pending.awaitingIssuer') };
   }
   if (slow) {
     return { title, message: t('contract.pending.slow') };

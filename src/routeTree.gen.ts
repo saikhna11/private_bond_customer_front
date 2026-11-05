@@ -21,6 +21,7 @@ import { Route as PublicForgotPasswordIndexRouteImport } from './routes/_public/
 import { Route as PublicLoginIndexRouteImport } from './routes/_public/login/index'
 import { Route as PublicSignupIndexRouteImport } from './routes/_public/signup/index'
 import { Route as PublicVerifyIndexRouteImport } from './routes/_public/verify/index'
+import { Route as IssuerIssuerContractsIndexRouteImport } from './routes/_issuer/issuer/contracts/index'
 import { Route as PublicIssuerLoginIndexRouteImport } from './routes/_public/issuer/login/index'
 
 const CustomerRouteRoute = CustomerRouteRouteImport.update({
@@ -81,6 +82,12 @@ const PublicVerifyIndexRoute = PublicVerifyIndexRouteImport.update({
   path: '/verify/',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const IssuerIssuerContractsIndexRoute =
+  IssuerIssuerContractsIndexRouteImport.update({
+    id: '/issuer/contracts/',
+    path: '/issuer/contracts/',
+    getParentRoute: () => IssuerRouteRoute,
+  } as any)
 const PublicIssuerLoginIndexRoute = PublicIssuerLoginIndexRouteImport.update({
   id: '/issuer/login/',
   path: '/issuer/login/',
@@ -97,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/login/': typeof PublicLoginIndexRoute
   '/signup/': typeof PublicSignupIndexRoute
   '/verify/': typeof PublicVerifyIndexRoute
+  '/issuer/contracts/': typeof IssuerIssuerContractsIndexRoute
   '/issuer/login/': typeof PublicIssuerLoginIndexRoute
 }
 export interface FileRoutesByTo {
@@ -109,6 +117,7 @@ export interface FileRoutesByTo {
   '/login': typeof PublicLoginIndexRoute
   '/signup': typeof PublicSignupIndexRoute
   '/verify': typeof PublicVerifyIndexRoute
+  '/issuer/contracts': typeof IssuerIssuerContractsIndexRoute
   '/issuer/login': typeof PublicIssuerLoginIndexRoute
 }
 export interface FileRoutesById {
@@ -125,6 +134,7 @@ export interface FileRoutesById {
   '/_public/login/': typeof PublicLoginIndexRoute
   '/_public/signup/': typeof PublicSignupIndexRoute
   '/_public/verify/': typeof PublicVerifyIndexRoute
+  '/_issuer/issuer/contracts/': typeof IssuerIssuerContractsIndexRoute
   '/_public/issuer/login/': typeof PublicIssuerLoginIndexRoute
 }
 export interface FileRouteTypes {
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/login/'
     | '/signup/'
     | '/verify/'
+    | '/issuer/contracts/'
     | '/issuer/login/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/verify'
+    | '/issuer/contracts'
     | '/issuer/login'
   id:
     | '__root__'
@@ -166,6 +178,7 @@ export interface FileRouteTypes {
     | '/_public/login/'
     | '/_public/signup/'
     | '/_public/verify/'
+    | '/_issuer/issuer/contracts/'
     | '/_public/issuer/login/'
   fileRoutesById: FileRoutesById
 }
@@ -261,6 +274,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicVerifyIndexRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_issuer/issuer/contracts/': {
+      id: '/_issuer/issuer/contracts/'
+      path: '/issuer/contracts'
+      fullPath: '/issuer/contracts/'
+      preLoaderRoute: typeof IssuerIssuerContractsIndexRouteImport
+      parentRoute: typeof IssuerRouteRoute
+    }
     '/_public/issuer/login/': {
       id: '/_public/issuer/login/'
       path: '/issuer/login'
@@ -291,10 +311,12 @@ const CustomerRouteRouteWithChildren = CustomerRouteRoute._addFileChildren(
 
 interface IssuerRouteRouteChildren {
   IssuerIssuerIndexRoute: typeof IssuerIssuerIndexRoute
+  IssuerIssuerContractsIndexRoute: typeof IssuerIssuerContractsIndexRoute
 }
 
 const IssuerRouteRouteChildren: IssuerRouteRouteChildren = {
   IssuerIssuerIndexRoute: IssuerIssuerIndexRoute,
+  IssuerIssuerContractsIndexRoute: IssuerIssuerContractsIndexRoute,
 }
 
 const IssuerRouteRouteWithChildren = IssuerRouteRoute._addFileChildren(

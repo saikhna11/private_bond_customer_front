@@ -5,6 +5,7 @@ import {
   TriangleAlertIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { isPending } from '@/queries/contract/options';
 import type { ContractType } from '@/queries/contract/type';
 
 /**
@@ -23,7 +24,7 @@ export function PendingStatusIcon({
     ? CircleXIcon
     : status === 'failed'
       ? TriangleAlertIcon
-      : slow || status === 'pending_signature'
+      : slow || isPending(status)
         ? ClockIcon
         : LoaderCircleIcon;
 

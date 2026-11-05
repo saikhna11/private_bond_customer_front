@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toApiError } from '@/lib/fetcher';
 import { apiErrorMessage } from '@/lib/i18n';
+import { useContractApi } from '@/queries/contract/api';
 import { contractDocumentOptions } from '@/queries/contract/options';
 import { usePdfPages } from './use-pdf-pages';
 
@@ -13,7 +14,7 @@ import { usePdfPages } from './use-pdf-pages';
 export function SignedContractPdf({ contractId }: { contractId: string }) {
   const { t } = useTranslation();
   const { data, isPending, error } = useQuery(
-    contractDocumentOptions(contractId),
+    contractDocumentOptions(contractId, useContractApi()),
   );
   const { pages, ready, failed } = usePdfPages(data);
 

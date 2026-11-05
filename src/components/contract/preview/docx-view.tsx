@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toApiError } from '@/lib/fetcher';
 import { apiErrorMessage } from '@/lib/i18n';
+import { useContractApi } from '@/queries/contract/api';
 import { templateFileOptions } from '@/queries/contract/options';
 import type { ProductPreviewType } from '@/queries/contract/type';
 import { useDocxRender } from './use-docx-render';
@@ -11,7 +12,7 @@ import { useDocxRender } from './use-docx-render';
 export function DocxView({ preview }: { preview: ProductPreviewType }) {
   const { t } = useTranslation();
   const { data, isPending, error } = useQuery(
-    templateFileOptions(preview.template.id),
+    templateFileOptions(preview.template.id, useContractApi()),
   );
   const { container, failed } = useDocxRender(data, preview);
 

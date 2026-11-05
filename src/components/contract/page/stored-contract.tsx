@@ -3,8 +3,8 @@ import { awaitingYou } from '@/queries/contract/options';
 import { CoSignSteps } from './co-sign-steps';
 import { ContractFailed } from './contract-failed';
 import { ContractLoading } from './contract-loading';
+import type { ContractNav } from './contract-nav';
 import { ContractSection } from './contract-section';
-import { contractsRoute } from './route';
 import { usePdfPolling } from './use-pdf-polling';
 
 /**
@@ -13,8 +13,13 @@ import { usePdfPolling } from './use-pdf-polling';
  * signatures it waits for, then its PDF rendering, then the signed PDF itself and its
  * download (DoneStep), polling while the PDF renders (usePdfPolling).
  */
-export function StoredContract({ contractId }: { contractId: string }) {
-  const navigate = contractsRoute.useNavigate();
+export function StoredContract({
+  contractId,
+  nav,
+}: {
+  contractId: string;
+  nav: ContractNav;
+}) {
   const { query, stopped, checkAgain } = usePdfPolling(contractId);
   const { data: contract, isPending, isFetching, error } = query;
 
@@ -22,10 +27,10 @@ export function StoredContract({ contractId }: { contractId: string }) {
     return <ContractLoading />;
   }
   if (error) {
-    return <ContractFailed error={error} />;
+    return <ContractFailed error={error} onBack={nav.toList} />;
   }
   if (awaitingYou(contract)) {
-    return <CoSignSteps contract={contract} />;
+    return <CoSignSteps contract={contract} nav={nav} />;
   }
   return (
     <ContractSection step="done" complete={contract.status === 'signed'}>
@@ -34,7 +39,7 @@ export function StoredContract({ contractId }: { contractId: string }) {
         stopped={stopped}
         checking={isFetching}
         onCheckAgain={checkAgain}
-        onList={() => navigate({ search: {} })}
+        onList={nav.toList}
       />
     </ContractSection>
   );

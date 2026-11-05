@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { DeclineButton } from '@/components/contract/decline-button';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { yourParty } from '@/queries/contract/options';
+import { signingStatus, yourParty } from '@/queries/contract/options';
 import type { ContractType } from '@/queries/contract/type';
 
 /**
@@ -32,7 +32,7 @@ export function PendingActions({
         <ArrowLeftIcon />
         {t('contract.toList')}
       </Button>
-      {contract.status === 'pending_signature' && you?.signs && (
+      {you?.signs && contract.status === signingStatus(you) && (
         <DeclineButton contractId={contract.id} signed={!!you.signed_at} />
       )}
       {slow && (

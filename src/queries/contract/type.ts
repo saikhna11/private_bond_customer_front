@@ -6,6 +6,7 @@ const partyTypeSchema = z.enum([
   'organization',
   'guardian',
   'minor',
+  'issuer',
 ]);
 
 /**
@@ -35,12 +36,14 @@ const SignatureSchema = z.object({
 });
 
 /**
- * pending_signature until every party has signed from their own account; rendering while
- * the signed PDF is made; cancelled when a party declined or the deadline passed.
+ * pending_customer_signature until every client party has signed from their own account,
+ * then pending_issuer_signature until the bond issuer's director signs; rendering while the
+ * signed PDF is made; cancelled when a party declined, expired when the deadline passed.
  */
 const statusSchema = z.enum([
   'draft',
-  'pending_signature',
+  'pending_customer_signature',
+  'pending_issuer_signature',
   'rendering',
   'signed',
   'cancelled',

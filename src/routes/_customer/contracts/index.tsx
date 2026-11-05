@@ -5,6 +5,7 @@ import { PageTitle } from '@/components/common/page-title';
 import { ContractList } from '@/components/contract/list/contract-list';
 import { ProductSteps } from '@/components/contract/page/product-steps';
 import { StoredContract } from '@/components/contract/page/stored-contract';
+import { useClientContractNav } from '@/components/contract/page/use-client-contract-nav';
 import { ProductCards } from '@/components/contract/product/product-cards';
 import { purchasableOwnershipSchema } from '@/queries/contract/type';
 
@@ -32,9 +33,10 @@ function ContractPage() {
   const { t } = useTranslation();
   const { product, ownership, contractId } = Route.useSearch();
   const navigate = Route.useNavigate();
+  const nav = useClientContractNav();
 
   if (contractId !== undefined) {
-    return <StoredContract contractId={contractId} />;
+    return <StoredContract contractId={contractId} nav={nav} />;
   }
   if (product !== undefined) {
     return (

@@ -4,6 +4,7 @@ import {
   Building2Icon,
   CalendarClockIcon,
   ChevronsUpDownIcon,
+  FileSignatureIcon,
   HouseIcon,
   LandmarkIcon,
   LogOutIcon,
@@ -41,21 +42,25 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { cancelRefresh } from '@/lib/fetcher';
+import { issuerContractApi } from '@/queries/contract/api';
 import { issuerKeys, issuerMeOptions } from '@/queries/issuer/options';
 import { issuerLogout } from '@/queries/issuer/query';
 
-type NavKey = 'dashboard' | 'bonds' | 'schedule';
+type NavKey = 'dashboard' | 'contracts' | 'bonds' | 'schedule';
 
 interface NavItem {
   title: NavKey;
-  to?: '/issuer';
+  to?: '/issuer' | '/issuer/contracts';
   icon: LucideIcon;
 }
 
 const navGroups: { label: 'general' | 'bonds'; items: NavItem[] }[] = [
   {
     label: 'general',
-    items: [{ title: 'dashboard', to: '/issuer', icon: HouseIcon }],
+    items: [
+      { title: 'dashboard', to: '/issuer', icon: HouseIcon },
+      { title: 'contracts', to: '/issuer/contracts', icon: FileSignatureIcon },
+    ],
   },
   {
     // The issuer's bonds and their payment schedule come with the bond module.
@@ -69,6 +74,7 @@ const navGroups: { label: 'general' | 'bonds'; items: NavItem[] }[] = [
 
 const titles: Record<string, NavKey> = {
   '/issuer': 'dashboard',
+  '/issuer/contracts': 'contracts',
 };
 
 function useIssuerLogout() {
@@ -82,6 +88,7 @@ function useIssuerLogout() {
       // 204 even without a session; a network error still leaves locally.
     }
     queryClient.removeQueries({ queryKey: issuerKeys.all });
+    queryClient.removeQueries({ queryKey: [issuerContractApi.root] });
     await navigate({ to: '/issuer/login' });
   }, [queryClient, navigate]);
 }

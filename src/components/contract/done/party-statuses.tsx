@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { isPending } from '@/queries/contract/options';
 import type { ContractType } from '@/queries/contract/type';
 import { PartyStatusRow } from './party-status-row';
 
@@ -23,7 +24,7 @@ export function PartyStatuses({
           <PartyStatusRow
             key={p.id}
             party={p}
-            pending={contract.status === 'pending_signature'}
+            pending={isPending(contract.status)}
           />
         ))}
     </ul>

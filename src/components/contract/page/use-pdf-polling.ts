@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { useContractApi } from '@/queries/contract/api';
 import {
   contractOptions,
   pdfPollDelay,
@@ -15,7 +16,7 @@ export function usePdfPolling(contractId: string) {
   const [since, setSince] = useState(() => Date.now());
   const [stopped, setStopped] = useState(false);
   const query = useQuery({
-    ...contractOptions(contractId),
+    ...contractOptions(contractId, useContractApi()),
     refetchInterval: (q) =>
       stopped || q.state.data?.status !== 'rendering'
         ? false

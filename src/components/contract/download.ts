@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toApiError } from '@/lib/fetcher';
 import { apiErrorMessage } from '@/lib/i18n';
 import { showToast } from '@/lib/utils';
+import { useContractApi } from '@/queries/contract/api';
 import { contractDocumentOptions } from '@/queries/contract/options';
 
 /**
@@ -10,9 +11,10 @@ import { contractDocumentOptions } from '@/queries/contract/options';
  */
 export function useDownloadContract() {
   const queryClient = useQueryClient();
+  const api = useContractApi();
   return useMutation({
     mutationFn: async (c: { id: string; contract_no?: string }) => ({
-      pdf: await queryClient.fetchQuery(contractDocumentOptions(c.id)),
+      pdf: await queryClient.fetchQuery(contractDocumentOptions(c.id, api)),
       name: `${(c.contract_no ?? c.id).replaceAll('/', '-')}.pdf`,
     }),
     onSuccess: ({ pdf, name }) => {

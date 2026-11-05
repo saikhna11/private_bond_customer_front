@@ -16,8 +16,8 @@ import {
 import { toApiError } from '@/lib/fetcher';
 import { apiErrorMessage } from '@/lib/i18n';
 import { showToast } from '@/lib/utils';
-import { contractKeys } from '@/queries/contract/options';
-import { declineContract } from '@/queries/contract/query';
+import { useContractApi } from '@/queries/contract/api';
+import { storedKeys } from '@/queries/contract/options';
 
 /**
  * Cancels a contract pending signature for every party, once confirmed. signed says the
@@ -33,17 +33,19 @@ export function DeclineButton({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const api = useContractApi();
+  const keys = storedKeys(api);
   const decline = useMutation({
-    mutationFn: () => declineContract(contractId),
+    mutationFn: () => api.declineContract(contractId),
     onSuccess: (c) => {
-      queryClient.setQueryData(contractKeys.detail(c.id), c);
-      queryClient.invalidateQueries({ queryKey: contractKeys.list() });
+      queryClient.setQueryData(keys.detail(c.id), c);
+      queryClient.invalidateQueries({ queryKey: keys.list() });
       setOpen(false);
     },
     onError: (err) => {
       showToast('error', apiErrorMessage(toApiError(err)));
       queryClient.invalidateQueries({
-        queryKey: contractKeys.detail(contractId),
+        queryKey: keys.detail(contractId),
       });
       setOpen(false);
     },

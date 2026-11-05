@@ -1,13 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
-import {
-  getContract,
-  getContractDocument,
-  getContractPreview,
-  getContracts,
-  getProductPreview,
-  getProducts,
-  getTemplateFile,
-} from './query';
+import { type ContractApi, clientContractApi } from './api';
+import { getProductPreview, getProducts } from './query';
 import type {
   CoHolder,
   ContractType,
@@ -40,17 +33,51 @@ export const contractKeys = {
   document: (id: string) => [...contractKeys.all, 'document', id] as const,
 };
 
+/**
+ * The keys of a stored contract's queries through api: the client's are contractKeys,
+ * the issuer portal's their own.
+ */
+export function storedKeys(api: ContractApi) {
+  const all = [api.root] as const;
+  return {
+    all,
+    list: () => [...all, 'list'] as const,
+    detail: (id: string) => [...all, 'detail', id] as const,
+    preview: (id: string) => [...all, 'preview', id] as const,
+    templateFile: (id: string) => [...all, 'template-file', id] as const,
+    document: (id: string) => [...all, 'document', id] as const,
+  };
+}
+
 /** The client's own party on the contract. */
 export function yourParty(contract: ContractType): PartyType | undefined {
   return contract.parties.find((p) => p.id === contract.your_party_id);
 }
 
-/** Whether the contract waits for the client's own signature. */
+/** Whether the contract still waits for a signature, its clients' or its issuer's. */
+export function isPending(status: ContractType['status']): boolean {
+  return (
+    status === 'pending_customer_signature' ||
+    status === 'pending_issuer_signature'
+  );
+}
+
+/**
+ * The status in which party signs or declines: the issuer's director once every client
+ * party has signed, any other party before.
+ */
+export function signingStatus(party: PartyType): ContractType['status'] {
+  return party.type === 'issuer'
+    ? 'pending_issuer_signature'
+    : 'pending_customer_signature';
+}
+
+/** Whether the contract waits for the reader's own signature, at their turn. */
 export function awaitingYou(contract: ContractType): boolean {
   const you = yourParty(contract);
   return (
-    contract.status === 'pending_signature' &&
     !!you?.signs &&
+    contract.status === signingStatus(you) &&
     !you.signed_at &&
     !you.declined_at
   );
@@ -74,10 +101,10 @@ export function pdfPollDelay(elapsed: number): number {
 }
 
 /** One contract. The page showing it polls while its PDF renders (pdfPollDelay). */
-export function contractOptions(id: string) {
+export function contractOptions(id: string, api = clientContractApi) {
   return queryOptions({
-    queryKey: contractKeys.detail(id),
-    queryFn: () => getContract(id),
+    queryKey: storedKeys(api).detail(id),
+    queryFn: () => api.getContract(id),
   });
 }
 
@@ -86,18 +113,18 @@ export function contractOptions(id: string) {
  * read fetches the signatures from storage, so it stays fresh for a while; signing
  * invalidates it.
  */
-export function contractPreviewOptions(id: string) {
+export function contractPreviewOptions(id: string, api = clientContractApi) {
   return queryOptions({
-    queryKey: contractKeys.preview(id),
-    queryFn: () => getContractPreview(id),
+    queryKey: storedKeys(api).preview(id),
+    queryFn: () => api.getContractPreview(id),
     staleTime: 5 * 60 * 1000,
   });
 }
 
-export function contractsOptions() {
+export function contractsOptions(api = clientContractApi) {
   return queryOptions({
-    queryKey: contractKeys.list(),
-    queryFn: getContracts,
+    queryKey: storedKeys(api).list(),
+    queryFn: api.getContracts,
   });
 }
 
@@ -132,10 +159,10 @@ export function productPreviewOptions(
  * A template never changes once active, nor after it is retired: its id names one version
  * of the file.
  */
-export function templateFileOptions(id: string) {
+export function templateFileOptions(id: string, api = clientContractApi) {
   return queryOptions({
-    queryKey: contractKeys.templateFile(id),
-    queryFn: () => getTemplateFile(id),
+    queryKey: storedKeys(api).templateFile(id),
+    queryFn: () => api.getTemplateFile(id),
     staleTime: Number.POSITIVE_INFINITY,
   });
 }
@@ -144,10 +171,10 @@ export function templateFileOptions(id: string) {
  * A signed contract's PDF. It never changes once signed, so the page that shows it and the
  * download share one fetch.
  */
-export function contractDocumentOptions(id: string) {
+export function contractDocumentOptions(id: string, api = clientContractApi) {
   return queryOptions({
-    queryKey: contractKeys.document(id),
-    queryFn: () => getContractDocument(id),
+    queryKey: storedKeys(api).document(id),
+    queryFn: () => api.getContractDocument(id),
     staleTime: Number.POSITIVE_INFINITY,
   });
 }

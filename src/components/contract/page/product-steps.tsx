@@ -37,6 +37,7 @@ export function ProductSteps({
   const { sign } = contractsRoute.useSearch();
   const { t } = useTranslation();
   const navigate = contractsRoute.useNavigate();
+  const toList = () => navigate({ search: {} });
   const queryClient = useQueryClient();
   const [coHolder, setCoHolder] = useState<CoHolder | null>(null);
   const [editingCoHolder, setEditingCoHolder] = useState(false);
@@ -62,10 +63,12 @@ export function ProductSteps({
     return <ContractLoading />;
   }
   if (products.error) {
-    return <ContractFailed error={products.error} />;
+    return <ContractFailed error={products.error} onBack={toList} />;
   }
   if (!info) {
-    return <ContractFailed message={t('contract.productNotFound')} />;
+    return (
+      <ContractFailed message={t('contract.productNotFound')} onBack={toList} />
+    );
   }
   if (asking) {
     return (
@@ -95,7 +98,7 @@ export function ProductSteps({
     return <ContractLoading />;
   }
   if (error) {
-    return <ContractFailed error={error} />;
+    return <ContractFailed error={error} onBack={toList} />;
   }
   const holder = preview.parties.find((p) => p.position === 0);
   if (sign && holder) {
