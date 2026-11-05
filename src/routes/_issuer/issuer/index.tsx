@@ -56,6 +56,10 @@ function IssuerHome() {
                 label={t('common.registerNumber')}
                 value={issuer.register_number}
               />
+              <Row
+                label={t('issuer.stateRegisterNumber')}
+                value={issuer.state_register_number}
+              />
             </dl>
           </CardContent>
         </Card>

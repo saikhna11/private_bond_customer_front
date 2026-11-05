@@ -29,6 +29,7 @@ export const IssuerSchema = z.object({
   id: z.string(),
   name: z.string(),
   register_number: z.string(),
+  state_register_number: z.string(),
   created_at: z.string(),
   updated_at: z.string(),
   members: z.array(IssuerMemberSchema),

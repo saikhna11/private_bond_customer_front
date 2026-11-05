@@ -486,6 +486,7 @@ export const en: Messages = {
     title: 'Bond issuer',
     company: 'Company',
     companyName: 'Company name',
+    stateRegisterNumber: 'State registration number',
     members: 'Members',
     membersText:
       'Ulzii & Co staff register members and give them their passwords.',

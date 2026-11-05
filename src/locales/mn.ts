@@ -482,6 +482,7 @@ export const mn = {
     title: 'Бонд гаргагч',
     company: 'Компанийн мэдээлэл',
     companyName: 'Компанийн нэр',
+    stateRegisterNumber: 'Улсын бүртгэлийн дугаар',
     members: 'Ажилтнууд',
     membersText:
       'Ажилтныг Ulzii & Co-гийн ажилтан бүртгэж, нууц үгийг нь олгоно.',
