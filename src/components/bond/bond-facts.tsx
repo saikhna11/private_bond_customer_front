@@ -1,53 +1,53 @@
-import { ShieldCheckIcon } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatDate } from "@/lib/format";
-import type { BondType } from "@/queries/bond/type";
-import { formatMoney } from "./format";
+import { ShieldCheckIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatDate } from '@/lib/format';
+import type { BondType } from '@/queries/bond/type';
+import { formatMoney } from './format';
 
 export function BondFacts({ bond }: { bond: BondType }) {
   const { t } = useTranslation();
   const money = (v: string) => formatMoney(v, bond.currency);
   const unit = Number(bond.purchase_unit);
   const pieces = (v: string) =>
-    t("bond.facts.pieces", { count: Math.floor(Number(v) / unit) });
+    t('bond.facts.pieces', { count: Math.floor(Number(v) / unit) });
 
   const facts: { label: string; value: string; hint?: string }[] = [
-    { label: t("bond.facts.unit"), value: money(bond.purchase_unit) },
+    { label: t('bond.facts.unit'), value: money(bond.purchase_unit) },
     {
-      label: t("bond.facts.minPurchase"),
+      label: t('bond.facts.minPurchase'),
       value: pieces(bond.min_purchase),
       hint: money(bond.min_purchase),
     },
     {
-      label: t("bond.facts.total"),
+      label: t('bond.facts.total'),
       value: money(bond.total_amount),
       hint: pieces(bond.total_amount),
     },
     {
-      label: t("bond.facts.remaining"),
+      label: t('bond.facts.remaining'),
       value: money(bond.remaining),
       hint: pieces(bond.remaining),
     },
     {
-      label: t("bond.facts.cap"),
+      label: t('bond.facts.cap'),
       value: bond.investor_cap
         ? pieces(bond.investor_cap)
-        : t("bond.facts.noCap"),
+        : t('bond.facts.noCap'),
       hint: bond.investor_cap ? money(bond.investor_cap) : undefined,
     },
     {
-      label: t("bond.facts.sale"),
+      label: t('bond.facts.sale'),
       value: bond.sale_end
         ? `${formatDate(bond.sale_start)} - ${formatDate(bond.sale_end)}`
-        : t("bond.facts.saleOpen", { from: formatDate(bond.sale_start) }),
+        : t('bond.facts.saleOpen', { from: formatDate(bond.sale_start) }),
     },
   ];
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>{t("bond.facts.title")}</CardTitle>
+        <CardTitle>{t('bond.facts.title')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Хайрцагуудын зайг бага зэрэг нэмэгдүүлж (gap-4), цэгцэлсэн */}
@@ -80,7 +80,7 @@ export function BondFacts({ bond }: { bond: BondType }) {
           <div className="pt-2">
             <p className="inline-flex items-center gap-2 rounded-lg bg-emerald-500/10 px-3 py-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
               <ShieldCheckIcon className="size-4" />
-              {t("bond.facts.guarantee")}
+              {t('bond.facts.guarantee')}
             </p>
           </div>
         )}

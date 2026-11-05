@@ -1,7 +1,7 @@
-import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { RateOptionType } from "@/queries/bond/type";
-import { frequencyText, percent } from "./format";
+import { useTranslation } from 'react-i18next';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { RateOptionType } from '@/queries/bond/type';
+import { frequencyText, percent } from './format';
 
 export function RateOptionTable({ options }: { options: RateOptionType[] }) {
   const { t } = useTranslation();
@@ -28,8 +28,8 @@ export function RateOptionTable({ options }: { options: RateOptionType[] }) {
                 <tr key={o.id} className="border-b last:border-0">
                   <td className="tabular py-3 pr-4">
                     {o.term_min_months === o.term_max_months
-                      ? t("contract.months", { count: o.term_min_months })
-                      : t("bond.monthsRange", {
+                      ? t('contract.months', { count: o.term_min_months })
+                      : t('bond.monthsRange', {
                           from: o.term_min_months,
                           to: o.term_max_months,
                         })}

@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { BondDetail } from "@/components/bond/bond-detail";
+import { createFileRoute } from '@tanstack/react-router';
+import { BondDetail } from '@/components/bond/bond-detail';
 
-export const Route = createFileRoute("/_customer/bonds/$bondId/")({
+export const Route = createFileRoute('/_customer/bonds/$bondId/')({
   component: BondPage,
 });
 
