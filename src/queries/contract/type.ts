@@ -36,9 +36,10 @@ const SignatureSchema = z.object({
 });
 
 /**
+ * A purchase is paid at once (the test payment) and numbered, then waits
  * pending_customer_signature until every client party has signed from their own account,
  * then pending_issuer_signature until the bond issuer's director signs; rendering while the
- * signed PDF is made; cancelled when a party declined, expired when the deadline passed.
+ * signed PDF is made. A paid contract is never cancelled nor expires.
  */
 const statusSchema = z.enum([
   'draft',
@@ -53,6 +54,7 @@ const statusSchema = z.enum([
 
 const frequencySchema = z.enum([
   'monthly',
+  'bimonthly',
   'quarterly',
   'semi_annual',
   'annual',
@@ -62,8 +64,8 @@ const frequencySchema = z.enum([
 const cancelReasonSchema = z.enum(['declined', 'expired']);
 
 /**
- * A contract in the list: no parties or signatures. Its number comes with the last
- * signature; awaiting_signature says it waits for the client's own.
+ * A contract in the list: no parties or signatures. Its number comes with its payment;
+ * awaiting_signature says it waits for the client's own.
  */
 export const ContractSummarySchema = z.object({
   id: z.uuid(),
@@ -98,6 +100,9 @@ export const ContractSchema = z.object({
   tax_rate: z.string(),
   term_months: z.number(),
   interest_frequency: frequencySchema,
+  /** The day it was paid, which started and numbered it. */
+  paid_on: z.string().optional(),
+  payment_source: z.enum(['mock', 'admin', 'payment']).optional(),
   signature_deadline: z.string().optional(),
   cancel_reason: cancelReasonSchema.optional(),
   cancelled_at: z.string().optional(),
@@ -110,12 +115,6 @@ export const ContractSchema = z.object({
 export type PartyType = z.infer<typeof PartySchema>;
 export type ContractType = z.infer<typeof ContractSchema>;
 export type ContractSummaryType = z.infer<typeof ContractSummarySchema>;
-
-/**
- * A bond's product name, as GET /products lists it: the backend decides which bonds are
- * on sale, so the app names none of them.
- */
-export type Product = string;
 
 /**
  * Who a contract names: a holder alone, with a co-holder, a minor with their guardian, or
@@ -132,36 +131,6 @@ export type Ownership = z.infer<typeof ownershipSchema>;
 /** The kinds a holder can buy now: alone, or with a co-holder who signs too. */
 export const purchasableOwnershipSchema = z.enum(['individual', 'joint']);
 export type PurchasableOwnership = z.infer<typeof purchasableOwnershipSchema>;
-
-/**
- * One kind of contract a bond is sold under: its ownership type, whether it prints the
- * holder's taxpayer number (ТТД), its active template, and whether it can be bought now.
- */
-export const ProductOptionSchema = z.object({
-  ownership_type: ownershipSchema,
-  ttd: z.boolean(),
-  template: z
-    .object({
-      id: z.uuid(),
-      name: z.string(),
-      status: z.enum(['draft', 'active', 'inactive']),
-    })
-    .optional(),
-  available: z.boolean(),
-});
-
-export type ProductOptionType = z.infer<typeof ProductOptionSchema>;
-
-/** A bond on sale: its terms and the kinds of contract it is sold under. */
-export const BondProductSchema = z.object({
-  name: z.string(),
-  annual_rate: z.string(),
-  term_months: z.number(),
-  interest_frequency: frequencySchema,
-  options: z.array(ProductOptionSchema),
-});
-
-export type BondProductType = z.infer<typeof BondProductSchema>;
 
 /** A person the previewed contract names, at their place among its parties. */
 const PreviewPartySchema = z.object({
@@ -184,13 +153,10 @@ const PreviewSignatureSchema = z.object({
 });
 
 /**
- * What the browser fills a contract's document from: a product's before anything is
- * stored (POST /products/{name}/preview), or a stored contract's with the signatures its
- * parties gave so far (GET /contracts/{id}/preview). The number ends in ___ until the last
- * party signs.
+ * What the browser fills a stored contract's document from, with the signatures its parties
+ * gave so far (GET /contracts/{id}/preview): the values kept when it was paid.
  */
-export const ProductPreviewSchema = z.object({
-  product: z.string(),
+export const ContractPreviewSchema = z.object({
   template: z.object({ id: z.uuid(), name: z.string() }),
   contract_no: z.string(),
   contract_date: z.string(),
@@ -207,12 +173,12 @@ export const ProductPreviewSchema = z.object({
   schedule_keys: z.array(z.string()),
   schedule: z.array(z.record(z.string(), z.string())),
   signatures: z.array(PreviewSignatureSchema),
-  // Sums the values and schedule; a purchase sends it back to sign what it read.
+  // Sums the values and schedule.
   values_hash: z.string(),
 });
 
 export type PreviewPartyType = z.infer<typeof PreviewPartySchema>;
-export type ProductPreviewType = z.infer<typeof ProductPreviewSchema>;
+export type ContractPreviewType = z.infer<typeof ContractPreviewSchema>;
 
 /**
  * A contract's co-holder: another approved client's register number (a foreigner's
@@ -221,21 +187,4 @@ export type ProductPreviewType = z.infer<typeof ProductPreviewSchema>;
 export interface CoHolder {
   register_no: string;
   phone: string;
-}
-
-/**
- * POST /contracts: the client's own signature on the preview, a base64 PNG without the
- * data URL prefix, which stores the contract; the backend fills the rest from the bond's
- * sample order. Each other party signs from their own account. request_id names the
- * purchase: sent again, it answers the contract the first request stored. values_hash is the
- * preview's: values changed since answer contract.template_changed, as a new template does.
- */
-export interface CreateContractBody {
-  product: Product;
-  ownership_type: PurchasableOwnership;
-  template_id: string;
-  values_hash: string;
-  request_id: string;
-  co_holder?: CoHolder;
-  signature: string;
 }

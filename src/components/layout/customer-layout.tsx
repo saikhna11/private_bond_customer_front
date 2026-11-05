@@ -51,7 +51,7 @@ type NavKey = 'dashboard' | 'bonds' | 'contracts' | 'profile' | 'security';
 
 interface NavItem {
   title: NavKey;
-  to?: '/' | '/contracts' | '/profile' | '/security';
+  to?: '/' | '/bonds' | '/contracts' | '/profile' | '/security';
   icon: LucideIcon;
 }
 
@@ -64,10 +64,9 @@ const navGroups: {
     items: [{ title: 'dashboard', to: '/', icon: HouseIcon }],
   },
   {
-    // Bonds and certificates come with their modules.
     label: 'investment',
     items: [
-      { title: 'bonds', icon: LandmarkIcon },
+      { title: 'bonds', to: '/bonds', icon: LandmarkIcon },
       { title: 'contracts', to: '/contracts', icon: FileTextIcon },
     ],
   },
@@ -82,14 +81,21 @@ const navGroups: {
 
 const titles: Record<string, NavKey> = {
   '/': 'dashboard',
+  '/bonds': 'bonds',
   '/contracts': 'contracts',
   '/profile': 'profile',
   '/security': 'security',
 };
 
+/** The nav item a path sits under: its first segment's, so a bond's page reads Bonds. */
+function titleOf(pathname: string): NavKey | undefined {
+  return titles[pathname] ?? titles[`/${pathname.split('/')[1]}`];
+}
+
 export function CustomerLayout() {
   const { t } = useTranslation();
   const pathname = useLocation({ select: (l) => l.pathname });
+  const title = titleOf(pathname);
 
   return (
     <SidebarProvider
@@ -109,7 +115,7 @@ export function CustomerLayout() {
             className="data-[orientation=vertical]:h-4"
           />
           <span className="text-sm font-medium">
-            {titles[pathname] ? t(`nav.${titles[pathname]}`) : ''}
+            {title ? t(`nav.${title}`) : ''}
           </span>
           <div className="ml-auto flex items-center gap-1">
             <LanguageToggle />
@@ -151,7 +157,11 @@ function CustomerSidebar({ pathname }: { pathname: string }) {
                     {item.to ? (
                       <SidebarMenuButton
                         asChild
-                        isActive={pathname === item.to}
+                        isActive={
+                          item.to === '/'
+                            ? pathname === '/'
+                            : pathname.startsWith(item.to)
+                        }
                         tooltip={t(`nav.${item.title}`)}
                       >
                         <Link to={item.to}>

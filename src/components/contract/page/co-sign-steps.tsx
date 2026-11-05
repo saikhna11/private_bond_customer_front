@@ -74,7 +74,9 @@ export function CoSignSteps({
       <CoSignIntro contract={contract} />
       <ContractPreview preview={preview} />
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-        <DeclineButton contractId={contract.id} signed={false} />
+        {!contract.paid_on && (
+          <DeclineButton contractId={contract.id} signed={false} />
+        )}
         <ToSignButton onClick={() => nav.toSign(contract.id)} />
       </div>
     </ContractSection>

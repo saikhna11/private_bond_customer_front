@@ -574,7 +574,7 @@ export const en: Messages = {
     page: {
       title: 'Contracts & certificates',
       description:
-        'Choose a bond, read its contract and sign it. Download your signed contracts here.',
+        'Read and sign the contracts of the bonds you bought. Download your signed contracts here.',
       buy: 'Buy a bond',
     },
     toList: 'Contracts',
@@ -583,11 +583,10 @@ export const en: Messages = {
     months_one: '{{count}} month',
     months_other: '{{count}} months',
     unnumbered: 'Not numbered yet',
-    productNotFound: 'Product not found.',
     steps: {
       create: {
-        label: 'Choose a bond',
-        hint: 'Product',
+        label: 'Buy',
+        hint: 'Terms and payment',
       },
       view: {
         label: 'Read the contract',
@@ -632,6 +631,7 @@ export const en: Messages = {
     },
     frequency: {
       monthly: 'Monthly',
+      bimonthly: 'Every two months',
       quarterly: 'Quarterly',
       semi_annual: 'Every six months',
       annual: 'Annually',
@@ -651,29 +651,6 @@ export const en: Messages = {
       awaited: 'Awaiting',
       unsigned: 'Not signed',
     },
-    product: {
-      kinds_one: '{{count}} contract type',
-      kinds_other: '{{count}} contract types',
-      ownership: {
-        individual: 'Individual',
-        joint: 'Joint',
-        minor: 'Minor',
-        organization: 'Organization',
-      },
-      ttd: 'TIN',
-      annualRate: 'annual rate',
-      term: 'Term',
-      frequency: 'Interest paid',
-      buy: 'Buy',
-      noTemplate: 'No contract template is assigned to this bond yet.',
-      individualsOnlyTitle: 'Individuals only for now',
-      individualsOnlyText:
-        'Bond purchase contracts are open to individuals only for now.',
-      notApprovedTitle: 'Your account is not approved yet',
-      notApprovedText:
-        'Once your account is approved you can buy bonds and make contracts.',
-      profile: 'Profile',
-    },
     list: {
       title: 'My contracts',
       count_one: '{{count}} contract',
@@ -683,7 +660,7 @@ export const en: Messages = {
       awaitingTitle: 'Waiting for your signature ({{count}})',
       othersTitle: 'Other contracts',
       emptyTitle: 'No contracts yet',
-      emptyText: 'Choose a bond above to make your first contract.',
+      emptyText: 'Your contracts appear here once you buy a bond.',
     },
     coHolder: {
       title: 'Co-holder',
@@ -722,7 +699,7 @@ export const en: Messages = {
         'Draw your signature in the box above with a mouse or your finger.',
       others: '{{names}} will sign from their own accounts.',
       deadline:
-        'Once the clients sign within 72 hours, and then the bond issuer within 72 hours, the contract is numbered and confirmed. Otherwise it is cancelled.',
+        'A paid contract is never cancelled. It is confirmed once the client parties, then the bond issuer, have signed.',
     },
     coSignIntro:
       "This contract is waiting for your signature. The other parties' signatures appear on the contract.",
@@ -761,10 +738,106 @@ export const en: Messages = {
       awaitingOthers:
         "Waiting for the other parties' signatures. They sign from their own accounts. Then the bond issuer signs.",
       awaitingIssuer:
-        "Waiting for the bond issuer's signature. Once they sign, the contract is numbered and its final copy is prepared.",
+        "Waiting for the bond issuer's signature. Once they sign, the contract's final copy is prepared.",
       slow: 'Preparing the final copy is taking longer than usual. Press "Check again", or check your contract list later.',
       rendering:
         'Preparing the final copy of the contract. This page updates once it is ready.',
+    },
+  },
+  bond: {
+    issuer: 'Issuer',
+    rate: 'Annual rate',
+    term: 'Term',
+    frequency: 'Interest paid',
+    currency: 'Currency',
+    remaining: 'Remaining',
+    soldShare: '{{share}}% sold',
+    monthsRange: '{{from}}-{{to}} months',
+    about: 'About',
+    status: {
+      draft: 'Draft',
+      upcoming: 'Upcoming',
+      selling: 'Active',
+      paused: 'Paused',
+      closed: 'Closed',
+    },
+    ownership: {
+      individual: 'On my own',
+      joint: 'With a co-holder',
+    },
+    list: {
+      title: 'Bonds',
+      description: 'Explore the bonds on offer, pick your terms and buy.',
+      emptyTitle: 'No bonds yet',
+      emptyText: 'New bonds appear here once published.',
+    },
+    options: {
+      title: 'Rate options',
+    },
+    facts: {
+      title: 'Bond details',
+      total: 'Total raised',
+      remaining: 'Remaining',
+      minPurchase: 'Minimum purchase',
+      unit: 'Purchase unit',
+      cap: 'Investor cap',
+      noCap: 'No cap',
+      sale: 'Sales period',
+      saleOpen: 'From {{from}} until sold out',
+      guarantee: 'Guaranteed',
+    },
+    prospectus: {
+      title: 'Prospectus',
+      description:
+        'Read it here only. Every page carries your name and register number as a watermark.',
+      failed: 'The prospectus could not be shown.',
+    },
+    buy: {
+      cta: 'Buy',
+      title: 'Buy {{name}}',
+      description:
+        'Pick the terms, the term and the amount, and pay. Then read and sign your contract.',
+      option: 'Rate option',
+      termPlaceholder: 'Choose a term',
+      amount: 'Amount',
+      amountHint:
+        'At least {{min}}, in steps of {{unit}}. {{remaining}} remaining.',
+      ownership: 'Ownership',
+      errors: {
+        amountRequired: 'Enter the amount',
+        amountStep:
+          'The amount must be at least the minimum and a multiple of the purchase unit',
+        amountRemaining: "The amount exceeds the bond's remaining amount",
+      },
+      individualsOnlyTitle: 'Individuals only for now',
+      individualsOnlyText:
+        'Bond purchase contracts are open to individuals only for now.',
+      notApprovedTitle: 'Your account is not approved yet',
+      notApprovedText:
+        'Once your account is approved you can buy bonds and make contracts.',
+      profile: 'Profile',
+      notSelling: {
+        draft: 'This bond is not on sale',
+        upcoming: 'Sales have not started yet',
+        paused: 'Sales are paused',
+        closed: 'Sales are closed',
+        selling: '',
+      },
+      notSellingText: 'Choose a bond that is on sale.',
+      noTemplateTitle: 'The contract template is not ready',
+      noTemplateText:
+        'You can buy this bond once its contract template is ready.',
+    },
+    quote: {
+      title: 'Purchase',
+      fill: 'Pick the rate option, the term and the amount.',
+      amount: 'Amount',
+      tax: 'Tax on interest',
+      start: 'Start date',
+      maturity: 'Maturity date',
+      pay: 'Pay (test)',
+      mock: 'Test payment: pressing the button counts the payment as received and numbers the contract. The repayment schedule is in the contract annex.',
+      paid: 'Payment received. Read and sign contract {{no}}.',
     },
   },
   errors: {
@@ -859,7 +932,6 @@ export const en: Messages = {
       no_active_template:
         'No active template is assigned to this bond and ownership type.',
       template_unsupported: 'A contract cannot be made from this template.',
-      product_not_found: 'Product not found.',
       template_not_found: 'Contract template not found.',
       template_changed:
         'The contract template was updated. Read the contract again, then sign it.',
@@ -879,6 +951,21 @@ export const en: Messages = {
       document_not_ready: 'The final contract document is not ready yet.',
       holder_unsupported:
         'For now only approved individuals with a register or passport number and a bank account can make a contract.',
+      paid: 'A paid contract cannot be cancelled.',
+    },
+    bond: {
+      not_found: 'Bond not found.',
+      not_selling: 'This bond is not on sale now.',
+      term_invalid: 'The chosen term does not fit the rate option.',
+      amount_invalid:
+        'The amount must be at least the minimum and a multiple of the purchase unit.',
+      amount_exceeds_remaining:
+        "The amount exceeds the bond's remaining amount.",
+      remainder_too_small:
+        'The amount left after this purchase would be below the minimum purchase.',
+      investor_cap_exceeded: 'This exceeds the cap per investor.',
+      rate_option_not_found: 'Rate option not found.',
+      file_not_found: 'File not found.',
     },
   },
 };

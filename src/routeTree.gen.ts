@@ -13,6 +13,7 @@ import { Route as CustomerRouteRouteImport } from './routes/_customer/route'
 import { Route as IssuerRouteRouteImport } from './routes/_issuer/route'
 import { Route as PublicRouteRouteImport } from './routes/_public/route'
 import { Route as CustomerIndexRouteImport } from './routes/_customer/index'
+import { Route as CustomerBondsIndexRouteImport } from './routes/_customer/bonds/index'
 import { Route as CustomerContractsIndexRouteImport } from './routes/_customer/contracts/index'
 import { Route as CustomerProfileIndexRouteImport } from './routes/_customer/profile/index'
 import { Route as CustomerSecurityIndexRouteImport } from './routes/_customer/security/index'
@@ -21,6 +22,8 @@ import { Route as PublicForgotPasswordIndexRouteImport } from './routes/_public/
 import { Route as PublicLoginIndexRouteImport } from './routes/_public/login/index'
 import { Route as PublicSignupIndexRouteImport } from './routes/_public/signup/index'
 import { Route as PublicVerifyIndexRouteImport } from './routes/_public/verify/index'
+import { Route as CustomerBondsBondIdIndexRouteImport } from './routes/_customer/bonds/$bondId/index'
+import { Route as CustomerBondsBondIdBuyRouteImport } from './routes/_customer/bonds/$bondId/buy'
 import { Route as IssuerIssuerContractsIndexRouteImport } from './routes/_issuer/issuer/contracts/index'
 import { Route as PublicIssuerLoginIndexRouteImport } from './routes/_public/issuer/login/index'
 
@@ -39,6 +42,11 @@ const PublicRouteRoute = PublicRouteRouteImport.update({
 const CustomerIndexRoute = CustomerIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => CustomerRouteRoute,
+} as any)
+const CustomerBondsIndexRoute = CustomerBondsIndexRouteImport.update({
+  id: '/bonds/',
+  path: '/bonds/',
   getParentRoute: () => CustomerRouteRoute,
 } as any)
 const CustomerContractsIndexRoute = CustomerContractsIndexRouteImport.update({
@@ -82,6 +90,17 @@ const PublicVerifyIndexRoute = PublicVerifyIndexRouteImport.update({
   path: '/verify/',
   getParentRoute: () => PublicRouteRoute,
 } as any)
+const CustomerBondsBondIdIndexRoute =
+  CustomerBondsBondIdIndexRouteImport.update({
+    id: '/bonds/$bondId/',
+    path: '/bonds/$bondId/',
+    getParentRoute: () => CustomerRouteRoute,
+  } as any)
+const CustomerBondsBondIdBuyRoute = CustomerBondsBondIdBuyRouteImport.update({
+  id: '/bonds/$bondId/buy',
+  path: '/bonds/$bondId/buy',
+  getParentRoute: () => CustomerRouteRoute,
+} as any)
 const IssuerIssuerContractsIndexRoute =
   IssuerIssuerContractsIndexRouteImport.update({
     id: '/issuer/contracts/',
@@ -96,6 +115,7 @@ const PublicIssuerLoginIndexRoute = PublicIssuerLoginIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof CustomerIndexRoute
+  '/bonds/': typeof CustomerBondsIndexRoute
   '/contracts/': typeof CustomerContractsIndexRoute
   '/profile/': typeof CustomerProfileIndexRoute
   '/security/': typeof CustomerSecurityIndexRoute
@@ -104,11 +124,14 @@ export interface FileRoutesByFullPath {
   '/login/': typeof PublicLoginIndexRoute
   '/signup/': typeof PublicSignupIndexRoute
   '/verify/': typeof PublicVerifyIndexRoute
+  '/bonds/$bondId/buy': typeof CustomerBondsBondIdBuyRoute
+  '/bonds/$bondId/': typeof CustomerBondsBondIdIndexRoute
   '/issuer/contracts/': typeof IssuerIssuerContractsIndexRoute
   '/issuer/login/': typeof PublicIssuerLoginIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof CustomerIndexRoute
+  '/bonds': typeof CustomerBondsIndexRoute
   '/contracts': typeof CustomerContractsIndexRoute
   '/profile': typeof CustomerProfileIndexRoute
   '/security': typeof CustomerSecurityIndexRoute
@@ -117,6 +140,8 @@ export interface FileRoutesByTo {
   '/login': typeof PublicLoginIndexRoute
   '/signup': typeof PublicSignupIndexRoute
   '/verify': typeof PublicVerifyIndexRoute
+  '/bonds/$bondId/buy': typeof CustomerBondsBondIdBuyRoute
+  '/bonds/$bondId': typeof CustomerBondsBondIdIndexRoute
   '/issuer/contracts': typeof IssuerIssuerContractsIndexRoute
   '/issuer/login': typeof PublicIssuerLoginIndexRoute
 }
@@ -126,6 +151,7 @@ export interface FileRoutesById {
   '/_issuer': typeof IssuerRouteRouteWithChildren
   '/_public': typeof PublicRouteRouteWithChildren
   '/_customer/': typeof CustomerIndexRoute
+  '/_customer/bonds/': typeof CustomerBondsIndexRoute
   '/_customer/contracts/': typeof CustomerContractsIndexRoute
   '/_customer/profile/': typeof CustomerProfileIndexRoute
   '/_customer/security/': typeof CustomerSecurityIndexRoute
@@ -134,6 +160,8 @@ export interface FileRoutesById {
   '/_public/login/': typeof PublicLoginIndexRoute
   '/_public/signup/': typeof PublicSignupIndexRoute
   '/_public/verify/': typeof PublicVerifyIndexRoute
+  '/_customer/bonds/$bondId/buy': typeof CustomerBondsBondIdBuyRoute
+  '/_customer/bonds/$bondId/': typeof CustomerBondsBondIdIndexRoute
   '/_issuer/issuer/contracts/': typeof IssuerIssuerContractsIndexRoute
   '/_public/issuer/login/': typeof PublicIssuerLoginIndexRoute
 }
@@ -141,6 +169,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/bonds/'
     | '/contracts/'
     | '/profile/'
     | '/security/'
@@ -149,11 +178,14 @@ export interface FileRouteTypes {
     | '/login/'
     | '/signup/'
     | '/verify/'
+    | '/bonds/$bondId/buy'
+    | '/bonds/$bondId/'
     | '/issuer/contracts/'
     | '/issuer/login/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/bonds'
     | '/contracts'
     | '/profile'
     | '/security'
@@ -162,6 +194,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/verify'
+    | '/bonds/$bondId/buy'
+    | '/bonds/$bondId'
     | '/issuer/contracts'
     | '/issuer/login'
   id:
@@ -170,6 +204,7 @@ export interface FileRouteTypes {
     | '/_issuer'
     | '/_public'
     | '/_customer/'
+    | '/_customer/bonds/'
     | '/_customer/contracts/'
     | '/_customer/profile/'
     | '/_customer/security/'
@@ -178,6 +213,8 @@ export interface FileRouteTypes {
     | '/_public/login/'
     | '/_public/signup/'
     | '/_public/verify/'
+    | '/_customer/bonds/$bondId/buy'
+    | '/_customer/bonds/$bondId/'
     | '/_issuer/issuer/contracts/'
     | '/_public/issuer/login/'
   fileRoutesById: FileRoutesById
@@ -216,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof CustomerIndexRouteImport
+      parentRoute: typeof CustomerRouteRoute
+    }
+    '/_customer/bonds/': {
+      id: '/_customer/bonds/'
+      path: '/bonds'
+      fullPath: '/bonds/'
+      preLoaderRoute: typeof CustomerBondsIndexRouteImport
       parentRoute: typeof CustomerRouteRoute
     }
     '/_customer/contracts/': {
@@ -274,6 +318,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicVerifyIndexRouteImport
       parentRoute: typeof PublicRouteRoute
     }
+    '/_customer/bonds/$bondId/': {
+      id: '/_customer/bonds/$bondId/'
+      path: '/bonds/$bondId'
+      fullPath: '/bonds/$bondId/'
+      preLoaderRoute: typeof CustomerBondsBondIdIndexRouteImport
+      parentRoute: typeof CustomerRouteRoute
+    }
+    '/_customer/bonds/$bondId/buy': {
+      id: '/_customer/bonds/$bondId/buy'
+      path: '/bonds/$bondId/buy'
+      fullPath: '/bonds/$bondId/buy'
+      preLoaderRoute: typeof CustomerBondsBondIdBuyRouteImport
+      parentRoute: typeof CustomerRouteRoute
+    }
     '/_issuer/issuer/contracts/': {
       id: '/_issuer/issuer/contracts/'
       path: '/issuer/contracts'
@@ -293,16 +351,22 @@ declare module '@tanstack/react-router' {
 
 interface CustomerRouteRouteChildren {
   CustomerIndexRoute: typeof CustomerIndexRoute
+  CustomerBondsIndexRoute: typeof CustomerBondsIndexRoute
   CustomerContractsIndexRoute: typeof CustomerContractsIndexRoute
   CustomerProfileIndexRoute: typeof CustomerProfileIndexRoute
   CustomerSecurityIndexRoute: typeof CustomerSecurityIndexRoute
+  CustomerBondsBondIdBuyRoute: typeof CustomerBondsBondIdBuyRoute
+  CustomerBondsBondIdIndexRoute: typeof CustomerBondsBondIdIndexRoute
 }
 
 const CustomerRouteRouteChildren: CustomerRouteRouteChildren = {
   CustomerIndexRoute: CustomerIndexRoute,
+  CustomerBondsIndexRoute: CustomerBondsIndexRoute,
   CustomerContractsIndexRoute: CustomerContractsIndexRoute,
   CustomerProfileIndexRoute: CustomerProfileIndexRoute,
   CustomerSecurityIndexRoute: CustomerSecurityIndexRoute,
+  CustomerBondsBondIdBuyRoute: CustomerBondsBondIdBuyRoute,
+  CustomerBondsBondIdIndexRoute: CustomerBondsBondIdIndexRoute,
 }
 
 const CustomerRouteRouteWithChildren = CustomerRouteRoute._addFileChildren(

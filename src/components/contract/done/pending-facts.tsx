@@ -37,16 +37,18 @@ export function PendingFacts({ contract }: { contract: ContractType }) {
           <ContractStatusBadge status={status} />
         </dd>
       </div>
-      {isPending(status) && contract.signature_deadline && (
-        <div className="col-span-2 flex items-center justify-between rounded-xl bg-muted/60 px-3 py-2">
-          <dt className="text-xs text-muted-foreground">
-            {t('contract.facts.deadline')}
-          </dt>
-          <dd className="tabular font-semibold">
-            {formatDateTime(contract.signature_deadline)}
-          </dd>
-        </div>
-      )}
+      {isPending(status) &&
+        contract.signature_deadline &&
+        !contract.paid_on && (
+          <div className="col-span-2 flex items-center justify-between rounded-xl bg-muted/60 px-3 py-2">
+            <dt className="text-xs text-muted-foreground">
+              {t('contract.facts.deadline')}
+            </dt>
+            <dd className="tabular font-semibold">
+              {formatDateTime(contract.signature_deadline)}
+            </dd>
+          </div>
+        )}
     </dl>
   );
 }

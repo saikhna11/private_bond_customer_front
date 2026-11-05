@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import type { ProductPreviewType } from '@/queries/contract/type';
+import type { ContractPreviewType } from '@/queries/contract/type';
 import { ContractTerms } from './contract-terms';
 import { DocxView } from './docx-view';
 
@@ -15,7 +15,7 @@ import { DocxView } from './docx-view';
  * browser, from the values the backend will fill the signed document with, and the
  * signatures the parties already gave in place.
  */
-export function ContractPreview({ preview }: { preview: ProductPreviewType }) {
+export function ContractPreview({ preview }: { preview: ContractPreviewType }) {
   const { t } = useTranslation();
   return (
     <>

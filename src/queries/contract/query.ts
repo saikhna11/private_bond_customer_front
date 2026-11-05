@@ -1,31 +1,17 @@
 import z from 'zod';
 import fetchAndValidate from '@/lib/fetcher';
 import {
-  BondProductSchema,
-  type BondProductType,
-  type CoHolder,
+  ContractPreviewSchema,
+  type ContractPreviewType,
   ContractSchema,
   ContractSummarySchema,
   type ContractSummaryType,
   type ContractType,
-  type CreateContractBody,
-  type Product,
-  ProductPreviewSchema,
-  type ProductPreviewType,
-  type PurchasableOwnership,
 } from './type';
-
-export const getProducts = (): Promise<BondProductType[]> =>
-  fetchAndValidate('products', z.array(BondProductSchema));
 
 /** The newest contracts, newest first; drafts are not listed. */
 export const getContracts = (): Promise<ContractSummaryType[]> =>
   fetchAndValidate('contracts', z.array(ContractSummarySchema));
-
-export const createContract = (
-  body: CreateContractBody,
-): Promise<ContractType> =>
-  fetchAndValidate('contracts', ContractSchema, { method: 'POST', body });
 
 export const getContract = (id: string): Promise<ContractType> =>
   fetchAndValidate(`contracts/${id}`, ContractSchema);
@@ -47,25 +33,9 @@ export const declineContract = (id: string): Promise<ContractType> =>
     body: {},
   });
 
-/**
- * What the browser fills the preview of the product's contract of ownership from; nothing
- * is stored. The co-holder travels in the body, so it stays out of URLs and logs.
- */
-export const getProductPreview = (
-  product: Product,
-  ownership: PurchasableOwnership,
-  coHolder?: CoHolder,
-): Promise<ProductPreviewType> =>
-  fetchAndValidate(`products/${product}/preview`, ProductPreviewSchema, {
-    method: 'POST',
-    body: coHolder
-      ? { ownership_type: ownership, co_holder: coHolder }
-      : { ownership_type: ownership },
-  });
-
 /** What the browser fills a stored contract from, with its parties' signatures so far. */
-export const getContractPreview = (id: string): Promise<ProductPreviewType> =>
-  fetchAndValidate(`contracts/${id}/preview`, ProductPreviewSchema);
+export const getContractPreview = (id: string): Promise<ContractPreviewType> =>
+  fetchAndValidate(`contracts/${id}/preview`, ContractPreviewSchema);
 
 /** A template's .docx, unfilled. */
 export const getTemplateFile = (id: string): Promise<ArrayBuffer> =>

@@ -5,11 +5,11 @@ import { toApiError } from '@/lib/fetcher';
 import { apiErrorMessage } from '@/lib/i18n';
 import { useContractApi } from '@/queries/contract/api';
 import { templateFileOptions } from '@/queries/contract/options';
-import type { ProductPreviewType } from '@/queries/contract/type';
+import type { ContractPreviewType } from '@/queries/contract/type';
 import { useDocxRender } from './use-docx-render';
 
 /** The previewed contract's document, filled and drawn in the browser (useDocxRender). */
-export function DocxView({ preview }: { preview: ProductPreviewType }) {
+export function DocxView({ preview }: { preview: ContractPreviewType }) {
   const { t } = useTranslation();
   const { data, isPending, error } = useQuery(
     templateFileOptions(preview.template.id, useContractApi()),

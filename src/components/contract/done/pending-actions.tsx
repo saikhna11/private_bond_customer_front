@@ -7,8 +7,8 @@ import { signingStatus, yourParty } from '@/queries/contract/options';
 import type { ContractType } from '@/queries/contract/type';
 
 /**
- * What the client can do with a pending contract: go back to the list, decline it while
- * it waits for signatures, or check again once polling for its PDF stopped (slow).
+ * What the client can do with a pending contract: go back to the list, decline an unpaid
+ * one while it waits for signatures, or check again once polling for its PDF stopped (slow).
  */
 export function PendingActions({
   contract,
@@ -32,9 +32,11 @@ export function PendingActions({
         <ArrowLeftIcon />
         {t('contract.toList')}
       </Button>
-      {you?.signs && contract.status === signingStatus(you) && (
-        <DeclineButton contractId={contract.id} signed={!!you.signed_at} />
-      )}
+      {you?.signs &&
+        contract.status === signingStatus(you) &&
+        !contract.paid_on && (
+          <DeclineButton contractId={contract.id} signed={!!you.signed_at} />
+        )}
       {slow && (
         <Button
           className="h-10 rounded-xl px-6"

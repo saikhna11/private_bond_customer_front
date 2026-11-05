@@ -11,12 +11,12 @@ import {
   signContract,
 } from './query';
 import {
+  ContractPreviewSchema,
+  type ContractPreviewType,
   ContractSchema,
   ContractSummarySchema,
   type ContractSummaryType,
   type ContractType,
-  ProductPreviewSchema,
-  type ProductPreviewType,
 } from './type';
 
 /**
@@ -28,7 +28,7 @@ export interface ContractApi {
   root: string;
   getContracts: () => Promise<ContractSummaryType[]>;
   getContract: (id: string) => Promise<ContractType>;
-  getContractPreview: (id: string) => Promise<ProductPreviewType>;
+  getContractPreview: (id: string) => Promise<ContractPreviewType>;
   getTemplateFile: (id: string) => Promise<ArrayBuffer>;
   signContract: (id: string, signature: string) => Promise<ContractType>;
   declineContract: (id: string) => Promise<ContractType>;
@@ -55,7 +55,7 @@ export const issuerContractApi: ContractApi = {
   getContract: (id) =>
     fetchAndValidate(`issuer/contracts/${id}`, ContractSchema),
   getContractPreview: (id) =>
-    fetchAndValidate(`issuer/contracts/${id}/preview`, ProductPreviewSchema),
+    fetchAndValidate(`issuer/contracts/${id}/preview`, ContractPreviewSchema),
   getTemplateFile: (id) =>
     fetchAndValidate<ArrayBuffer>(`issuer/templates/${id}/file`, undefined, {
       responseType: 'arraybuffer',

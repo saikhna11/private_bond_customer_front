@@ -9,10 +9,10 @@ import {
 import { useTranslation } from 'react-i18next';
 import { formatAmount, frequencyLabel } from '@/components/contract/format';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { ProductPreviewType } from '@/queries/contract/type';
+import type { ContractPreviewType } from '@/queries/contract/type';
 
 /** The previewed contract's key terms, one tile each. */
-export function ContractTerms({ preview }: { preview: ProductPreviewType }) {
+export function ContractTerms({ preview }: { preview: ContractPreviewType }) {
   const { t } = useTranslation();
   const terms = [
     {

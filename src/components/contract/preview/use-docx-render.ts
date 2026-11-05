@@ -1,7 +1,7 @@
 import { renderAsync } from 'docx-preview';
 import { useEffect, useRef, useState } from 'react';
 import { fillDocx } from '@/lib/docx-fill';
-import type { ProductPreviewType } from '@/queries/contract/type';
+import type { ContractPreviewType } from '@/queries/contract/type';
 
 /**
  * Fills the template (data) with the preview's values, schedule and signatures and draws
@@ -9,7 +9,7 @@ import type { ProductPreviewType } from '@/queries/contract/type';
  */
 export function useDocxRender(
   data: ArrayBuffer | undefined,
-  preview: ProductPreviewType,
+  preview: ContractPreviewType,
 ) {
   const container = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(false);

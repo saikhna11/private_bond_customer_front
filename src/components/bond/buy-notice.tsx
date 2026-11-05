@@ -3,8 +3,8 @@ import type { ReactNode } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
-/** Why the client cannot buy a bond yet, and what they can do about it (action). */
-export function ProductNotice({
+/** Why the client cannot buy a bond now, and what they can do about it (action). */
+export function BuyNotice({
   Icon,
   title,
   text,

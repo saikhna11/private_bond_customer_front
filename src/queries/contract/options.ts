@@ -1,33 +1,12 @@
 import { queryOptions } from '@tanstack/react-query';
 import { type ContractApi, clientContractApi } from './api';
-import { getProductPreview, getProducts } from './query';
-import type {
-  CoHolder,
-  ContractType,
-  PartyType,
-  Product,
-  PurchasableOwnership,
-} from './type';
+import type { ContractType, PartyType } from './type';
 
 export const contractKeys = {
   all: ['contract'] as const,
   list: () => [...contractKeys.all, 'list'] as const,
-  products: () => [...contractKeys.all, 'products'] as const,
   detail: (id: string) => [...contractKeys.all, 'detail', id] as const,
   preview: (id: string) => [...contractKeys.all, 'preview', id] as const,
-  productPreview: (
-    product: Product,
-    ownership: PurchasableOwnership,
-    coHolder?: CoHolder,
-  ) =>
-    [
-      ...contractKeys.all,
-      'product-preview',
-      product,
-      ownership,
-      coHolder?.register_no ?? '',
-      coHolder?.phone ?? '',
-    ] as const,
   templateFile: (id: string) =>
     [...contractKeys.all, 'template-file', id] as const,
   document: (id: string) => [...contractKeys.all, 'document', id] as const,
@@ -125,33 +104,6 @@ export function contractsOptions(api = clientContractApi) {
   return queryOptions({
     queryKey: storedKeys(api).list(),
     queryFn: api.getContracts,
-  });
-}
-
-/**
- * The bonds the app sells, each with the kinds of contract it is sold under. A joint one
- * asks for the co-holder before its preview; they sign from their own account.
- */
-export function productsOptions() {
-  return queryOptions({
-    queryKey: contractKeys.products(),
-    queryFn: getProducts,
-  });
-}
-
-/**
- * The preview is dated today; a few minutes old is still current. A joint contract
- * previews with its co-holder only.
- */
-export function productPreviewOptions(
-  product: Product,
-  ownership: PurchasableOwnership,
-  coHolder?: CoHolder,
-) {
-  return queryOptions({
-    queryKey: contractKeys.productPreview(product, ownership, coHolder),
-    queryFn: () => getProductPreview(product, ownership, coHolder),
-    staleTime: 5 * 60 * 1000,
   });
 }
 
