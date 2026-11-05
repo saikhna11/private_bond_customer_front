@@ -8,7 +8,8 @@ const steps: Step[] = ['create', 'pay', 'view', 'sign', 'done'];
 
 /**
  * Where the holder is in buying a bond, drawn as the home page's review steps are. complete
- * marks the last step done too, once the signed PDF exists.
+ * marks the last step done too, once the signed PDF exists. A phone names only the current
+ * step: five names do not fit side by side.
  */
 export function Steps({
   current,
@@ -49,7 +50,12 @@ export function Steps({
             >
               {done ? <CheckIcon className="size-4" strokeWidth={3} /> : i + 1}
             </span>
-            <span className="mt-2 text-[11px] font-medium leading-tight sm:text-sm">
+            <span
+              className={cn(
+                'mt-2 text-xs font-medium sm:block sm:text-sm',
+                !now && 'hidden',
+              )}
+            >
               {t(`contract.steps.${s}.label`)}
             </span>
             <span className="hidden text-[11px] text-muted-foreground sm:block">
