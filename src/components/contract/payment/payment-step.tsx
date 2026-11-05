@@ -29,7 +29,7 @@ export function PaymentStep({
           <CardContent className="flex flex-col gap-4">
             <PaymentProgress payment={payment} />
             {holder && payment.mock && (
-              <MockPayButton contractId={contract.id} />
+              <MockPayButton contractId={contract.id} payment={payment} />
             )}
             {holder && Number(payment.received) === 0 && (
               <CancelOrderButton contractId={contract.id} />

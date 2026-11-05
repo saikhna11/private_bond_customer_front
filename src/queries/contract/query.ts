@@ -33,11 +33,18 @@ export const declineContract = (id: string): Promise<ContractType> =>
     body: {},
   });
 
-/** Pays the client's order with the test payment, where the backend allows it. */
-export const mockPayContract = (id: string): Promise<ContractType> =>
+/**
+ * Pays the client's order with the test payment, where the backend allows it. With the
+ * local fake bank it is a real transfer of amount (what is left when left out), described by
+ * reference (the order's own when left out).
+ */
+export const mockPayContract = (
+  id: string,
+  body: { amount?: string; reference?: string } = {},
+): Promise<ContractType> =>
   fetchAndValidate(`contracts/${id}/mock-payment`, ContractSchema, {
     method: 'POST',
-    body: {},
+    body,
   });
 
 /** What the browser fills a stored contract from, with its parties' signatures so far. */

@@ -97,6 +97,8 @@ export const PaymentSchema = z.object({
   ),
   account: PaymentAccountSchema.optional(),
   mock: z.boolean(),
+  /** The test button makes a real transfer through the local fake bank, of any amount. */
+  mock_bank: z.boolean(),
 });
 
 /**

@@ -709,6 +709,19 @@ export const en: Messages = {
       short: 'Short by {{left}}. Transfer the rest with the same reference.',
       mock: 'Continue (test)',
       mockText: 'Test mode: the button counts the payment as received.',
+      mockBankText:
+        'Test mode: the fake bank transfers the chosen amount from your account and matches the statement at once.',
+      mockCase: {
+        exact: 'Exact',
+        short: 'Short',
+        over: 'Over',
+        wrong: 'Wrong reference',
+      },
+      mockAmount: 'Amount to transfer',
+      mockReference: 'Payment reference',
+      mockShort: 'Paid short. Transfer the rest.',
+      mockUnknown:
+        'The reference did not match, so the payment is unrecognised. The order waits until an admin links it.',
       paid: 'Payment received. Read and sign contract {{no}}.',
       cancel: 'Cancel the order',
       cancelTitle: 'Cancel your order?',
