@@ -1,11 +1,12 @@
-import { MinusIcon, PlusIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { StepperField } from './stepper-field';
+
+/** The most digits of a quantity: more bonds than any bond sells. */
+const maxDigits = 6;
 
 /**
  * How many bonds the client buys: typed, or stepped one at a time between min and max.
- * An empty field is undefined.
+ * Cleared, it reads 1: it is never empty.
  */
 export function QuantityField({
   id,
@@ -23,47 +24,24 @@ export function QuantityField({
   invalid?: boolean;
 }) {
   const { t } = useTranslation();
+  const less = value && value > min ? Math.min(max, value - 1) : undefined;
+  const more =
+    value === undefined || value < max
+      ? Math.max(min, (value ?? min - 1) + 1)
+      : undefined;
   return (
-    <div className="flex items-center gap-2">
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        className="size-11 shrink-0 rounded-xl"
-        aria-label={t('bond.buy.less')}
-        disabled={!value || value <= min}
-        onClick={() => onChange(Math.max(min, (value ?? min) - 1))}
-      >
-        <MinusIcon />
-      </Button>
-      <div className="relative min-w-0 flex-1">
-        <Input
-          id={id}
-          inputMode="numeric"
-          autoComplete="off"
-          className="tabular h-11 rounded-xl pr-16 text-center text-lg font-semibold"
-          aria-invalid={invalid}
-          value={value ?? ''}
-          onChange={(e) => {
-            const digits = e.target.value.replace(/[^0-9]/g, '');
-            onChange(digits ? Number(digits) : undefined);
-          }}
-        />
-        <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-sm text-muted-foreground">
-          {t('bond.buy.pieces')}
-        </span>
-      </div>
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        className="size-11 shrink-0 rounded-xl"
-        aria-label={t('bond.buy.more')}
-        disabled={value !== undefined && value >= max}
-        onClick={() => onChange(Math.min(max, (value ?? min - 1) + 1))}
-      >
-        <PlusIcon />
-      </Button>
-    </div>
+    <StepperField
+      id={id}
+      value={value}
+      onChange={onChange}
+      onLess={less !== undefined && less >= min ? less : undefined}
+      onMore={more !== undefined && more <= max ? more : undefined}
+      suffix={t('bond.buy.pieces')}
+      lessLabel={t('bond.buy.less')}
+      moreLabel={t('bond.buy.more')}
+      digits={maxDigits}
+      emptyValue={1}
+      invalid={invalid}
+    />
   );
 }

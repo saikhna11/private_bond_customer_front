@@ -913,7 +913,10 @@ export const en: Messages = {
       description:
         'Pick the rate option, the term and how many bonds, and pay. Then read and sign your contract.',
       option: 'Rate option',
-      termPlaceholder: 'Choose a term',
+      months: 'months',
+      termHint: 'Between {{min}} and {{max}} months.',
+      termLess: 'Shorter term',
+      termMore: 'Longer term',
       quantity: 'Quantity',
       pieces: 'bonds',
       quantityHint: 'At least {{min}}, at most {{max}} bonds.',
@@ -935,6 +938,11 @@ export const en: Messages = {
       },
       errors: {
         quantityRequired: 'Enter how many bonds',
+        termRequired: 'Enter the term',
+        termInvalid:
+          'The term is {{min}} to {{max}} months, in steps of {{step}}',
+        capReached:
+          'You already hold the most one investor may hold of this bond',
         quantityMin_one: 'Buy at least {{count}} bond',
         quantityMin_other: 'Buy at least {{count}} bonds',
         quantityMax_one: 'You can buy at most {{count}} bond',

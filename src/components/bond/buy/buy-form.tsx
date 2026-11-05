@@ -9,7 +9,7 @@ import { OwnershipPicker } from './ownership-picker';
 import { PurchaseSummary } from './purchase-summary';
 import { PurchaseTotal } from './purchase-total';
 import { QuantityField } from './quantity-field';
-import { TermPicker } from './term-picker';
+import { TermField } from './term-field';
 import { usePurchaseForm } from './use-purchase-form';
 
 /**
@@ -35,13 +35,22 @@ export function BuyForm({ bond }: { bond: BondType }) {
             value={form.option?.id ?? ''}
             onChange={form.pickOption}
           />
-          <FormField id="term" label={t('bond.term')}>
-            <TermPicker
+          <FormField id="term" label={t('bond.term')} error={form.errors.term}>
+            <TermField
               id="term"
               terms={form.terms}
               value={form.term}
               onChange={form.setTerm}
+              invalid={!!form.errors.term}
             />
+            {form.terms.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                {t('bond.buy.termHint', {
+                  min: form.terms[0],
+                  max: form.terms[form.terms.length - 1],
+                })}
+              </p>
+            )}
           </FormField>
         </BuySection>
         <BuySection
@@ -49,34 +58,36 @@ export function BuyForm({ bond }: { bond: BondType }) {
           title={t('bond.buy.sections.quantity')}
           description={t('bond.buy.sections.quantityText', { price })}
         >
-          <div className="grid items-start gap-4 sm:grid-cols-2">
-            <FormField
+          {/* <div className="grid items-start gap-4 sm:grid-cols-2"> */}
+          <FormField
+            id="quantity"
+            label={t('bond.buy.quantity')}
+            error={form.errors.quantity}
+          >
+            <QuantityField
               id="quantity"
-              label={t('bond.buy.quantity')}
-              error={form.errors.quantity}
-            >
-              <QuantityField
-                id="quantity"
-                value={form.quantity}
-                min={form.minQuantity}
-                max={form.maxQuantity}
-                onChange={form.setQuantity}
-                invalid={!!form.errors.quantity}
-              />
+              value={form.quantity}
+              min={form.minQuantity}
+              max={form.maxQuantity}
+              onChange={form.setQuantity}
+              invalid={!!form.errors.quantity}
+            />
+            {form.maxQuantity >= form.minQuantity && (
               <p className="text-xs text-muted-foreground">
                 {t('bond.buy.quantityHint', {
                   min: form.minQuantity,
                   max: form.maxQuantity,
                 })}
               </p>
-            </FormField>
-            <PurchaseTotal
-              quantity={form.quantity}
-              unit={form.unit}
-              currency={bond.currency}
-              className="lg:hidden"
-            />
-          </div>
+            )}
+          </FormField>
+          <PurchaseTotal
+            quantity={form.quantity}
+            unit={form.unit}
+            currency={bond.currency}
+            className="lg:hidden"
+          />
+          {/* </div> */}
         </BuySection>
         {form.ownerships.length > 1 && (
           <BuySection

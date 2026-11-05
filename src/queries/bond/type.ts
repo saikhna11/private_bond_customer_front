@@ -84,6 +84,7 @@ export const BondSchema = z.object({
   rate_options: z.array(RateOptionSchema),
   files: z.array(BondFileSchema),
   options: z.array(PurchaseOptionSchema),
+  investor_bought: z.string().optional(),
 });
 export type BondType = z.infer<typeof BondSchema>;
 
