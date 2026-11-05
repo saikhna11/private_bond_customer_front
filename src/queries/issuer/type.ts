@@ -14,13 +14,18 @@ export const IssuerMemberSchema = z.object({
 });
 export type IssuerMemberType = z.infer<typeof IssuerMemberSchema>;
 
+/** One of the issuer's accounts; an issuer can hold several per currency. */
 export const IssuerBankAccountSchema = z.object({
+  id: z.string(),
   currency: z.enum(['MNT', 'USD']),
   bank_name: z.string(),
   account_number: z.string(),
   iban: z.string(),
   account_name: z.string(),
   status: z.enum(['unverified', 'verified', 'mismatch', 'not_found']),
+  /** The currency's default account. */
+  is_default: z.boolean(),
+  created_at: z.string(),
   updated_at: z.string(),
 });
 export type IssuerBankAccountType = z.infer<typeof IssuerBankAccountSchema>;

@@ -1,13 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ParseKeys } from 'i18next';
-import {
-  BadgeCheckIcon,
-  Loader2Icon,
-  LockIcon,
-  PercentIcon,
-  ShieldAlertIcon,
-} from 'lucide-react';
+import { Loader2Icon, LockIcon, PercentIcon } from 'lucide-react';
 import { Fragment, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -29,8 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useRelocalizedErrors } from '@/hooks/use-relocalized-errors';
-import { banks, ibanChecksumValid, ibanMatchesAccount } from '@/lib/banks';
-import { actsForOrg, PERSON_REGISTER } from '@/lib/client';
+import { actsForOrg, isIndividual, PERSON_REGISTER } from '@/lib/client';
 import { countries, priorityCount } from '@/lib/countries';
 import { type ApiError, toApiError } from '@/lib/fetcher';
 import { applyFieldErrors } from '@/lib/form-errors';
@@ -38,13 +31,20 @@ import i18n, { apiErrorMessage, currentLanguage, msg } from '@/lib/i18n';
 import { isValidPhone, phoneFitsCountry } from '@/lib/phone';
 import { cn, showToast } from '@/lib/utils';
 import { authKeys } from '@/queries/auth/options';
-import { updateMe, verifyBankAccount } from '@/queries/auth/query';
+import { updateMe } from '@/queries/auth/query';
 import type {
-  BankAccountType,
   MeType,
   TaxExemptStatus,
   UpdateMeBody,
 } from '@/queries/auth/type';
+import {
+  BankAccountFields,
+  bankAccountIssues,
+  bankFieldErrors,
+  bankFieldOf,
+  defaultHolderName,
+  ibanDigits,
+} from './bank-account-fields';
 
 const text = (max: number) =>
   z.string().trim().max(max, msg('validation.tooLong'));
@@ -83,14 +83,10 @@ function initial(me: MeType): Values {
     bank_name: bank?.bank_name ?? '',
     account_number: bank?.account_number ?? '',
     // The form keeps the 18 digits; MN is fixed in front of them.
-    iban: bank?.iban.replace(/^mn/i, '') ?? '',
+    iban: ibanDigits(bank?.iban),
     // Until an account is saved, the client's own name fills it in: an organization's
     // account is held in its name, a person's in theirs.
-    holder_account_name:
-      bank?.holder_account_name ??
-      (actsForOrg(me)
-        ? (me.name ?? '')
-        : [me.last_name, me.first_name].filter(Boolean).join(' ')),
+    holder_account_name: bank?.holder_account_name ?? defaultHolderName(me),
     tax_exempt:
       me.tax_exempt_status === 'requested' ||
       me.tax_exempt_status === 'approved',
@@ -99,10 +95,23 @@ function initial(me: MeType): Values {
   };
 }
 
+/**
+ * The profile form takes the first bank account only: once the client has one, the bank
+ * accounts card manages them all.
+ */
+function needsBankAccount(me: MeType) {
+  return (
+    (isIndividual(me) || actsForOrg(me)) &&
+    !me.bank_account &&
+    me.bank_accounts.length === 0
+  );
+}
+
 function rules(me: MeType) {
   const customer = me.type === 'customer';
   const foreign = me.type === 'foreign';
   const organization = actsForOrg(me);
+  const bank = needsBankAccount(me);
 
   return schema.superRefine((v, ctx) => {
     const need = (ok: boolean, path: Key, key: ParseKeys) => {
@@ -131,36 +140,9 @@ function rules(me: MeType) {
         'details.errors.register',
       );
     }
-    if (customer || foreign || organization) {
-      need(v.bank_name !== '', 'bank_name', 'details.errors.bank');
-      need(
-        /^\d{6,20}$/.test(v.account_number),
-        'account_number',
-        'details.errors.accountNumber',
-      );
-      need(/^\d{18}$/.test(v.iban), 'iban', 'details.errors.iban');
-      if (/^\d{18}$/.test(v.iban)) {
-        const iban = `MN${v.iban}`;
-        const valid = ibanChecksumValid(iban);
-        need(valid, 'iban', 'details.errors.ibanChecksum');
-        if (valid && /^\d{6,20}$/.test(v.account_number))
-          need(
-            ibanMatchesAccount(iban, v.account_number),
-            'account_number',
-            'details.errors.ibanMismatch',
-          );
-      }
-      need(
-        v.holder_account_name !== '',
-        'holder_account_name',
-        'details.errors.holderAccountName',
-      );
-      // A person's account name is stored in up to 100 characters.
-      need(
-        organization || v.holder_account_name.length <= 100,
-        'holder_account_name',
-        'validation.tooLong',
-      );
+    if (bank) {
+      for (const issue of bankAccountIssues(v, organization))
+        need(false, issue.path, issue.key);
     }
     if (foreign) {
       need(
@@ -210,24 +192,14 @@ function changes(me: MeType, values: Values): UpdateMeBody {
     if (v !== before[k] && v !== '') (body as Record<string, string>)[k] = v;
   }
 
-  const organization = actsForOrg(me);
-  if (me.type === 'customer' || me.type === 'foreign' || organization) {
-    const bankKeys = [
-      'bank_name',
-      'account_number',
-      'iban',
-      'holder_account_name',
-    ] as const;
-    // The account is replaced as a whole: send it when any part changed, or when the
-    // client has none yet.
-    if (!me.bank_account || bankKeys.some((k) => values[k] !== before[k])) {
-      body.bank_account = {
-        bank_name: values.bank_name,
-        account_number: values.account_number,
-        iban: `MN${values.iban}`,
-        holder_account_name: values.holder_account_name,
-      };
-    }
+  // The first account becomes the default of its currency (MNT).
+  if (needsBankAccount(me)) {
+    body.bank_account = {
+      bank_name: values.bank_name,
+      account_number: values.account_number,
+      iban: `MN${values.iban}`,
+      holder_account_name: values.holder_account_name,
+    };
   }
   if (me.type === 'customer') {
     if (values.tax_exempt !== before.tax_exempt)
@@ -240,15 +212,15 @@ const fieldOf: Partial<Record<string, Key>> = {
   'client.register_taken': 'register_number',
   'client.passport_taken': 'passport_number',
   'client.org_name_taken': 'name',
-  'client.iban_invalid': 'iban',
-  'client.iban_mismatch': 'account_number',
   'client.phone_invalid': 'phone_secondary',
+  ...bankFieldOf,
 };
 
 /**
  * PATCH /me: completes the profile, or changes it later, for a customer, a foreigner or
- * an organization (with its bank account). Reviewed fields lock once approved; contacts, the bank account and
- * the tax exemption stay editable. Sends only what changed.
+ * an organization. Takes the first bank account while there is none; later ones are
+ * managed in the bank accounts card. Reviewed fields lock once approved; contacts and the
+ * tax exemption stay editable. Sends only what changed.
  */
 export function ProfileDetailsForm({
   me,
@@ -264,11 +236,10 @@ export function ProfileDetailsForm({
   const countryList = useMemo(() => countries(lang), [lang]);
   const queryClient = useQueryClient();
   const [error, setError] = useState<ApiError | null>(null);
-  const [verifying, setVerifying] = useState(false);
   const locked = me.status === 'approved';
   const customer = me.type === 'customer';
-  const individual = customer || me.type === 'foreign';
   const organization = actsForOrg(me);
+  const bankNeeded = needsBankAccount(me);
 
   const form = useForm<Values>({
     resolver: zodResolver(rules(me)),
@@ -277,39 +248,6 @@ export function ProfileDetailsForm({
   });
   const { errors, isSubmitting, isDirty } = form.formState;
   useRelocalizedErrors(form);
-
-  const bank = me.bank_account;
-  const [bankName, accountNumber, iban, holderAccountName] = form.watch([
-    'bank_name',
-    'account_number',
-    'iban',
-    'holder_account_name',
-  ]);
-  // The verification belongs to the saved account: unsaved edits must be stored first.
-  const bankChanged =
-    !bank ||
-    bankName !== bank.bank_name ||
-    accountNumber !== bank.account_number ||
-    `MN${iban}` !== bank.iban.toUpperCase() ||
-    holderAccountName !== bank.holder_account_name;
-
-  async function onVerify() {
-    setVerifying(true);
-    try {
-      const account = await verifyBankAccount();
-      queryClient.setQueryData(authKeys.me(), (prev: MeType | undefined) =>
-        prev ? { ...prev, bank_account: account } : prev,
-      );
-      showToast('success', t('details.bankVerification.verifiedToast'));
-    } catch (err) {
-      const e = toApiError(err);
-      // A failed attempt is recorded on the account; read it back so the reason shows.
-      await queryClient.invalidateQueries({ queryKey: authKeys.me() });
-      showToast('error', apiErrorMessage(e));
-    } finally {
-      setVerifying(false);
-    }
-  }
 
   async function onSubmit(values: Values) {
     setError(null);
@@ -321,6 +259,10 @@ export function ProfileDetailsForm({
     try {
       const next = await updateMe(body);
       queryClient.setQueryData(authKeys.me(), next);
+      if (body.bank_account)
+        void queryClient.invalidateQueries({
+          queryKey: authKeys.bankAccounts(),
+        });
       form.reset(initial(next));
       if (me.status === 'rejected' && next.status === 'pending') {
         showToast('success', t('details.resubmitted'));
@@ -337,16 +279,10 @@ export function ProfileDetailsForm({
         form.setError(name, { message: apiErrorMessage(e) });
         return;
       }
-      const bankFields = {
-        'bank_account.bank_name': 'bank_name',
-        'bank_account.account_number': 'account_number',
-        'bank_account.iban': 'iban',
-        'bank_account.holder_account_name': 'holder_account_name',
-      } as const;
       const fields = Object.fromEntries(
         (Object.keys(schema.shape) as Key[]).map((k) => [k, k]),
       ) as Record<string, Key>;
-      if (applyFieldErrors(e, form.setError, { ...fields, ...bankFields }))
+      if (applyFieldErrors(e, form.setError, { ...fields, ...bankFieldErrors }))
         return;
       setError(e);
     }
@@ -533,121 +469,27 @@ export function ProfileDetailsForm({
           </>
         )}
 
-        {(individual || organization) && (
-          <>
-            <Section
-              title={t('details.bankAccount')}
-              description={t(
-                organization
-                  ? 'details.orgBankAccountText'
-                  : 'details.bankAccountText',
-              )}
-            >
-              <FormField
-                id="bank_name"
-                label={t('details.bank')}
-                error={errors.bank_name?.message}
-              >
-                <Controller
-                  control={form.control}
-                  name="bank_name"
-                  render={({ field }) => (
-                    <Select
-                      value={field.value || undefined}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger
-                        id="bank_name"
-                        className="h-10! w-full"
-                        aria-invalid={!!errors.bank_name}
-                        onBlur={field.onBlur}
-                      >
-                        <SelectValue placeholder={t('details.selectBank')} />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-72">
-                        {/* A bank saved earlier under another name stays selectable. */}
-                        {banks.map((b) => (
-                          <SelectItem key={b.value} value={b.value}>
-                            {t(`banks.${b.key}`)}
-                          </SelectItem>
-                        ))}
-                        {field.value &&
-                          !banks.some((b) => b.value === field.value) && (
-                            <SelectItem value={field.value}>
-                              {field.value}
-                            </SelectItem>
-                          )}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </FormField>
-              {input('account_number', t('details.accountNumber'), {
-                inputMode: 'numeric',
-                maxLength: 20,
-                placeholder: '5000123456',
-                className: 'tabular',
-              })}
-              <div className="sm:col-span-2">
-                <FormField
-                  id="iban"
-                  label={t('details.iban')}
-                  error={errors.iban?.message}
-                  hint={t('details.ibanHint')}
-                >
-                  <div className="flex">
-                    <span className="inline-flex h-10 items-center rounded-l-md border border-r-0 bg-muted px-3 font-mono text-sm text-muted-foreground">
-                      MN
-                    </span>
-                    <Input
-                      id="iban"
-                      inputMode="numeric"
-                      maxLength={18}
-                      placeholder="300005005000123456"
-                      className="tabular h-10 rounded-l-none font-mono tracking-wider"
-                      aria-invalid={!!errors.iban}
-                      {...form.register('iban', {
-                        setValueAs: (v: string) =>
-                          v.replace(/^mn/i, '').replace(/\s/g, ''),
-                      })}
-                    />
-                  </div>
-                </FormField>
-              </div>
-              <div className="sm:col-span-2">
-                {input('holder_account_name', t('details.holderAccountName'), {
-                  autoComplete: organization ? 'organization' : 'name',
-                  maxLength: organization ? 200 : 100,
-                  hint: t(
-                    organization
-                      ? 'details.holderAccountNameOrgHint'
-                      : 'details.holderAccountNameHint',
-                  ),
-                })}
-              </div>
-              {/* The bank check reads individuals' accounts only for now. */}
-              {individual && (
-                <div className="sm:col-span-2">
-                  <BankVerification
-                    account={bank}
-                    changed={bankChanged}
-                    verifying={verifying}
-                    onVerify={onVerify}
-                  />
-                </div>
-              )}
-            </Section>
-
-            {customer && (
-              <TaxExemptField
-                status={me.tax_exempt_status}
-                checked={form.watch('tax_exempt')}
-                onChange={(v) =>
-                  form.setValue('tax_exempt', v, { shouldDirty: true })
-                }
-              />
+        {bankNeeded && (
+          <Section
+            title={t('details.bankAccount')}
+            description={t(
+              organization
+                ? 'details.orgBankAccountText'
+                : 'details.bankAccountText',
             )}
-          </>
+          >
+            <BankAccountFields form={form} organization={organization} />
+          </Section>
+        )}
+
+        {customer && (
+          <TaxExemptField
+            status={me.tax_exempt_status}
+            checked={form.watch('tax_exempt')}
+            onChange={(v) =>
+              form.setValue('tax_exempt', v, { shouldDirty: true })
+            }
+          />
         )}
 
         <ApiErrorAlert error={error} />
@@ -669,112 +511,6 @@ export function ProfileDetailsForm({
         </div>
       </FieldGroup>
     </form>
-  );
-}
-
-const verificationError: Record<string, ParseKeys> = {
-  mismatch: 'details.bankVerification.mismatch',
-  not_found: 'details.bankVerification.notFound',
-};
-
-/** The saved account's CAM state, with the button that asks the bank again. */
-function BankVerification({
-  account,
-  changed,
-  verifying,
-  onVerify,
-}: {
-  account?: BankAccountType;
-  changed: boolean;
-  verifying: boolean;
-  onVerify: () => void;
-}) {
-  const { t } = useTranslation();
-  if (changed) {
-    return (
-      <div className="flex items-start gap-3 rounded-xl border border-dashed p-4">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-          <ShieldAlertIcon className="size-4.5" />
-        </span>
-        <div className="min-w-0 space-y-1">
-          <p className="text-sm font-medium">
-            {t('details.bankVerification.title')}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {t('details.bankVerification.saveFirst')}
-          </p>
-        </div>
-      </div>
-    );
-  }
-  if (!account) return null;
-
-  const verified = account.status === 'verified';
-  const reason = account.status ? verificationError[account.status] : undefined;
-
-  return (
-    <div
-      className={cn(
-        'rounded-xl border p-4',
-        verified
-          ? 'border-success/30 bg-success/5'
-          : 'border-warning/40 bg-warning/5',
-      )}
-    >
-      <div className="flex flex-wrap items-start gap-3">
-        <span
-          className={cn(
-            'flex size-9 shrink-0 items-center justify-center rounded-lg',
-            verified
-              ? 'bg-success/12 text-success'
-              : 'bg-warning/15 text-warning-foreground dark:text-warning',
-          )}
-        >
-          {verified ? (
-            <BadgeCheckIcon className="size-4.5" />
-          ) : (
-            <ShieldAlertIcon className="size-4.5" />
-          )}
-        </span>
-        <div className="min-w-0 flex-1 space-y-1">
-          <p className="text-sm font-semibold">
-            {t(
-              verified
-                ? 'details.bankVerification.verified'
-                : 'details.bankVerification.notVerified',
-            )}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {verified
-              ? t('details.bankVerification.verifiedText')
-              : reason
-                ? t(reason)
-                : t('details.bankVerification.notVerifiedText')}
-          </p>
-        </div>
-        <Button
-          type="button"
-          size="sm"
-          variant={verified ? 'outline' : 'default'}
-          onClick={onVerify}
-          disabled={verifying}
-          className="h-9"
-        >
-          {verifying ? (
-            <Loader2Icon className="animate-spin" />
-          ) : verified ? (
-            <BadgeCheckIcon />
-          ) : (
-            <ShieldAlertIcon />
-          )}
-          {verifying
-            ? t('details.bankVerification.verifying')
-            : verified
-              ? t('details.bankVerification.reverify')
-              : t('details.bankVerification.verify')}
-        </Button>
-      </div>
-    </div>
   );
 }
 

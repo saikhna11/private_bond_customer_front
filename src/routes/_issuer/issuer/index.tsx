@@ -1,5 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
+import { StarIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PageTitle } from '@/components/common/page-title';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 import { issuerMeOptions } from '@/queries/issuer/options';
 import type { IssuerBankAccountType } from '@/queries/issuer/type';
 
@@ -30,6 +32,18 @@ function bankVariant(status: IssuerBankAccountType['status']) {
   if (status === 'verified') return 'default';
   if (status === 'unverified') return 'secondary';
   return 'destructive';
+}
+
+const currencyOrder = { MNT: 0, USD: 1 } as const;
+
+/** By currency, each currency's default first, then oldest first. */
+function sortAccounts(accounts: IssuerBankAccountType[]) {
+  return [...accounts].sort(
+    (a, b) =>
+      currencyOrder[a.currency] - currencyOrder[b.currency] ||
+      Number(b.is_default) - Number(a.is_default) ||
+      a.created_at.localeCompare(b.created_at),
+  );
 }
 
 function IssuerHome() {
@@ -75,15 +89,29 @@ function IssuerHome() {
                 {t('issuer.noBankAccounts')}
               </p>
             )}
-            {issuer.bank_accounts.map((a) => (
-              <div key={a.currency} className="rounded-xl border p-4">
-                <div className="mb-3 flex items-center justify-between gap-2">
+            {sortAccounts(issuer.bank_accounts).map((a) => (
+              <div
+                key={a.id}
+                className={cn(
+                  'rounded-xl border p-4',
+                  a.is_default && 'border-primary/40 bg-primary/4',
+                )}
+              >
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <span className="font-semibold">
                     {a.bank_name} · {a.currency}
                   </span>
-                  <Badge variant={bankVariant(a.status)}>
-                    {t(`issuer.bankStatus.${a.status}`)}
-                  </Badge>
+                  <div className="flex flex-wrap gap-1.5">
+                    {a.is_default && (
+                      <Badge variant="outline">
+                        <StarIcon />
+                        {t('issuer.defaultAccount')}
+                      </Badge>
+                    )}
+                    <Badge variant={bankVariant(a.status)}>
+                      {t(`issuer.bankStatus.${a.status}`)}
+                    </Badge>
+                  </div>
                 </div>
                 <dl className="flex flex-col gap-2">
                   <Row label={t('issuer.accountName')} value={a.account_name} />

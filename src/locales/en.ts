@@ -10,7 +10,6 @@ export const en: Messages = {
     change: 'Change',
     soon: 'Soon',
     optional: '(optional)',
-    referenceId: 'Reference ID: {{id}}',
     login: 'Sign in',
     signup: 'Sign up',
     logout: 'Sign out',
@@ -415,6 +414,50 @@ export const en: Messages = {
       position: 'Enter the position',
     },
   },
+  bankAccounts: {
+    title: 'Bank accounts',
+    description:
+      'Bond interest and principal are paid into the default account of each currency. You can register several accounts in MNT and USD.',
+    orgDescription:
+      "Bond interest and principal are paid into the organization's default account of each currency. Accounts must be in the organization's name.",
+    add: 'Add account',
+    addFirst: 'Add your first account',
+    addTitle: 'Add bank account',
+    editTitle: 'Edit bank account',
+    dialogText:
+      "Enter the bank, account number, IBAN and holder's name as registered with the bank.",
+    editText: 'Changing the details means the account must be verified again.',
+    empty: 'No bank account is registered yet.',
+    currency: 'Currency',
+    currencies: {
+      MNT: 'Tugrik (MNT)',
+      USD: 'US dollar (USD)',
+    },
+    default: 'Default',
+    makeDefault: 'Make default',
+    makeDefaultLabel: 'Make it the default account for this currency',
+    makeDefaultText:
+      "Payments in a currency go to its default account. A currency's first account becomes its default automatically.",
+    currencyChangeText:
+      'Changing the currency means the account is no longer a default.',
+    edit: 'Edit',
+    remove: 'Remove',
+    removeTitle: 'Remove this account?',
+    removeText: 'The {{bank}} account {{account}} will be removed.',
+    removeDefaultText:
+      'It is a default account, so the oldest other account of its currency becomes the default.',
+    lastAccountTitle: 'The last account cannot be removed',
+    added: 'Bank account added',
+    saved: 'Bank account saved',
+    removed: 'Bank account removed',
+    defaultSet: 'The default {{currency}} account changed',
+    status: {
+      unverified: 'Unverified',
+      verified: 'Verified',
+      mismatch: 'Name mismatch',
+      not_found: 'Not found at the bank',
+    },
+  },
   banks: {
     khan: 'Khan Bank',
     golomt: 'Golomt Bank',
@@ -492,6 +535,7 @@ export const en: Messages = {
       'Ulzii & Co staff register members and give them their passwords.',
     bankAccounts: 'Bank accounts',
     bankAccountsText: 'The money your bonds raise is paid into these accounts.',
+    defaultAccount: 'Default',
     noBankAccounts: 'No bank account is registered yet.',
     accountName: 'Account holder',
     accountNumber: 'Account number',
@@ -783,6 +827,20 @@ export const en: Messages = {
         'Your account is not verified yet. You can use this once our team has verified it.',
       profile_locked:
         'Name, registration number, passport and officer details of a verified account cannot be changed.',
+    },
+    bank: {
+      account_not_found:
+        'No bank account is registered. Please register your account first.',
+      account_exists: 'An account with this IBAN is already registered.',
+      account_last:
+        'The last account cannot be removed. Add another account first.',
+      verification_mismatch:
+        "The name in the bank's record does not match the account holder's name you registered.",
+      account_lookup_not_found:
+        'The bank does not know this account. Check the account number and IBAN.',
+      unavailable: 'Could not reach the bank. Please wait and try again.',
+      not_configured:
+        'The bank connection is not set up. Please contact an administrator.',
     },
     contract: {
       not_found: 'Contract not found.',

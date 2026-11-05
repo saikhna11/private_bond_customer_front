@@ -8,16 +8,52 @@ export const ClientTypeSchema = z.enum([
 ]);
 export const ReviewStatusSchema = z.enum(['pending', 'approved', 'rejected']);
 
+export const CurrencySchema = z.enum(['MNT', 'USD']);
+export type Currency = z.infer<typeof CurrencySchema>;
+
+/** Only a verified account takes payments; any change puts it back to unverified. */
+export const BankAccountStatusSchema = z.enum([
+  'unverified',
+  'verified',
+  'mismatch',
+  'not_found',
+]);
+export type BankAccountStatus = z.infer<typeof BankAccountStatusSchema>;
+
 export const BankAccountSchema = z.object({
+  id: z.string(),
   bank_name: z.string(),
   account_number: z.string(),
   iban: z.string(),
+  currency: CurrencySchema,
   /** The name the account is held in: the person's, or the organization's. */
   holder_account_name: z.string(),
-  /** unverified, verified, mismatch or not_found: only a verified account takes payments. */
-  status: z.string().optional(),
+  status: BankAccountStatusSchema,
+  /** The currency's default: its bond payments go here unless an admin picks another. */
+  is_default: z.boolean(),
 });
 export type BankAccountType = z.infer<typeof BankAccountSchema>;
+
+/** GET /me/bank-accounts: each currency's default first. */
+export const BankAccountsSchema = z.object({
+  items: z.array(BankAccountSchema),
+});
+
+/** PUT /me/bank-accounts/{id} and PATCH /me bank_account. */
+export interface BankAccountInput {
+  bank_name: string;
+  account_number: string;
+  /** MN and 18 digits. */
+  iban: string;
+  /** MNT when left out. */
+  currency?: Currency;
+  holder_account_name: string;
+}
+
+/** POST /me/bank-accounts: the first account of a currency is its default anyway. */
+export interface AddBankAccountBody extends BankAccountInput {
+  is_default?: boolean;
+}
 
 export const TaxExemptStatusSchema = z.enum([
   'requested',
@@ -49,7 +85,10 @@ export const MeSchema = z.object({
   activity: z.string().optional(),
   tax_exempt_status: TaxExemptStatusSchema.optional(),
   tax_exempt_reviewed_at: z.string().optional(),
+  /** The account contracts print: the MNT default, else another default. */
   bank_account: BankAccountSchema.optional(),
+  /** Every account, each currency's default first; a member gets their organization's. */
+  bank_accounts: z.array(BankAccountSchema).default([]),
   org_id: z.string().optional(),
   org_name: z.string().optional(),
   position: z.string().optional(),
@@ -116,8 +155,11 @@ export interface UpdateMeBody {
   register_number?: string;
   nationality?: string;
   passport_number?: string;
-  /** Individuals and organizations (a member for theirs): replaces the account bond payments go to. */
-  bank_account?: BankAccountType;
+  /**
+   * Individuals and organizations (a member for theirs): replaces the default account of
+   * its currency, or adds it as the default when there is none.
+   */
+  bank_account?: BankAccountInput;
   /** Customers: true requests the interest tax exemption, false withdraws it. */
   tax_exempt?: boolean;
   /** Organizations: with activity and address, the only fields they change here. */

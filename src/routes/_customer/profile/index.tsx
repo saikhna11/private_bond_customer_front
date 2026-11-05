@@ -4,6 +4,7 @@ import { CircleCheckIcon, MailIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PageTitle } from '@/components/common/page-title';
 import { StatusBadge } from '@/components/common/status-badge';
+import { BankAccountsCard } from '@/components/profile/bank-accounts-card';
 import { ChangeEmailDialog } from '@/components/profile/change-email-dialog';
 import { ChangePasswordForm } from '@/components/profile/change-password-form';
 import { OfficersCard } from '@/components/profile/officers-card';
@@ -16,7 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { actsForOrg, initials, isIndividual } from '@/lib/client';
+import { actsForOrg, editsProfile, initials, isIndividual } from '@/lib/client';
 import { formatDate } from '@/lib/format';
 import { meOptions } from '@/queries/auth/options';
 import { displayName } from '@/queries/auth/type';
@@ -30,6 +31,8 @@ function ProfilePage() {
   const { data: me } = useSuspenseQuery(meOptions());
   const individual = isIndividual(me);
   const member = me.type === 'org_member';
+  // Until the first account is saved, the details form takes it (profile completion).
+  const hasBankAccount = !!me.bank_account || me.bank_accounts.length > 0;
 
   return (
     <>
@@ -100,6 +103,8 @@ function ProfilePage() {
               <ProfileDetailsForm me={me} />
             </CardContent>
           </Card>
+
+          {editsProfile(me) && hasBankAccount && <BankAccountsCard me={me} />}
 
           {actsForOrg(me) && <OfficersCard me={me} />}
         </div>

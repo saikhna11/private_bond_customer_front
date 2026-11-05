@@ -1,7 +1,10 @@
 import fetchAndValidate, { scheduleRefresh } from '@/lib/fetcher';
 import { deviceName } from '@/lib/format';
 import {
+  type AddBankAccountBody,
+  type BankAccountInput,
   BankAccountSchema,
+  BankAccountsSchema,
   CodeSentSchema,
   MeSchema,
   ResetTokenSchema,
@@ -16,9 +19,35 @@ export const getMe = () => fetchAndValidate('me', MeSchema);
 export const updateMe = (body: UpdateMeBody) =>
   fetchAndValidate('me', MeSchema, { method: 'PATCH', body });
 
-/** POST /me/bank-account/verify: asks the bank whose name is on the saved account. */
-export const verifyBankAccount = () =>
-  fetchAndValidate('me/bank-account/verify', BankAccountSchema, {
+export const getBankAccounts = async () =>
+  (await fetchAndValidate('me/bank-accounts', BankAccountsSchema)).items;
+
+export const addBankAccount = (body: AddBankAccountBody) =>
+  fetchAndValidate('me/bank-accounts', BankAccountSchema, {
+    method: 'POST',
+    body,
+  });
+
+/** PUT /me/bank-accounts/{id}: any change puts the account back to unverified. */
+export const updateBankAccount = (id: string, body: BankAccountInput) =>
+  fetchAndValidate(`me/bank-accounts/${id}`, BankAccountSchema, {
+    method: 'PUT',
+    body,
+  });
+
+/** Makes the account its currency's default. */
+export const setDefaultBankAccount = (id: string) =>
+  fetchAndValidate(`me/bank-accounts/${id}/default`, BankAccountSchema, {
+    method: 'POST',
+  });
+
+/** The last account cannot be removed (bank.account_last). */
+export const removeBankAccount = (id: string) =>
+  fetchAndValidate(`me/bank-accounts/${id}`, undefined, { method: 'DELETE' });
+
+/** Asks the bank whose name is on the account; a failed check is recorded on it too. */
+export const verifyBankAccount = (id: string) =>
+  fetchAndValidate(`me/bank-accounts/${id}/verify`, BankAccountSchema, {
     method: 'POST',
   });
 
