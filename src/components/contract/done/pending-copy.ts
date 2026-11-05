@@ -5,14 +5,30 @@ import type { ContractType } from '@/queries/contract/type';
 /**
  * What a contract not signed yet says of itself, in t's language: cancelled by a party,
  * expired, its PDF failed, waiting for the other parties' signatures, or its PDF
- * rendering, slow once the page stopped polling for it. A paid contract ends only at the
- * bond issuer's director's turn: they declined it, or let their deadline pass.
+ * rendering, slow once the page stopped polling for it. An order ends unpaid when its payment
+ * deadline passes or its holder cancels it. A paid contract ends only at the bond issuer's
+ * director's turn: they declined it, or let their deadline pass.
  */
 export function pendingCopy(
   t: TFunction,
   contract: ContractType,
   slow: boolean,
 ): { title: string; message: string } {
+  // An order that ended before it was paid: it lapsed, or its holder cancelled it.
+  if (contract.payment && !contract.paid_on) {
+    if (contract.status === 'expired') {
+      return {
+        title: t('contract.payment.expiredTitle'),
+        message: t('contract.payment.expired'),
+      };
+    }
+    if (contract.status === 'cancelled') {
+      return {
+        title: t('contract.pending.cancelled'),
+        message: t('contract.payment.cancelled'),
+      };
+    }
+  }
   if (contract.status === 'expired') {
     return {
       title: t('contract.pending.expiredTitle'),

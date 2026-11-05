@@ -36,7 +36,8 @@ const SignatureSchema = z.object({
 });
 
 /**
- * A purchase is paid at once (the test payment) and numbered, then waits
+ * A purchase is ordered unpaid (pending_payment) under a payment reference; the bank transfer
+ * naming it (or the test button) pays and numbers it, and it then waits
  * pending_customer_signature until every client party has signed from their own account,
  * then pending_issuer_signature until the bond issuer's director signs; rendering while the
  * signed PDF is made. Its clients neither decline a paid contract nor let it expire: only
@@ -45,6 +46,7 @@ const SignatureSchema = z.object({
  */
 export const contractStatusSchema = z.enum([
   'draft',
+  'pending_payment',
   'pending_customer_signature',
   'pending_issuer_signature',
   'rendering',
@@ -65,6 +67,38 @@ const frequencySchema = z.enum([
 
 const cancelReasonSchema = z.enum(['declined', 'expired']);
 
+/** A company account a buyer pays an order into. */
+const PaymentAccountSchema = z.object({
+  bank_name: z.string(),
+  account_number: z.string(),
+  iban: z.string(),
+  account_name: z.string(),
+});
+
+/**
+ * How an order is paid: amount in currency into account, naming reference, before deadline.
+ * received is what the transfers applied to it add up to; mock says the test button pays it.
+ * money is, per currency, what it received, keeps, gave back and has left to give back.
+ */
+export const PaymentSchema = z.object({
+  reference: z.string(),
+  deadline: z.string(),
+  amount: z.string(),
+  currency: z.string(),
+  received: z.string(),
+  money: z.array(
+    z.object({
+      currency: z.string(),
+      received: z.string(),
+      kept: z.string(),
+      refunded: z.string(),
+      refundable: z.string(),
+    }),
+  ),
+  account: PaymentAccountSchema.optional(),
+  mock: z.boolean(),
+});
+
 /**
  * A contract in the list: no parties or signatures. Its number comes with its payment;
  * awaiting_signature says it waits for the client's own.
@@ -78,6 +112,7 @@ export const ContractSummarySchema = z.object({
   currency: z.string(),
   principal_amount: z.string(),
   signature_deadline: z.string().optional(),
+  payment_deadline: z.string().optional(),
   cancel_reason: cancelReasonSchema.optional(),
   created_at: z.string(),
   signed_at: z.string().optional(),
@@ -106,6 +141,8 @@ export const ContractSchema = z.object({
   /** The day it was paid, which started and numbered it. */
   paid_on: z.string().optional(),
   payment_source: z.enum(['mock', 'admin', 'payment']).optional(),
+  payment_reference: z.string().optional(),
+  payment_deadline: z.string().optional(),
   signature_deadline: z.string().optional(),
   cancel_reason: cancelReasonSchema.optional(),
   cancelled_at: z.string().optional(),
@@ -122,8 +159,11 @@ export const ContractSchema = z.object({
   your_party_id: z.uuid().optional(),
   /** The underwriter the contract names beside its parties; it does not sign. */
   underwriter: z.string(),
+  /** How it is paid; left out for a contract never ordered with a reference. */
+  payment: PaymentSchema.optional(),
 });
 
+export type PaymentType = z.infer<typeof PaymentSchema>;
 export type PartyType = z.infer<typeof PartySchema>;
 export type ContractType = z.infer<typeof ContractSchema>;
 export type ContractSummaryType = z.infer<typeof ContractSummarySchema>;

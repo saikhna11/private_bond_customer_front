@@ -85,6 +85,9 @@ export const BondSchema = z.object({
   files: z.array(BondFileSchema),
   options: z.array(PurchaseOptionSchema),
   investor_bought: z.string().optional(),
+  /** The client's order of it still waiting for its payment. */
+  pending_contract_id: z.uuid().optional(),
+  reserved: z.string().optional(),
 });
 export type BondType = z.infer<typeof BondSchema>;
 

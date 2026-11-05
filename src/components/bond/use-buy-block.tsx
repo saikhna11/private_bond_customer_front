@@ -11,7 +11,8 @@ import { BuyNotice } from './buy-notice';
 
 /**
  * Why the signed-in client cannot buy bond now, as a notice, or null when they can: only an
- * approved individual buys, a bond that is selling, with a kind of contract on sale.
+ * approved individual buys, a bond that is selling, with a kind of contract on sale, and not
+ * while their earlier order of it still waits for its payment.
  */
 export function useBuyBlock(bond: BondType): ReactNode {
   const { t } = useTranslation();
@@ -53,6 +54,27 @@ export function useBuyBlock(bond: BondType): ReactNode {
         className="border-dashed"
         title={t(`bond.buy.notSelling.${bond.sales_status}`)}
         text={t('bond.buy.notSellingText')}
+      />
+    );
+  }
+  if (bond.pending_contract_id) {
+    return (
+      <BuyNotice
+        Icon={ClockIcon}
+        className="border-primary/30 bg-primary/5"
+        title={t('bond.buy.pendingOrderTitle')}
+        text={t('bond.buy.pendingOrderText')}
+        action={
+          <Button asChild className="h-10 rounded-xl">
+            <Link
+              to="/contracts"
+              search={{ contractId: bond.pending_contract_id }}
+            >
+              {t('bond.buy.pendingOrder')}
+              <ArrowRightIcon />
+            </Link>
+          </Button>
+        }
       />
     );
   }

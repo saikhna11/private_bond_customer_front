@@ -2,9 +2,9 @@ import { CheckIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
-export type Step = 'create' | 'view' | 'sign' | 'done';
+export type Step = 'create' | 'pay' | 'view' | 'sign' | 'done';
 
-const steps: Step[] = ['create', 'view', 'sign', 'done'];
+const steps: Step[] = ['create', 'pay', 'view', 'sign', 'done'];
 
 /**
  * Where the holder is in buying a bond, drawn as the home page's review steps are. complete
@@ -21,7 +21,7 @@ export function Steps({
   const at = steps.indexOf(current);
 
   return (
-    <ol className="grid grid-cols-4 gap-2">
+    <ol className="grid grid-cols-5 gap-1 sm:gap-2">
       {steps.map((s, i) => {
         const done = i < at || (complete && i === at);
         const now = i === at && !done;
@@ -49,7 +49,7 @@ export function Steps({
             >
               {done ? <CheckIcon className="size-4" strokeWidth={3} /> : i + 1}
             </span>
-            <span className="mt-2 text-xs font-medium sm:text-sm">
+            <span className="mt-2 text-[11px] font-medium leading-tight sm:text-sm">
               {t(`contract.steps.${s}.label`)}
             </span>
             <span className="hidden text-[11px] text-muted-foreground sm:block">

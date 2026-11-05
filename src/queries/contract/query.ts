@@ -26,9 +26,16 @@ export const signContract = (
     body: { signature },
   });
 
-/** Cancels a contract pending signature for every party. */
+/** Cancels a contract pending signature for every party, or the holder's unpaid order. */
 export const declineContract = (id: string): Promise<ContractType> =>
   fetchAndValidate(`contracts/${id}/decline`, ContractSchema, {
+    method: 'POST',
+    body: {},
+  });
+
+/** Pays the client's order with the test payment, where the backend allows it. */
+export const mockPayContract = (id: string): Promise<ContractType> =>
+  fetchAndValidate(`contracts/${id}/mock-payment`, ContractSchema, {
     method: 'POST',
     body: {},
   });

@@ -19,6 +19,11 @@ const statuses: Record<
     className: 'bg-muted text-muted-foreground',
     Icon: FilePenLineIcon,
   },
+  // Ordered, it waits for its bank transfer.
+  pending_payment: {
+    className: 'bg-primary/10 text-primary',
+    Icon: ClockIcon,
+  },
   // Stored with the first signature, it waits for the other clients' own.
   pending_customer_signature: {
     className: 'bg-warning/15 text-warning-foreground dark:text-warning',

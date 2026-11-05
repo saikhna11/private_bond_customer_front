@@ -683,10 +683,50 @@ export const en: Messages = {
     months_one: '{{count}} month',
     months_other: '{{count}} months',
     unnumbered: 'Not numbered yet',
+    payment: {
+      title: 'Pay',
+      description:
+        'Transfer to the account below with the payment reference exactly as shown. Once the money arrives, your contract moves on to signing.',
+      recipient: 'Recipient',
+      bank: 'Bank',
+      account: 'Account number',
+      iban: 'IBAN',
+      amount: 'Amount to pay',
+      reference: 'Payment reference',
+      referenceHint:
+        'Write only this code as the transfer description. A transfer with another description is not recognised automatically.',
+      copy: 'Copy',
+      copied: 'Copied',
+      copyFailed: 'Could not copy',
+      noAccount:
+        'No account is registered to receive the payment. Please contact our staff.',
+      deadline: 'Pay by',
+      left: '{{time}} left',
+      waiting: 'Checking for your payment',
+      waitingText:
+        'It is confirmed automatically a few minutes after you transfer. You may close this page.',
+      received: 'Received: {{received}}',
+      short: 'Short by {{left}}. Transfer the rest with the same reference.',
+      mock: 'Continue (test)',
+      mockText: 'Test mode: the button counts the payment as received.',
+      paid: 'Payment received. Read and sign contract {{no}}.',
+      cancel: 'Cancel the order',
+      cancelTitle: 'Cancel your order?',
+      cancelText:
+        'The order is cancelled and its payment reference no longer works. You may order again.',
+      expiredTitle: 'The payment deadline passed',
+      expired:
+        'The payment did not arrive in time, so the order lapsed. Any money received is refunded.',
+      cancelled: 'You cancelled the order.',
+    },
     steps: {
       create: {
-        label: 'Buy',
-        hint: 'Terms and payment',
+        label: 'Order',
+        hint: 'Terms and amount',
+      },
+      pay: {
+        label: 'Payment',
+        hint: 'Bank transfer',
       },
       view: {
         label: 'Read the contract',
@@ -706,6 +746,11 @@ export const en: Messages = {
         title: 'Choose a bond',
         description: '',
       },
+      pay: {
+        title: 'Pay',
+        description:
+          'Transfer to the account below with the payment reference exactly as shown. Once the money arrives, your contract moves on to signing.',
+      },
       view: {
         title: 'Review the contract',
         description: 'Read the terms and the contract carefully.',
@@ -721,6 +766,7 @@ export const en: Messages = {
     },
     status: {
       draft: 'Draft',
+      pending_payment: 'Awaiting payment',
       pending_customer_signature: 'Awaiting signatures',
       pending_issuer_signature: "Awaiting the issuer's signature",
       rendering: 'Preparing',
@@ -952,6 +998,10 @@ export const en: Messages = {
       individualsOnlyText:
         'Bond purchase contracts are open to individuals only for now.',
       notApprovedTitle: 'Your account is not approved yet',
+      pendingOrderTitle: 'You have an order awaiting payment',
+      pendingOrderText:
+        'Pay or cancel your order of this bond before ordering again.',
+      pendingOrder: 'Payment page',
       notApprovedText:
         'Once your account is approved you can buy bonds and make contracts.',
       profile: 'Profile',
@@ -973,9 +1023,9 @@ export const en: Messages = {
       tax: 'Tax on interest',
       start: 'Start date',
       maturity: 'Maturity date',
-      pay: 'Pay (test)',
-      mock: 'Test payment: pressing the button counts the payment as received and numbers the contract. The repayment schedule is in the contract annex.',
-      paid: 'Payment received. Read and sign contract {{no}}.',
+      pay: 'Pay',
+      mock: 'The next step shows the account and the payment reference. Transfer within 24 hours. The repayment schedule is in the contract annex.',
+      ordered: 'Order placed. Transfer the payment within 24 hours.',
     },
   },
   errors: {
@@ -1090,6 +1140,13 @@ export const en: Messages = {
       holder_unsupported:
         'For now only approved individuals with a register or passport number and a bank account can make a contract.',
       paid: 'A paid contract cannot be cancelled.',
+      payment_pending:
+        'You have an order of this bond awaiting payment. Pay or cancel it, then order again.',
+      payment_account_missing:
+        'No company account is registered to receive payments in this currency.',
+      not_awaiting_payment:
+        'This order no longer awaits payment: it was paid, cancelled or lapsed.',
+      mock_payment_disabled: 'The test payment is off here.',
       director_only:
         "Only the issuer's chief executive signs or declines its contracts.",
       decline_reason_required: 'Write why you decline the contract.',

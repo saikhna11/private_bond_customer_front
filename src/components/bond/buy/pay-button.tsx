@@ -13,10 +13,11 @@ import type { BondType, PurchaseBody } from '@/queries/bond/type';
 import { contractsOptions } from '@/queries/contract/options';
 
 /**
- * Pays the purchase with the test payment, until the payments area takes the money: the
- * contract comes back paid and numbered, and the holder goes on to read and sign it. One
- * request id per page: a second press, or a request sent again after a lost answer, finds
- * the contract the first one stored.
+ * Orders the purchase: the contract comes back waiting for its payment, with the reference
+ * and the account to transfer to, and the holder goes on to its payment page. One request id
+ * per page: a second press, or a request sent again after a lost answer, finds the contract
+ * the first one stored. An order of the bond still waiting answers contract.payment_pending:
+ * the bond is read again, and the page then points to that order.
  */
 export function PayButton({
   bond,
@@ -38,7 +39,7 @@ export function PayButton({
     onSuccess: (c) => {
       queryClient.invalidateQueries({ queryKey: bondKeys.all });
       queryClient.invalidateQueries({ queryKey: contractsOptions().queryKey });
-      showToast('success', t('bond.quote.paid', { no: c.contract_no ?? '' }));
+      showToast('success', t('bond.quote.ordered'));
       navigate({ to: '/contracts', search: { contractId: c.id } });
     },
     onError: (err) => {

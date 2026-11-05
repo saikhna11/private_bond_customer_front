@@ -12,6 +12,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { toApiError } from '@/lib/fetcher';
 import { contractsOptions } from '@/queries/contract/options';
+import type { ContractSummaryType } from '@/queries/contract/type';
 import { ContractGroup } from './contract-group';
 import { ContractListEmpty } from './contract-list-empty';
 
@@ -28,8 +29,11 @@ export function ContractList({
   const { t } = useTranslation();
   const { data: contracts, isPending, error } = useQuery(contractsOptions());
   const download = useDownloadContract();
-  const awaiting = contracts?.filter((c) => c.awaiting_signature) ?? [];
-  const others = contracts?.filter((c) => !c.awaiting_signature) ?? [];
+  // What waits for the client: their signature, or the payment of their order.
+  const needsYou = (c: ContractSummaryType) =>
+    c.awaiting_signature || c.status === 'pending_payment';
+  const awaiting = contracts?.filter(needsYou) ?? [];
+  const others = contracts?.filter((c) => !needsYou(c)) ?? [];
 
   return (
     <Card>
