@@ -10,10 +10,17 @@ export type BuyOwnership = PurchaseBody['ownership_type'];
 
 const CYRILLIC = /[А-ЯЁӨҮ]/i;
 
+/** The most bonds a client types: more than any bond sells. */
+const maxDigits = 6;
+
 /**
- * What the client picks of bond: an option, a term it offers, the amount, and who holds
- * it. body is the purchase once every field is filled and passes the checks the browser
- * can make, a moment after the last change, for the quote; errors name what fails.
+ * What the client picks of bond: an option, a term it offers, how many bonds, and who
+ * holds them. One bond costs the purchase unit (bond.md 3.2), so the amount the purchase
+ * sends is quantity times unit: between minQuantity, the minimum purchase in bonds, and
+ * maxQuantity, what remains or the investor cap allows, whichever is less. The backend
+ * checks the rest (6.9, what the investor already holds). body is the purchase once every
+ * field is filled and passes the checks the browser can make, a moment after the last
+ * change, for the quote; errors name what fails.
  */
 export function usePurchaseForm(bond: BondType) {
   const { t } = useTranslation();
@@ -25,7 +32,20 @@ export function usePurchaseForm(bond: BondType) {
   const option = bond.rate_options.find((o) => o.id === optionId);
   const terms = option ? termsOf(option) : [];
   const [term, setTerm] = useState<number | undefined>(terms[0]);
-  const [amount, setAmount] = useState(bond.min_purchase.replace(/\.0+$/, ''));
+  const unit = Number(bond.purchase_unit);
+  const minQuantity = Math.max(1, Math.ceil(Number(bond.min_purchase) / unit));
+  const maxQuantity = Math.min(
+    Math.floor(Number(bond.remaining) / unit),
+    bond.investor_cap
+      ? Math.floor(Number(bond.investor_cap) / unit)
+      : Number.POSITIVE_INFINITY,
+  );
+  const [quantity, setQuantityState] = useState<number | undefined>(
+    minQuantity,
+  );
+  const setQuantity = (n: number | undefined) =>
+    setQuantityState(n === undefined ? n : Math.min(n, 10 ** maxDigits - 1));
+  const amount = quantity ? String(quantity * unit) : '';
   const [ownership, setOwnership] = useState<BuyOwnership>(
     ownerships[0] ?? 'individual',
   );
@@ -40,15 +60,13 @@ export function usePurchaseForm(bond: BondType) {
   };
 
   const errors = useMemo(() => {
-    const out: { amount?: string; registerNo?: string; phone?: string } = {};
-    const n = Number(amount);
-    const unit = Number(bond.purchase_unit);
-    if (!amount || !Number.isFinite(n)) {
-      out.amount = t('bond.buy.errors.amountRequired');
-    } else if (n < Number(bond.min_purchase) || n % unit !== 0) {
-      out.amount = t('bond.buy.errors.amountStep');
-    } else if (n > Number(bond.remaining)) {
-      out.amount = t('bond.buy.errors.amountRemaining');
+    const out: { quantity?: string; registerNo?: string; phone?: string } = {};
+    if (!quantity) {
+      out.quantity = t('bond.buy.errors.quantityRequired');
+    } else if (quantity < minQuantity) {
+      out.quantity = t('bond.buy.errors.quantityMin', { count: minQuantity });
+    } else if (quantity > maxQuantity) {
+      out.quantity = t('bond.buy.errors.quantityMax', { count: maxQuantity });
     }
     if (ownership === 'joint') {
       const r = registerNo.trim();
@@ -59,7 +77,7 @@ export function usePurchaseForm(bond: BondType) {
       if (!isValidPhone(phone)) out.phone = t('validation.phoneDigits');
     }
     return out;
-  }, [amount, bond, ownership, registerNo, phone, t]);
+  }, [quantity, minQuantity, maxQuantity, ownership, registerNo, phone, t]);
 
   const ready = !!option && !!term && Object.keys(errors).length === 0;
   const body = useDebouncedValue<PurchaseBody | undefined>(
@@ -93,8 +111,12 @@ export function usePurchaseForm(bond: BondType) {
     terms,
     term,
     setTerm,
+    unit,
+    quantity,
+    setQuantity,
+    minQuantity,
+    maxQuantity,
     amount,
-    setAmount,
     ownership,
     setOwnership,
     registerNo,

@@ -1,70 +1,99 @@
 import { useTranslation } from 'react-i18next';
 import { FormField } from '@/components/common/form-field';
-import { Card, CardContent } from '@/components/ui/card';
 import type { BondType } from '@/queries/bond/type';
-import { AmountField } from './amount-field';
+import { formatMoney } from '../format';
+import { BuySection } from './buy-section';
 import { CoHolderFields } from './co-holder-fields';
 import { OptionPicker } from './option-picker';
 import { OwnershipPicker } from './ownership-picker';
-import { QuoteCard } from './quote-card';
-import { TermSelect } from './term-select';
+import { PurchaseSummary } from './purchase-summary';
+import { PurchaseTotal } from './purchase-total';
+import { QuantityField } from './quantity-field';
+import { TermPicker } from './term-picker';
 import { usePurchaseForm } from './use-purchase-form';
 
 /**
- * Buying a bond: the option, the term, the amount and who holds it on the left; what the
- * purchase would be, checked by the backend, and the payment on the right.
+ * Buying a bond, step by step on the left: the rate option and term, how many bonds, and
+ * who holds them; on the right, what the purchase comes to, checked by the backend, and the
+ * payment.
  */
 export function BuyForm({ bond }: { bond: BondType }) {
   const { t } = useTranslation();
   const form = usePurchaseForm(bond);
+  const price = formatMoney(form.unit, bond.currency);
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[1fr_22rem]">
-      <Card>
-        <CardContent className="flex flex-col gap-5">
-          <FormField id="option" label={t('bond.buy.option')}>
-            <OptionPicker
-              options={bond.rate_options}
-              value={form.option?.id ?? ''}
-              onChange={form.pickOption}
+      <div className="flex min-w-0 flex-col gap-6">
+        <BuySection
+          step={1}
+          title={t('bond.buy.sections.terms')}
+          description={t('bond.buy.sections.termsText')}
+        >
+          <OptionPicker
+            options={bond.rate_options}
+            value={form.option?.id ?? ''}
+            onChange={form.pickOption}
+          />
+          <FormField id="term" label={t('bond.term')}>
+            <TermPicker
+              id="term"
+              terms={form.terms}
+              value={form.term}
+              onChange={form.setTerm}
             />
           </FormField>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField id="term" label={t('bond.term')}>
-              <TermSelect
-                id="term"
-                terms={form.terms}
-                value={form.term}
-                onChange={form.setTerm}
-              />
-            </FormField>
+        </BuySection>
+        <BuySection
+          step={2}
+          title={t('bond.buy.sections.quantity')}
+          description={t('bond.buy.sections.quantityText', { price })}
+        >
+          <div className="grid items-start gap-4 sm:grid-cols-2">
             <FormField
-              id="amount"
-              label={t('bond.buy.amount')}
-              error={form.errors.amount}
+              id="quantity"
+              label={t('bond.buy.quantity')}
+              error={form.errors.quantity}
             >
-              <AmountField
-                id="amount"
-                bond={bond}
-                value={form.amount}
-                onChange={form.setAmount}
-                invalid={!!form.errors.amount}
+              <QuantityField
+                id="quantity"
+                value={form.quantity}
+                min={form.minQuantity}
+                max={form.maxQuantity}
+                onChange={form.setQuantity}
+                invalid={!!form.errors.quantity}
               />
+              <p className="text-xs text-muted-foreground">
+                {t('bond.buy.quantityHint', {
+                  min: form.minQuantity,
+                  max: form.maxQuantity,
+                })}
+              </p>
             </FormField>
+            <PurchaseTotal
+              quantity={form.quantity}
+              unit={form.unit}
+              currency={bond.currency}
+              className="lg:hidden"
+            />
           </div>
-          {form.ownerships.length > 1 && (
-            <FormField id="ownership" label={t('bond.buy.ownership')}>
-              <OwnershipPicker
-                options={form.ownerships}
-                value={form.ownership}
-                onChange={form.setOwnership}
-              />
-            </FormField>
-          )}
-          {form.ownership === 'joint' && <CoHolderFields form={form} />}
-        </CardContent>
-      </Card>
-      <QuoteCard bond={bond} body={form.body} />
+        </BuySection>
+        {form.ownerships.length > 1 && (
+          <BuySection
+            step={3}
+            title={t('bond.buy.sections.ownership')}
+            description={t('bond.buy.sections.ownershipText')}
+          >
+            <OwnershipPicker
+              options={form.ownerships}
+              value={form.ownership}
+              onChange={form.setOwnership}
+            />
+            {form.ownership === 'joint' && <CoHolderFields form={form} />}
+          </BuySection>
+        )}
+      </div>
+      <PurchaseSummary bond={bond} form={form} />
     </div>
   );
 }

@@ -19,6 +19,14 @@ export function formatMoney(value: string | number, currency: string): string {
     : `${amount} ${signs[currency] ?? currency}`;
 }
 
+/** A file's size as people read it: 640 KB, 2.4 MB. */
+export function formatFileSize(bytes: number): string {
+  if (bytes < 1024 * 1024) {
+    return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 /** How often an option pays interest, in the current language. */
 export function frequencyText(f: Frequency): string {
   return i18n.t(`contract.frequency.${f}`);

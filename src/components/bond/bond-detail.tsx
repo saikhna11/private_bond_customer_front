@@ -1,14 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { ApiErrorAlert } from '@/components/common/api-error-alert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toApiError } from '@/lib/fetcher';
 import { bondOptions } from '@/queries/bond/options';
 import { BackLink } from './back-link';
 import { BondFacts } from './bond-facts';
 import { BondHeader } from './bond-header';
-import { ProspectusViewer } from './prospectus/prospectus-viewer';
+import { ProspectusSection } from './prospectus/prospectus-section';
 import { RateOptionTable } from './rate-option-table';
 
 /** One bond as a buyer reads it before buying: its terms, options and prospectus. */
@@ -30,17 +29,7 @@ export function BondDetail({ bondId }: { bondId: string }) {
             <RateOptionTable options={bond.rate_options} />
             <BondFacts bond={bond} />
           </div>
-          {bond.prospectus && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('bond.about')}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm whitespace-pre-line">{bond.prospectus}</p>
-              </CardContent>
-            </Card>
-          )}
-          <ProspectusViewer bond={bond} />
+          <ProspectusSection bond={bond} />
         </>
       )}
     </div>

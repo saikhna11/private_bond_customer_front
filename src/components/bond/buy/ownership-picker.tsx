@@ -16,7 +16,7 @@ export function OwnershipPicker({
   return (
     <fieldset
       aria-label={t('bond.buy.ownership')}
-      className="m-0 flex h-10 w-full min-w-0 gap-1 rounded-lg border-0 bg-muted p-1"
+      className="m-0 flex min-h-10 w-full min-w-0 gap-1 rounded-lg border-0 bg-muted p-1"
     >
       {options.map((o) => (
         <button
@@ -25,7 +25,7 @@ export function OwnershipPicker({
           aria-pressed={o === value}
           onClick={() => onChange(o)}
           className={cn(
-            'flex-1 rounded-md text-sm text-muted-foreground transition-colors',
+            'flex-1 rounded-md px-2 py-1.5 text-sm leading-tight text-muted-foreground transition-colors',
             o === value && 'bg-background text-foreground shadow-sm',
           )}
         >
