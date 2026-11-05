@@ -8,7 +8,10 @@ import {
 import { isPending } from '@/queries/contract/options';
 import type { ContractType } from '@/queries/contract/type';
 
-/** A pending contract's number, amount and status, and the deadline for its signatures. */
+/**
+ * A pending contract's number, amount and status, and the deadline for its signatures: a
+ * paid one's only at the bond issuer's director's turn, since its clients have none.
+ */
 export function PendingFacts({ contract }: { contract: ContractType }) {
   const { t } = useTranslation();
   const { status } = contract;
@@ -39,7 +42,7 @@ export function PendingFacts({ contract }: { contract: ContractType }) {
       </div>
       {isPending(status) &&
         contract.signature_deadline &&
-        !contract.paid_on && (
+        (!contract.paid_on || status === 'pending_issuer_signature') && (
           <div className="col-span-2 flex items-center justify-between rounded-xl bg-muted/60 px-3 py-2">
             <dt className="text-xs text-muted-foreground">
               {t('contract.facts.deadline')}

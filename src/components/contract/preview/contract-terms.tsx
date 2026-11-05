@@ -7,42 +7,56 @@ import {
   RepeatIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { formatAmount, frequencyLabel } from '@/components/contract/format';
+import {
+  contractNumber,
+  formatAmount,
+  frequencyLabel,
+} from '@/components/contract/format';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { ContractPreviewType } from '@/queries/contract/type';
+import type { ContractType } from '@/queries/contract/type';
 
-/** The previewed contract's key terms, one tile each. */
-export function ContractTerms({ preview }: { preview: ContractPreviewType }) {
+/** The key terms a contract, or the preview of one, carries. */
+export type ContractTermsSource = Pick<
+  ContractType,
+  | 'principal_amount'
+  | 'annual_rate'
+  | 'term_months'
+  | 'interest_frequency'
+  | 'maturity_date'
+> & { contract_no?: string };
+
+/** A contract's key terms, one tile each. */
+export function ContractTerms({ terms: c }: { terms: ContractTermsSource }) {
   const { t } = useTranslation();
   const terms = [
     {
       label: t('contract.terms.contractNo'),
-      value: preview.contract_no,
+      value: contractNumber(c),
       Icon: HashIcon,
     },
     {
       label: t('contract.terms.amount'),
-      value: `${formatAmount(preview.principal_amount)} ₮`,
+      value: `${formatAmount(c.principal_amount)} ₮`,
       Icon: BanknoteIcon,
     },
     {
       label: t('contract.terms.annualRate'),
-      value: `${Number(preview.annual_rate)}%`,
+      value: `${Number(c.annual_rate)}%`,
       Icon: PercentIcon,
     },
     {
       label: t('contract.terms.term'),
-      value: t('contract.months', { count: preview.term_months }),
+      value: t('contract.months', { count: c.term_months }),
       Icon: CalendarRangeIcon,
     },
     {
       label: t('contract.terms.frequency'),
-      value: frequencyLabel(preview.interest_frequency),
+      value: frequencyLabel(c.interest_frequency),
       Icon: RepeatIcon,
     },
     {
       label: t('contract.terms.maturity'),
-      value: preview.maturity_date,
+      value: c.maturity_date,
       Icon: CalendarCheckIcon,
     },
   ];

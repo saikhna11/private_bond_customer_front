@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toApiError } from '@/lib/fetcher';
-import { useContractApi } from '@/queries/contract/api';
 import { contractsOptions } from '@/queries/contract/options';
 import { ContractGroup } from './contract-group';
 import { ContractListEmpty } from './contract-list-empty';
@@ -23,19 +22,11 @@ import { ContractListEmpty } from './contract-list-empty';
  */
 export function ContractList({
   onOpen,
-  title,
-  emptyText,
 }: {
   onOpen: (contractId: string) => void;
-  title?: string;
-  emptyText?: string;
 }) {
   const { t } = useTranslation();
-  const {
-    data: contracts,
-    isPending,
-    error,
-  } = useQuery(contractsOptions(useContractApi()));
+  const { data: contracts, isPending, error } = useQuery(contractsOptions());
   const download = useDownloadContract();
   const awaiting = contracts?.filter((c) => c.awaiting_signature) ?? [];
   const others = contracts?.filter((c) => !c.awaiting_signature) ?? [];
@@ -43,7 +34,7 @@ export function ContractList({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title ?? t('contract.list.title')}</CardTitle>
+        <CardTitle>{t('contract.list.title')}</CardTitle>
         <CardDescription>
           {contracts
             ? t('contract.list.count', { count: contracts.length })
@@ -62,7 +53,7 @@ export function ContractList({
           </div>
         ) : contracts.length === 0 ? (
           <div className="px-6">
-            <ContractListEmpty text={emptyText} />
+            <ContractListEmpty />
           </div>
         ) : (
           <div className="flex flex-col gap-6">

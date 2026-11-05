@@ -19,7 +19,7 @@ export function ContractPreview({ preview }: { preview: ContractPreviewType }) {
   const { t } = useTranslation();
   return (
     <>
-      <ContractTerms preview={preview} />
+      <ContractTerms terms={preview} />
       <Card>
         <CardHeader>
           <CardTitle>{t('contract.document.title')}</CardTitle>

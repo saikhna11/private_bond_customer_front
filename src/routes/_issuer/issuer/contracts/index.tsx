@@ -2,17 +2,20 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import z from 'zod';
 import { PageTitle } from '@/components/common/page-title';
-import { ContractList } from '@/components/contract/list/contract-list';
-import { StoredContract } from '@/components/contract/page/stored-contract';
+import { IssuerContractDetail } from '@/components/issuer/contracts/issuer-contract-detail';
+import { IssuerContractList } from '@/components/issuer/contracts/issuer-contract-list';
 import { useIssuerContractNav } from '@/components/issuer/contracts/use-issuer-contract-nav';
 import { ContractApiContext, issuerContractApi } from '@/queries/contract/api';
+import { issuerContractTabSchema } from '@/queries/issuer/type';
 
 /**
- * The contracts the signed-in member signs as their bond issuer's director, once every
- * client party has signed: the list, or one contract (contractId), which they read and
- * sign from here (sign) while it waits for them.
+ * The bond issuer's contracts, which every member reads once their clients signed them: the
+ * list, a tab (pending when left out) and a page at a time, or one contract (contractId),
+ * which the director signs from here (sign) or declines while it waits for them.
  */
 const searchSchema = z.object({
+  tab: issuerContractTabSchema.optional().catch(undefined),
+  page: z.number().int().min(1).optional().catch(undefined),
   sign: z.boolean().optional(),
   contractId: z.uuid().optional(),
 });
@@ -30,18 +33,14 @@ function IssuerContractsPage() {
   return (
     <ContractApiContext.Provider value={issuerContractApi}>
       {contractId !== undefined ? (
-        <StoredContract contractId={contractId} nav={nav} />
+        <IssuerContractDetail contractId={contractId} nav={nav} />
       ) : (
         <>
           <PageTitle
             title={t('issuer.contracts.title')}
             description={t('issuer.contracts.description')}
           />
-          <ContractList
-            title={t('issuer.contracts.list')}
-            emptyText={t('issuer.contracts.empty')}
-            onOpen={nav.toContract}
-          />
+          <IssuerContractList onOpen={nav.toContract} />
         </>
       )}
     </ContractApiContext.Provider>

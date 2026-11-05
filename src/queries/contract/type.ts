@@ -39,9 +39,11 @@ const SignatureSchema = z.object({
  * A purchase is paid at once (the test payment) and numbered, then waits
  * pending_customer_signature until every client party has signed from their own account,
  * then pending_issuer_signature until the bond issuer's director signs; rendering while the
- * signed PDF is made. A paid contract is never cancelled nor expires.
+ * signed PDF is made. Its clients neither decline a paid contract nor let it expire: only
+ * the director declines it (cancelled, with a decline_reason) or lets their 72 hours pass
+ * (expired), and the payment is then refunded.
  */
-const statusSchema = z.enum([
+export const contractStatusSchema = z.enum([
   'draft',
   'pending_customer_signature',
   'pending_issuer_signature',
@@ -69,7 +71,7 @@ const cancelReasonSchema = z.enum(['declined', 'expired']);
  */
 export const ContractSummarySchema = z.object({
   id: z.uuid(),
-  status: statusSchema,
+  status: contractStatusSchema,
   contract_no: z.string().optional(),
   contract_prefix: z.string(),
   contract_date: z.string(),
@@ -84,11 +86,12 @@ export const ContractSummarySchema = z.object({
 
 /**
  * A contract with its parties and signatures, as the client reads it: your_party_id is
- * theirs. Amounts and rates are decimal strings.
+ * theirs. On the issuer portal it is the issuer party for the director while the contract
+ * awaits their signature, and left out otherwise. Amounts and rates are decimal strings.
  */
 export const ContractSchema = z.object({
   id: z.uuid(),
-  status: statusSchema,
+  status: contractStatusSchema,
   contract_no: z.string().optional(),
   contract_prefix: z.string(),
   contract_date: z.string(),
@@ -106,10 +109,19 @@ export const ContractSchema = z.object({
   signature_deadline: z.string().optional(),
   cancel_reason: cancelReasonSchema.optional(),
   cancelled_at: z.string().optional(),
+  /** Why the bond issuer's director declined it; left out when a client declined it. */
+  decline_reason: z.string().optional(),
   signed_at: z.string().optional(),
+  /** Where the bond repays the holder, as the contract was bought. */
+  repayment_bank_name: z.string(),
+  repayment_account_no: z.string(),
+  repayment_iban: z.string(),
+  repayment_owner: z.string(),
   parties: z.array(PartySchema),
   signatures: z.array(SignatureSchema),
-  your_party_id: z.uuid(),
+  your_party_id: z.uuid().optional(),
+  /** The underwriter the contract names beside its parties; it does not sign. */
+  underwriter: z.string(),
 });
 
 export type PartyType = z.infer<typeof PartySchema>;

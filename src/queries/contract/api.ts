@@ -1,12 +1,10 @@
 import { createContext, useContext } from 'react';
-import z from 'zod';
 import fetchAndValidate from '@/lib/fetcher';
 import {
   declineContract,
   getContract,
   getContractDocument,
   getContractPreview,
-  getContracts,
   getTemplateFile,
   signContract,
 } from './query';
@@ -14,31 +12,29 @@ import {
   ContractPreviewSchema,
   type ContractPreviewType,
   ContractSchema,
-  ContractSummarySchema,
-  type ContractSummaryType,
   type ContractType,
 } from './type';
 
 /**
  * Where a stored contract is read and signed from: the client's own contracts, or the
- * contracts a bond issuer's director signs on the issuer portal. The two keep their caches
- * apart (root), since one browser may hold both sessions.
+ * contracts of a bond issuer on the issuer portal, which every member reads and its director
+ * signs or declines for a reason. The two keep their caches apart (root), since one browser
+ * may hold both sessions. Each lists its contracts its own way.
  */
 export interface ContractApi {
   root: string;
-  getContracts: () => Promise<ContractSummaryType[]>;
   getContract: (id: string) => Promise<ContractType>;
   getContractPreview: (id: string) => Promise<ContractPreviewType>;
   getTemplateFile: (id: string) => Promise<ArrayBuffer>;
   signContract: (id: string, signature: string) => Promise<ContractType>;
-  declineContract: (id: string) => Promise<ContractType>;
+  /** reason is the director's, which the issuer portal requires; a client gives none. */
+  declineContract: (id: string, reason?: string) => Promise<ContractType>;
   getContractDocument: (id: string) => Promise<ArrayBuffer>;
 }
 
 /** The client's own contracts. */
 export const clientContractApi: ContractApi = {
   root: 'contract',
-  getContracts,
   getContract,
   getContractPreview,
   getTemplateFile,
@@ -47,11 +43,9 @@ export const clientContractApi: ContractApi = {
   getContractDocument,
 };
 
-/** The contracts the signed-in issuer member signs as their bond issuer's director. */
+/** The contracts of the signed-in issuer member's bond issuer. */
 export const issuerContractApi: ContractApi = {
   root: 'issuer-contract',
-  getContracts: () =>
-    fetchAndValidate('issuer/contracts', z.array(ContractSummarySchema)),
   getContract: (id) =>
     fetchAndValidate(`issuer/contracts/${id}`, ContractSchema),
   getContractPreview: (id) =>
@@ -66,10 +60,10 @@ export const issuerContractApi: ContractApi = {
       method: 'POST',
       body: { signature },
     }),
-  declineContract: (id) =>
+  declineContract: (id, reason) =>
     fetchAndValidate(`issuer/contracts/${id}/decline`, ContractSchema, {
       method: 'POST',
-      body: {},
+      body: { reason },
     }),
   getContractDocument: (id) =>
     fetchAndValidate<ArrayBuffer>(

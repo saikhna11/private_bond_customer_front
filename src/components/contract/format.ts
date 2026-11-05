@@ -11,6 +11,11 @@ export function formatAmount(value: string): string {
   return amountFormat.format(Number(value));
 }
 
+/** An amount in currency: ₮ after a tugrik amount, the code after any other. */
+export function formatMoney(value: string, currency: string): string {
+  return `${formatAmount(value)} ${currency === 'MNT' ? '₮' : currency}`;
+}
+
 /** How often a contract pays interest, in the current language. */
 export function frequencyLabel(f: ContractType['interest_frequency']): string {
   return i18n.t(`contract.frequency.${f}`);

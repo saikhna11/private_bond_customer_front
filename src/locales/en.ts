@@ -521,9 +521,109 @@ export const en: Messages = {
     contracts: {
       title: 'Contracts',
       description:
-        'Contracts the clients have signed wait 72 hours for your signature. Read each one and sign it.',
-      list: "The issuer's contracts",
-      empty: 'Contracts appear here once their clients sign them.',
+        'Contracts every client party has signed. The chief executive signs or declines each, for a reason, within 72 hours; one left unsigned becomes void.',
+      tabs: {
+        pending: 'Pending',
+        valid: 'Valid',
+        cancelled: 'Cancelled',
+      },
+      empty: {
+        pending:
+          'No contract awaits a signature. Contracts arrive here once their client parties sign them.',
+        valid: 'Contracts every party has signed appear here.',
+        cancelled: 'Declined and expired contracts appear here.',
+      },
+      columns: {
+        contractNo: 'Number',
+        client: 'Client',
+        bond: 'Bond',
+        amount: 'Amount',
+        term: 'Term',
+        date: 'Date',
+        deadline: 'Deadline',
+        status: 'Status',
+      },
+      withCoHolder: 'Co-holder: {{name}}',
+      hoursLeft_one: '{{count}} hour left',
+      hoursLeft_other: '{{count}} hours left',
+      overdue: 'Deadline passed',
+      pageInfo: '{{from}}-{{to}} of {{total}}',
+      prev: 'Previous',
+      next: 'Next',
+      toList: 'Contracts',
+      heading: 'Contract {{no}}',
+      subheading: '{{code}} bond · {{date}}',
+      state: {
+        pending: "Awaiting the chief executive's signature",
+        pendingText:
+          'Every client party has signed. The chief executive signs it, or declines it for a reason, by {{deadline}}.',
+        overdueText:
+          'The signing deadline has passed, so the contract will soon become void.',
+        directorSigns: 'The chief executive signs it.',
+        rendering: 'Preparing the final copy',
+        renderingText:
+          'Every party has signed. This page updates once the final copy is ready.',
+        slowText:
+          'Preparing the final copy is taking longer than usual. Press "Check again".',
+        signed: 'The contract is valid',
+        signedText: 'Every party signed it: {{date}}.',
+        failed: 'The final copy could not be prepared',
+        failedText:
+          'Every party has signed, but preparing the final copy failed. Ulzii & Co staff will check it and prepare it.',
+        cancelled: 'The contract was cancelled',
+        cancelledText: 'The chief executive {{name}} declined it: {{date}}.',
+        expired: 'Expired',
+        expiredText:
+          'The chief executive did not sign it within 72 hours, so the contract became void: {{date}}.',
+        refund: "The client's payment is refunded.",
+      },
+      actions: {
+        sign: 'Sign',
+        decline: 'Decline',
+      },
+      decline: {
+        title: 'Decline the contract?',
+        text: "The contract is cancelled for every party and the client's payment is refunded. The client and Ulzii & Co staff read your reason.",
+        reason: 'Reason',
+        placeholder: 'Why do you decline the contract?',
+        submit: 'Decline',
+        done: 'The contract was declined.',
+      },
+      client: {
+        title: 'Client',
+        holder: 'Holder',
+        co_holder: 'Co-holder',
+        name: 'Name',
+        registerNo: 'Register / passport',
+        phone: 'Phone',
+        account: 'Repayment account',
+        bank: 'Bank',
+        owner: 'Account holder',
+        accountNo: 'Account number',
+        iban: 'IBAN',
+      },
+      parties: {
+        title: 'Parties',
+        client: 'Client',
+        issuer: 'Bond issuer',
+        underwriter: 'Underwriter',
+        director: 'Chief executive: {{name}}',
+        signed: 'Signed',
+        declined: 'Declined',
+        awaited: 'Awaiting',
+        unsigned: 'Not signed',
+        noSignature: 'Does not sign',
+      },
+      document: {
+        title: 'The contract',
+        pending:
+          "A preview with the client parties' signatures. The final copy is prepared once the chief executive signs.",
+      },
+      sign: {
+        title: 'Sign the contract',
+        description:
+          'Sign contract {{no}} as the chief executive. Your signature makes it valid.',
+      },
     },
     loginLink: 'A bond issuer?',
     loginLinkAction: 'Sign in as an issuer',
@@ -550,7 +650,7 @@ export const en: Messages = {
     you: 'You',
     blocked: 'Inactive',
     role: {
-      director: 'Director',
+      director: 'Chief executive',
       staff: 'Staff',
     },
     bankStatus: {
@@ -699,10 +799,11 @@ export const en: Messages = {
         'Draw your signature in the box above with a mouse or your finger.',
       others: '{{names}} will sign from their own accounts.',
       deadline:
-        'A paid contract is never cancelled. It is confirmed once the client parties, then the bond issuer, have signed.',
+        "Once the client parties sign, the bond issuer's chief executive signs within 72 hours. If they do not, or decline it, the contract becomes void and your payment is refunded.",
     },
     coSignIntro:
       "This contract is waiting for your signature. The other parties' signatures appear on the contract.",
+    declineReason: 'Reason for cancelling',
     decline: {
       decline: 'Decline the contract',
       withdraw: 'Cancel the contract',
@@ -734,11 +835,16 @@ export const en: Messages = {
       failed:
         'Every party has signed and the contract is numbered, but preparing its final copy failed. Our staff will check it and prepare it.',
       declinedBy: '{{who}} declined, so the contract was cancelled.',
+      declinedByIssuer:
+        "The bond issuer's chief executive declined the contract.",
+      expiredIssuer:
+        "The bond issuer's chief executive did not sign within 72 hours, so the contract is void.",
+      refund: 'Your payment is refunded.',
       someParty: 'A party',
       awaitingOthers:
-        "Waiting for the other parties' signatures. They sign from their own accounts. Then the bond issuer signs.",
+        "Waiting for the other parties' signatures. They sign from their own accounts. Then the bond issuer's chief executive signs within 72 hours.",
       awaitingIssuer:
-        "Waiting for the bond issuer's signature. Once they sign, the contract's final copy is prepared.",
+        "Waiting for the bond issuer's chief executive's signature. If they do not sign by the deadline, or decline it, the contract becomes void and your payment is refunded.",
       slow: 'Preparing the final copy is taking longer than usual. Press "Check again", or check your contract list later.',
       rendering:
         'Preparing the final copy of the contract. This page updates once it is ready.',
@@ -952,6 +1058,9 @@ export const en: Messages = {
       holder_unsupported:
         'For now only approved individuals with a register or passport number and a bank account can make a contract.',
       paid: 'A paid contract cannot be cancelled.',
+      director_only:
+        "Only the issuer's chief executive signs or declines its contracts.",
+      decline_reason_required: 'Write why you decline the contract.',
     },
     bond: {
       not_found: 'Bond not found.',

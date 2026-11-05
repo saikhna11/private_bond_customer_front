@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 import { type ContractApi, clientContractApi } from './api';
+import { getContracts } from './query';
 import type { ContractType, PartyType } from './type';
 
 export const contractKeys = {
@@ -28,7 +29,7 @@ export function storedKeys(api: ContractApi) {
   };
 }
 
-/** The client's own party on the contract. */
+/** The reader's own party on the contract, if any (your_party_id). */
 export function yourParty(contract: ContractType): PartyType | undefined {
   return contract.parties.find((p) => p.id === contract.your_party_id);
 }
@@ -100,10 +101,11 @@ export function contractPreviewOptions(id: string, api = clientContractApi) {
   });
 }
 
-export function contractsOptions(api = clientContractApi) {
+/** The client's own contracts; the issuer portal pages its own (issuerContractsOptions). */
+export function contractsOptions() {
   return queryOptions({
-    queryKey: storedKeys(api).list(),
-    queryFn: api.getContracts,
+    queryKey: storedKeys(clientContractApi).list(),
+    queryFn: getContracts,
   });
 }
 
