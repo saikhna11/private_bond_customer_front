@@ -1,4 +1,4 @@
-import { CheckIcon } from 'lucide-react';
+import { CheckIcon, XIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
@@ -8,15 +8,18 @@ const steps: Step[] = ['create', 'pay', 'view', 'sign', 'done'];
 
 /**
  * Where the holder is in buying a bond, drawn as the home page's review steps are. complete
- * marks the last step done too, once the signed PDF exists. A phone names only the current
- * step: five names do not fit side by side.
+ * marks the last step done too, once the signed PDF exists; failed marks the current step as
+ * where a cancelled or expired contract stopped. A phone names only the current step: five
+ * names do not fit side by side.
  */
 export function Steps({
   current,
   complete = false,
+  failed = false,
 }: {
   current: Step;
   complete?: boolean;
+  failed?: boolean;
 }) {
   const { t } = useTranslation();
   const at = steps.indexOf(current);
@@ -24,8 +27,9 @@ export function Steps({
   return (
     <ol className="grid grid-cols-5 gap-1 sm:gap-2">
       {steps.map((s, i) => {
-        const done = i < at || (complete && i === at);
+        const done = i < at || (complete && !failed && i === at);
         const now = i === at && !done;
+        const stopped = now && failed;
         return (
           <li
             key={s}
@@ -44,11 +48,21 @@ export function Steps({
               className={cn(
                 'relative z-10 flex size-8 items-center justify-center rounded-full border-2 bg-background text-xs font-semibold',
                 done && 'border-success bg-success text-success-foreground',
-                now && 'border-primary text-primary ring-4 ring-primary/15',
+                now &&
+                  !stopped &&
+                  'border-primary text-primary ring-4 ring-primary/15',
+                stopped &&
+                  'border-destructive text-destructive ring-4 ring-destructive/15',
                 !done && !now && 'border-border text-muted-foreground',
               )}
             >
-              {done ? <CheckIcon className="size-4" strokeWidth={3} /> : i + 1}
+              {done ? (
+                <CheckIcon className="size-4" strokeWidth={3} />
+              ) : stopped ? (
+                <XIcon className="size-4" strokeWidth={3} />
+              ) : (
+                i + 1
+              )}
             </span>
             <span
               className={cn(

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type {
   IssuerContractSummaryType,
-  IssuerContractTab,
+  IssuerContractView,
 } from '@/queries/issuer/type';
 import { issuerContractColumns } from './issuer-contract-columns';
 import { IssuerContractRow } from './issuer-contract-row';
@@ -17,7 +17,7 @@ export function IssuerContractTable({
   dimmed,
   onOpen,
 }: {
-  tab: IssuerContractTab;
+  tab: IssuerContractView;
   contracts: IssuerContractSummaryType[];
   dimmed: boolean;
   onOpen: (contractId: string) => void;

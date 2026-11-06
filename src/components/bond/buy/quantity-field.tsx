@@ -41,7 +41,6 @@ export function QuantityField({
       moreLabel={t('bond.buy.more')}
       digits={maxDigits}
       emptyValue={1}
-      invalid={invalid}
     />
   );
 }

@@ -1,7 +1,7 @@
 import fetchAndValidate, { scheduleIssuerRefresh } from '@/lib/fetcher';
 import {
   IssuerContractPageSchema,
-  type IssuerContractTab,
+  type IssuerContractView,
   IssuerMeSchema,
   IssuerSignedInSchema,
 } from './type';
@@ -12,12 +12,26 @@ export const getIssuerMe = () => fetchAndValidate('issuer/me', IssuerMeSchema);
 export const issuerContractPageSize = 20;
 
 /** One page of the issuer's contracts in tab, from 1. */
-export const getIssuerContracts = (tab: IssuerContractTab, page: number) =>
+/** What narrows a contract tab: any part of the number, bond or holder; the days it was made. */
+export interface IssuerContractFilter {
+  q?: string;
+  from?: string;
+  to?: string;
+}
+
+export const getIssuerContracts = (
+  tab: IssuerContractView,
+  page: number,
+  f: IssuerContractFilter = {},
+) =>
   fetchAndValidate(
     `issuer/contracts?${new URLSearchParams({
       status: tab,
       page: String(page),
       size: String(issuerContractPageSize),
+      ...(f.q ? { q: f.q } : {}),
+      ...(f.from ? { from: f.from } : {}),
+      ...(f.to ? { to: f.to } : {}),
     })}`,
     IssuerContractPageSchema,
   );

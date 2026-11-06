@@ -50,7 +50,7 @@ type NavKey = 'dashboard' | 'contracts' | 'bonds' | 'schedule';
 
 interface NavItem {
   title: NavKey;
-  to?: '/issuer' | '/issuer/contracts';
+  to?: '/issuer' | '/issuer/contracts' | '/issuer/bonds';
   icon: LucideIcon;
 }
 
@@ -63,10 +63,10 @@ const navGroups: { label: 'general' | 'bonds'; items: NavItem[] }[] = [
     ],
   },
   {
-    // The issuer's bonds and their payment schedule come with the bond module.
+    // The issuer's payment schedule comes with the repayment module.
     label: 'bonds',
     items: [
-      { title: 'bonds', icon: LandmarkIcon },
+      { title: 'bonds', to: '/issuer/bonds', icon: LandmarkIcon },
       { title: 'schedule', icon: CalendarClockIcon },
     ],
   },
@@ -75,6 +75,8 @@ const navGroups: { label: 'general' | 'bonds'; items: NavItem[] }[] = [
 const titles: Record<string, NavKey> = {
   '/issuer': 'dashboard',
   '/issuer/contracts': 'contracts',
+  '/issuer/bonds': 'bonds',
+  '/issuer/bonds/new': 'bonds',
 };
 
 function useIssuerLogout() {
@@ -165,7 +167,11 @@ function IssuerSidebar({ pathname }: { pathname: string }) {
                     {item.to ? (
                       <SidebarMenuButton
                         asChild
-                        isActive={active === item.to}
+                        isActive={
+                          active === item.to ||
+                          (item.to !== '/issuer' &&
+                            active.startsWith(`${item.to}/`))
+                        }
                         tooltip={t(`issuer.nav.${item.title}`)}
                       >
                         <Link to={item.to}>

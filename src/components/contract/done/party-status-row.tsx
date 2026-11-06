@@ -6,14 +6,17 @@ import type { PartyType } from '@/queries/contract/type';
 
 /**
  * One party who signs, and whether they signed or declined. pending says the contract
- * still waits for signatures: one not given yet is awaited rather than missing.
+ * still waits for signatures: one not given yet is awaited rather than missing. cancelled
+ * says the order ended unpaid, so one who declined cancelled it.
  */
 export function PartyStatusRow({
   party: p,
   pending,
+  cancelled = false,
 }: {
   party: PartyType;
   pending: boolean;
+  cancelled?: boolean;
 }) {
   const { t } = useTranslation();
   const state = p.signed_at
@@ -24,7 +27,11 @@ export function PartyStatusRow({
       }
     : p.declined_at
       ? {
-          label: t('contract.partyState.declined'),
+          label: t(
+            cancelled
+              ? 'contract.partyState.cancelled'
+              : 'contract.partyState.declined',
+          ),
           className: 'text-destructive',
           Icon: CircleXIcon,
         }

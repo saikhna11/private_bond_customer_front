@@ -9,17 +9,19 @@ import { Card, CardContent } from '@/components/ui/card';
 
 /**
  * One step of buying a bond: the way back, the step's title (its own unless title is given)
- * and where it sits.
+ * and where it sits. failed says the contract was cancelled or expired at that step.
  */
 export function ContractSection({
   step,
   complete,
+  failed,
   title,
   description,
   children,
 }: {
   step: Step;
   complete?: boolean;
+  failed?: boolean;
   title?: string;
   description?: string;
   children: ReactNode;
@@ -44,7 +46,7 @@ export function ContractSection({
       />
       <Card className="py-0">
         <CardContent className="px-4 py-5 sm:px-6">
-          <Steps current={step} complete={complete} />
+          <Steps current={step} complete={complete} failed={failed} />
         </CardContent>
       </Card>
       {children}

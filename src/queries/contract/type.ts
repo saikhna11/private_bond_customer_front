@@ -1,5 +1,17 @@
 import z from 'zod';
 
+/** The underwriter every contract names: it signs no account, the contract holds its signature. */
+const UnderwriterSchema = z.object({
+  name: z.string(),
+  state_reg_no: z.string(),
+  register_no: z.string(),
+  phone: z.string(),
+  director_last_name: z.string(),
+  director_first_name: z.string(),
+});
+
+export type UnderwriterType = z.infer<typeof UnderwriterSchema>;
+
 const partyTypeSchema = z.enum([
   'holder',
   'co_holder',
@@ -159,8 +171,8 @@ export const ContractSchema = z.object({
   parties: z.array(PartySchema),
   signatures: z.array(SignatureSchema),
   your_party_id: z.uuid().optional(),
-  /** The underwriter the contract names beside its parties; it does not sign. */
-  underwriter: z.string(),
+  /** The underwriter the contract names beside its parties, signed from the start. */
+  underwriter: UnderwriterSchema,
   /** How it is paid; left out for a contract never ordered with a reference. */
   payment: PaymentSchema.optional(),
 });

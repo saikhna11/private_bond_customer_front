@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { AlertCircle } from 'lucide-react'; // <-- Icon нэмсэн
 import { useTranslation } from 'react-i18next';
 import { ApiErrorAlert } from '@/components/common/api-error-alert';
 import {
@@ -17,12 +18,6 @@ import { PurchaseTotal } from './purchase-total';
 import { QuoteFacts } from './quote-facts';
 import type { PurchaseForm } from './use-purchase-form';
 
-/**
- * What the purchase comes to: its bonds and amount as the client picks them, then, checked
- * by the backend as the purchase will be (the remainder and the investor cap among them),
- * its terms if paid today, and the button that pays it. It has no schedule yet: the
- * contract's annex prints the sample one.
- */
 export function PurchaseSummary({
   bond,
   form,
@@ -36,6 +31,9 @@ export function PurchaseSummary({
     ...quoteOptions(bond.id, body as PurchaseBody),
     enabled: !!body,
   });
+
+  // Хязгаарт хүрсэн эсэхийг шалгах
+  const hasQuantityError = !!form.errors.quantity;
 
   return (
     <Card className="lg:sticky lg:top-20">
@@ -51,10 +49,20 @@ export function PurchaseSummary({
           unit={form.unit}
           currency={bond.currency}
         />
+
+        {hasQuantityError && (
+          <div className="flex items-start gap-3 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+            <AlertCircle className="mt-0.5 size-4 shrink-0" />
+            <p className="font-medium">{form.errors.quantity}</p>
+          </div>
+        )}
+
         {!body ? (
-          <p className="text-sm text-muted-foreground">
-            {t('bond.quote.fill')}
-          </p>
+          !hasQuantityError && ( // Хэрэв алдаа байхгүй бол л "Бөглөнө үү" гэж харуулна
+            <p className="text-sm text-muted-foreground">
+              {t('bond.quote.fill')}
+            </p>
+          )
         ) : quote.isPending ? (
           <Skeleton className="h-40 w-full" />
         ) : quote.error ? (
@@ -62,10 +70,11 @@ export function PurchaseSummary({
         ) : (
           <QuoteFacts quote={quote.data} />
         )}
+
         <PayButton
           bond={bond}
           body={quote.data && body ? body : undefined}
-          disabled={!quote.data || quote.isFetching}
+          disabled={!quote.data || quote.isFetching || hasQuantityError}
         />
         <p className="text-xs text-muted-foreground">{t('bond.quote.mock')}</p>
       </CardContent>

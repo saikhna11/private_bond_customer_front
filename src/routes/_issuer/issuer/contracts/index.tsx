@@ -6,7 +6,7 @@ import { IssuerContractDetail } from '@/components/issuer/contracts/issuer-contr
 import { IssuerContractList } from '@/components/issuer/contracts/issuer-contract-list';
 import { useIssuerContractNav } from '@/components/issuer/contracts/use-issuer-contract-nav';
 import { ContractApiContext, issuerContractApi } from '@/queries/contract/api';
-import { issuerContractTabSchema } from '@/queries/issuer/type';
+import { issuerContractViewSchema } from '@/queries/issuer/type';
 
 /**
  * The bond issuer's contracts, which every member reads once their clients signed them: the
@@ -14,8 +14,19 @@ import { issuerContractTabSchema } from '@/queries/issuer/type';
  * which the director signs from here (sign) or declines while it waits for them.
  */
 const searchSchema = z.object({
-  tab: issuerContractTabSchema.optional().catch(undefined),
+  tab: issuerContractViewSchema.optional().catch(undefined),
   page: z.number().int().min(1).optional().catch(undefined),
+  q: z.string().optional().catch(undefined),
+  from: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .catch(undefined),
+  to: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .catch(undefined),
   sign: z.boolean().optional(),
   contractId: z.uuid().optional(),
 });

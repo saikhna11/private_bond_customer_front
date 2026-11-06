@@ -67,6 +67,15 @@ export const issuerContractTabSchema = z.enum([
 ]);
 export type IssuerContractTab = z.infer<typeof issuerContractTabSchema>;
 
+/** What the contracts list shows: every tab's contracts together, or one tab's. */
+export const issuerContractViewSchema = z.enum([
+  'all',
+  'pending',
+  'valid',
+  'cancelled',
+]);
+export type IssuerContractView = z.infer<typeof issuerContractViewSchema>;
+
 /** A contract party's names: a person's, or an organization's name as first_name. */
 const PartyNameSchema = z.object({
   last_name: z.string(),

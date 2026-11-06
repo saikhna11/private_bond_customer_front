@@ -4,7 +4,7 @@ import { contractNumber, formatMoney } from '@/components/contract/format';
 import { cn } from '@/lib/utils';
 import type {
   IssuerContractSummaryType,
-  IssuerContractTab,
+  IssuerContractView,
 } from '@/queries/issuer/type';
 import { DeadlineLeft } from './deadline-left';
 import { issuerContractColumns } from './issuer-contract-columns';
@@ -20,7 +20,7 @@ export function IssuerContractRow({
   contract: c,
   onOpen,
 }: {
-  tab: IssuerContractTab;
+  tab: IssuerContractView;
   contract: IssuerContractSummaryType;
   onOpen: () => void;
 }) {

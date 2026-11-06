@@ -12,11 +12,6 @@ import { QuantityField } from './quantity-field';
 import { TermField } from './term-field';
 import { usePurchaseForm } from './use-purchase-form';
 
-/**
- * Buying a bond, step by step on the left: the rate option and term, how many bonds, and
- * who holds them; on the right, what the purchase comes to, checked by the backend, and the
- * payment.
- */
 export function BuyForm({ bond }: { bond: BondType }) {
   const { t } = useTranslation();
   const form = usePurchaseForm(bond);
@@ -53,17 +48,13 @@ export function BuyForm({ bond }: { bond: BondType }) {
             )}
           </FormField>
         </BuySection>
+
         <BuySection
           step={2}
           title={t('bond.buy.sections.quantity')}
           description={t('bond.buy.sections.quantityText', { price })}
         >
-          {/* <div className="grid items-start gap-4 sm:grid-cols-2"> */}
-          <FormField
-            id="quantity"
-            label={t('bond.buy.quantity')}
-            error={form.errors.quantity}
-          >
+          <FormField id="quantity" label={t('bond.buy.quantity')}>
             <QuantityField
               id="quantity"
               value={form.quantity}
@@ -87,8 +78,8 @@ export function BuyForm({ bond }: { bond: BondType }) {
             currency={bond.currency}
             className="lg:hidden"
           />
-          {/* </div> */}
         </BuySection>
+
         {form.ownerships.length > 1 && (
           <BuySection
             step={3}

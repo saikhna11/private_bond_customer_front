@@ -11,7 +11,7 @@ import { personName } from './person-name';
 /**
  * The contract's three parties: its client, holder and any co-holder, who signed first; its
  * bond issuer, in the name of its chief executive, who signs last (while it awaits them,
- * whoever holds the office now); and the underwriter, who does not sign.
+ * whoever holds the office now); and the underwriter, signed from the start.
  */
 export function IssuerContractParties({
   contract,
@@ -83,10 +83,17 @@ export function IssuerContractParties({
           <IssuerPartyBlock
             Icon={ShieldCheckIcon}
             label={t('issuer.contracts.parties.underwriter')}
-            name={contract.underwriter}
-            lines={[]}
-            state={t('issuer.contracts.parties.noSignature')}
-            tone="none"
+            name={contract.underwriter.name}
+            lines={[
+              t('issuer.contracts.parties.director', {
+                name: personName({
+                  last_name: contract.underwriter.director_last_name,
+                  first_name: contract.underwriter.director_first_name,
+                }),
+              }),
+            ]}
+            state={t('issuer.contracts.parties.signed')}
+            tone="done"
           />
         </ul>
       </CardContent>

@@ -1,4 +1,4 @@
-import { LockIcon } from 'lucide-react';
+// import { LockIcon } from "lucide-react";
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,10 +36,10 @@ export function ProspectusSection({ bond }: { bond: BondType }) {
               <h3 className="text-sm font-medium">
                 {t('bond.prospectus.title')}
               </h3>
-              <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+              {/* <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
                 <LockIcon className="mt-0.5 size-3.5 shrink-0" />
-                {t('bond.prospectus.description')}
-              </p>
+                {t("bond.prospectus.description")}
+              </p> */}
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {files.map((f) => (

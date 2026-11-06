@@ -1,8 +1,12 @@
 import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import { issuerContractApi } from '@/queries/contract/api';
 import { storedKeys } from '@/queries/contract/options';
-import { getIssuerContracts, getIssuerMe } from './query';
-import type { IssuerContractTab } from './type';
+import {
+  getIssuerContracts,
+  getIssuerMe,
+  type IssuerContractFilter,
+} from './query';
+import type { IssuerContractView } from './type';
 
 export const issuerKeys = {
   all: ['issuer'] as const,
@@ -22,10 +26,14 @@ export function issuerMeOptions() {
  * key, so a signature or a decline refreshes every tab; the previous page stays on screen
  * while the next loads.
  */
-export function issuerContractsOptions(tab: IssuerContractTab, page: number) {
+export function issuerContractsOptions(
+  tab: IssuerContractView,
+  page: number,
+  f: IssuerContractFilter = {},
+) {
   return queryOptions({
-    queryKey: [...storedKeys(issuerContractApi).list(), tab, page] as const,
-    queryFn: () => getIssuerContracts(tab, page),
+    queryKey: [...storedKeys(issuerContractApi).list(), tab, page, f] as const,
+    queryFn: () => getIssuerContracts(tab, page, f),
     placeholderData: keepPreviousData,
   });
 }

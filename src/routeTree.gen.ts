@@ -24,6 +24,8 @@ import { Route as PublicSignupIndexRouteImport } from './routes/_public/signup/i
 import { Route as PublicVerifyIndexRouteImport } from './routes/_public/verify/index'
 import { Route as CustomerBondsBondIdIndexRouteImport } from './routes/_customer/bonds/$bondId/index'
 import { Route as CustomerBondsBondIdBuyRouteImport } from './routes/_customer/bonds/$bondId/buy'
+import { Route as IssuerIssuerBondsIndexRouteImport } from './routes/_issuer/issuer/bonds/index'
+import { Route as IssuerIssuerBondsNewRouteImport } from './routes/_issuer/issuer/bonds/new'
 import { Route as IssuerIssuerContractsIndexRouteImport } from './routes/_issuer/issuer/contracts/index'
 import { Route as PublicIssuerLoginIndexRouteImport } from './routes/_public/issuer/login/index'
 
@@ -101,6 +103,16 @@ const CustomerBondsBondIdBuyRoute = CustomerBondsBondIdBuyRouteImport.update({
   path: '/bonds/$bondId/buy',
   getParentRoute: () => CustomerRouteRoute,
 } as any)
+const IssuerIssuerBondsIndexRoute = IssuerIssuerBondsIndexRouteImport.update({
+  id: '/issuer/bonds/',
+  path: '/issuer/bonds/',
+  getParentRoute: () => IssuerRouteRoute,
+} as any)
+const IssuerIssuerBondsNewRoute = IssuerIssuerBondsNewRouteImport.update({
+  id: '/issuer/bonds/new',
+  path: '/issuer/bonds/new',
+  getParentRoute: () => IssuerRouteRoute,
+} as any)
 const IssuerIssuerContractsIndexRoute =
   IssuerIssuerContractsIndexRouteImport.update({
     id: '/issuer/contracts/',
@@ -125,7 +137,9 @@ export interface FileRoutesByFullPath {
   '/signup/': typeof PublicSignupIndexRoute
   '/verify/': typeof PublicVerifyIndexRoute
   '/bonds/$bondId/buy': typeof CustomerBondsBondIdBuyRoute
+  '/issuer/bonds/new': typeof IssuerIssuerBondsNewRoute
   '/bonds/$bondId/': typeof CustomerBondsBondIdIndexRoute
+  '/issuer/bonds/': typeof IssuerIssuerBondsIndexRoute
   '/issuer/contracts/': typeof IssuerIssuerContractsIndexRoute
   '/issuer/login/': typeof PublicIssuerLoginIndexRoute
 }
@@ -141,7 +155,9 @@ export interface FileRoutesByTo {
   '/signup': typeof PublicSignupIndexRoute
   '/verify': typeof PublicVerifyIndexRoute
   '/bonds/$bondId/buy': typeof CustomerBondsBondIdBuyRoute
+  '/issuer/bonds/new': typeof IssuerIssuerBondsNewRoute
   '/bonds/$bondId': typeof CustomerBondsBondIdIndexRoute
+  '/issuer/bonds': typeof IssuerIssuerBondsIndexRoute
   '/issuer/contracts': typeof IssuerIssuerContractsIndexRoute
   '/issuer/login': typeof PublicIssuerLoginIndexRoute
 }
@@ -161,7 +177,9 @@ export interface FileRoutesById {
   '/_public/signup/': typeof PublicSignupIndexRoute
   '/_public/verify/': typeof PublicVerifyIndexRoute
   '/_customer/bonds/$bondId/buy': typeof CustomerBondsBondIdBuyRoute
+  '/_issuer/issuer/bonds/new': typeof IssuerIssuerBondsNewRoute
   '/_customer/bonds/$bondId/': typeof CustomerBondsBondIdIndexRoute
+  '/_issuer/issuer/bonds/': typeof IssuerIssuerBondsIndexRoute
   '/_issuer/issuer/contracts/': typeof IssuerIssuerContractsIndexRoute
   '/_public/issuer/login/': typeof PublicIssuerLoginIndexRoute
 }
@@ -179,7 +197,9 @@ export interface FileRouteTypes {
     | '/signup/'
     | '/verify/'
     | '/bonds/$bondId/buy'
+    | '/issuer/bonds/new'
     | '/bonds/$bondId/'
+    | '/issuer/bonds/'
     | '/issuer/contracts/'
     | '/issuer/login/'
   fileRoutesByTo: FileRoutesByTo
@@ -195,7 +215,9 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify'
     | '/bonds/$bondId/buy'
+    | '/issuer/bonds/new'
     | '/bonds/$bondId'
+    | '/issuer/bonds'
     | '/issuer/contracts'
     | '/issuer/login'
   id:
@@ -214,7 +236,9 @@ export interface FileRouteTypes {
     | '/_public/signup/'
     | '/_public/verify/'
     | '/_customer/bonds/$bondId/buy'
+    | '/_issuer/issuer/bonds/new'
     | '/_customer/bonds/$bondId/'
+    | '/_issuer/issuer/bonds/'
     | '/_issuer/issuer/contracts/'
     | '/_public/issuer/login/'
   fileRoutesById: FileRoutesById
@@ -332,6 +356,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerBondsBondIdBuyRouteImport
       parentRoute: typeof CustomerRouteRoute
     }
+    '/_issuer/issuer/bonds/': {
+      id: '/_issuer/issuer/bonds/'
+      path: '/issuer/bonds'
+      fullPath: '/issuer/bonds/'
+      preLoaderRoute: typeof IssuerIssuerBondsIndexRouteImport
+      parentRoute: typeof IssuerRouteRoute
+    }
+    '/_issuer/issuer/bonds/new': {
+      id: '/_issuer/issuer/bonds/new'
+      path: '/issuer/bonds/new'
+      fullPath: '/issuer/bonds/new'
+      preLoaderRoute: typeof IssuerIssuerBondsNewRouteImport
+      parentRoute: typeof IssuerRouteRoute
+    }
     '/_issuer/issuer/contracts/': {
       id: '/_issuer/issuer/contracts/'
       path: '/issuer/contracts'
@@ -375,11 +413,15 @@ const CustomerRouteRouteWithChildren = CustomerRouteRoute._addFileChildren(
 
 interface IssuerRouteRouteChildren {
   IssuerIssuerIndexRoute: typeof IssuerIssuerIndexRoute
+  IssuerIssuerBondsNewRoute: typeof IssuerIssuerBondsNewRoute
+  IssuerIssuerBondsIndexRoute: typeof IssuerIssuerBondsIndexRoute
   IssuerIssuerContractsIndexRoute: typeof IssuerIssuerContractsIndexRoute
 }
 
 const IssuerRouteRouteChildren: IssuerRouteRouteChildren = {
   IssuerIssuerIndexRoute: IssuerIssuerIndexRoute,
+  IssuerIssuerBondsNewRoute: IssuerIssuerBondsNewRoute,
+  IssuerIssuerBondsIndexRoute: IssuerIssuerBondsIndexRoute,
   IssuerIssuerContractsIndexRoute: IssuerIssuerContractsIndexRoute,
 }
 
